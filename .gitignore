@@ -1,0 +1,39 @@
+# Compiled Python files and caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+pyvenv.cfg
+
+# Packaging / build artifacts
+build/
+dist/
+*.egg-info/
+
+# Django / database artifacts
+db.sqlite3
+*.sqlite3
+*.log
+media/
+staticfiles/
+
+# Docker & data volumes
+postgres_data/
+
+# IDE / editor folders
+.vscode/
+.idea/
+*.swp
+
+# macOS files
+.DS_Store
+
+# Environment variable files
+.env
+.env.*
