@@ -38,9 +38,30 @@ services:
     restart: unless-stopped
     networks:
       - remeals
+  
+  pgadmin:
+    image: dpage/pgadmin4:8.11
+    container_name: remeals-pgadmin
+    env_file:
+      - .env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "5050:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    restart: unless-stopped
+    networks:
+      - remeals
+
 
 volumes:
   postgres_data:
+  pgadmin_data:
 
 networks:
   remeals:
