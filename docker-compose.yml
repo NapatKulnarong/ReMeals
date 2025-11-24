@@ -1,0 +1,10 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: remeals-backend
+    volumes:
+      - ./backend:/app/backend
+    ports:
+      - "8000:8000"
