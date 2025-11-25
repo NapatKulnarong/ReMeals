@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Nunito} from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 
-const nunito = Nunito({
-  variable: "--font-nunito",
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
   weight: ["300", "400", "600", "700", "800"], // choose weights you want
 });
@@ -21,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${nunito.variable} antialiased`}
+        className={`${poppins.variable} antialiased`}
       >
         {children}
       </body>

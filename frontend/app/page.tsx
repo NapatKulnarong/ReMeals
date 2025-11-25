@@ -6,10 +6,10 @@ import Sidebar from "@/components/Sidebar";
 // Content of each tab
 function TabContent({ tab }: { tab: number }) {
   return (
-    <div className="rounded-xl bg-white p-10 shadow text-center">
+    <div className="rounded-xl bg-[#FBFBFE] p-10 shadow text-center">
       <h1 className="text-3xl font-bold text-gray-900">Part {tab}</h1>
       <p className="mt-3 text-gray-600">
-        This is a blank page for Part {tab}. You’ll add real content later.
+        จับฉ่าย จับฉ่าย จับฉ่าย จับฉ่าย จับฉ่าย จับฉ่าย จับฉ่าย
       </p>
     </div>
   );
@@ -58,7 +58,7 @@ export default function Home() {
   const [showAuthModal, setShowAuthModal] = useState(false); // whether popup is visible
 
   return (
-    <main className="flex min-h-screen bg-[#EEE3D2]">
+    <main className="relative flex min-h-screen bg-[#EEE3D2]">
       {/* Sidebar on the left */}
       <Sidebar
         activeTab={activeTab}
