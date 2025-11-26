@@ -2,6 +2,7 @@ from django.db import models
 
 class User(models.Model):
     user_id = models.CharField(max_length=10, primary_key=True)
+    username = models.CharField(max_length=20, unique=True)
     fname = models.CharField(max_length=100)
     lname = models.CharField(max_length=100)
     bod = models.DateField()

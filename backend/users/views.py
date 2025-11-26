@@ -9,16 +9,20 @@ from .models import User
 from datetime import datetime
 import uuid
 
+
 @swagger_auto_schema(method="post", request_body=SignupSerializer)
 @api_view(["POST"])
 def signup(request):
     data = request.data
 
-    required_fields = ["fname", "lname", "phone", "email", "password"]
+    required_fields = ["username", "fname", "lname", "phone", "email", "password"]
 
     for field in required_fields:
         if not data.get(field):
             return Response({"error": f"{field} is required"}, status=400)
+
+    if User.objects.filter(username=data.get("username")).exists():
+        return Response({"error": "Username already exists"}, status=400)
 
     if User.objects.filter(email=data.get("email")).exists():
         return Response({"error": "Email already exists"}, status=400)
@@ -38,6 +42,7 @@ def signup(request):
 
     user = User.objects.create(
         user_id=random_id,
+        username=data.get("username"),
         fname=data.get("fname"),
         lname=data.get("lname"),
         bod=bod,
@@ -62,7 +67,7 @@ def login(request):
         user = User.objects.get(email=identifier)
     except User.DoesNotExist:
         try:
-            user = User.objects.get(user_id=identifier)
+            user = User.objects.get(username=identifier)
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=404)
 
@@ -71,6 +76,6 @@ def login(request):
 
     return Response({
         "message": "Login success",
-        "user_id": user.user_id,
+        "username": user.username,
         "email": user.email
     }, status=200)
