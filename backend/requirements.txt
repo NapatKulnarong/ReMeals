@@ -4,3 +4,6 @@ sqlparse==0.5.3
 tzdata==2024.1
 psycopg[binary]==3.2.1
 python-dotenv
+bcrypt
+djangorestframework
+drf-yasg
