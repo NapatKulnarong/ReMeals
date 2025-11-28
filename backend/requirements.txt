@@ -7,3 +7,4 @@ python-dotenv
 bcrypt
 djangorestframework
 drf-yasg
+django-cors-headers
