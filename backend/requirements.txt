@@ -2,7 +2,7 @@ asgiref==3.11.0
 Django==5.2.8
 sqlparse==0.5.3
 tzdata==2024.1
-psycopg[binary]==3.2.1
+psycopg[binary]==3.2.13
 python-dotenv
 bcrypt
 djangorestframework

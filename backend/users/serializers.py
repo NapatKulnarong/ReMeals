@@ -17,7 +17,7 @@ class SignupSerializer(serializers.Serializer):
                 "lname": "Loveson",
                 "bod": "02/01/2004",
                 "phone": "0863380481",
-                "email": "parunyu@gmail.com",
+                "email": "paranyu@gmail.com",
                 "password": "12345"
             }
         }
