@@ -1,6 +1,6 @@
 from django.db import models
 
-# Create your models here.
+
 class Restaurant(models.Model):
     restaurant_id = models.CharField(max_length=10, primary_key=True)
     address = models.CharField(max_length=300)
@@ -17,28 +17,9 @@ class Restaurant(models.Model):
         related_name="branches",
     )
 
-
     class Meta:
         db_table = "restaurant"
-        ordering = ["restaurant_id"] 
+        ordering = ["restaurant_id"]
 
     def __str__(self):
         return f"{self.name} ({self.branch_name})"
-    
-class Donation(models.Model):
-    donation_id = models.CharField(max_length=10, primary_key=True)
-    donated_at = models.DateTimeField(auto_now_add=True)
-    status = models.BooleanField(default=False)   # 0=pending, 1=delivered
-
-    restaurant = models.ForeignKey(
-        Restaurant,
-        on_delete=models.CASCADE,
-        related_name="donations"
-    )
-    
-    class Meta:
-        db_table = "donation"
-        ordering = ["donation_id"]
-
-    def __str__(self):
-        return f"Donation {self.donation_id}"

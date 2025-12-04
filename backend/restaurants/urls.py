@@ -1,8 +1,7 @@
 from rest_framework.routers import DefaultRouter
-from .views import RestaurantViewSet, DonationViewSet
+from .views import RestaurantViewSet
 
 router = DefaultRouter()
 router.register("restaurants", RestaurantViewSet, basename="restaurants")
-router.register("donations", DonationViewSet)
 
 urlpatterns = router.urls
