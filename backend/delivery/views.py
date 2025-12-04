@@ -12,3 +12,10 @@ class DeliveryViewSet(viewsets.ModelViewSet):
     ).all()
     serializer_class = DeliverySerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = self.queryset
+        delivery_type = self.request.query_params.get("delivery_type")
+        if delivery_type:
+            queryset = queryset.filter(delivery_type=delivery_type)
+        return queryset

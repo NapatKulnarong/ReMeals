@@ -46,3 +46,20 @@ class DeliverySerializer(serializers.ModelSerializer):
             "donation_id",
             "community_id",
         ]
+
+    def validate(self, attrs):
+        instance = getattr(self, "instance", None)
+        required_fk_fields = ["warehouse_id", "user_id", "donation_id", "community_id"]
+        errors = {}
+
+        for field in required_fk_fields:
+            value = attrs.get(field)
+            if value is None and instance is not None:
+                value = getattr(instance, field, None)
+            if value is None:
+                errors[field] = "This field is required."
+
+        if errors:
+            raise serializers.ValidationError(errors)
+
+        return attrs
