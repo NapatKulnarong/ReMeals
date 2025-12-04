@@ -37,6 +37,7 @@ postgres_data/
 # Environment variable files
 .env
 .env.*
+!/.env.example
 
 # Node.js / Next.js
 node_modules/
