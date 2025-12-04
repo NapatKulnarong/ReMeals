@@ -12,13 +12,16 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
+        migrations.AlterField(
             model_name='recipient',
             name='community_id',
-        ),
-        migrations.AddField(
-            model_name='recipient',
-            name='community',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='recipients', to='community.community'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='recipients',
+                to='community.community',
+                db_column='community_id',
+            ),
         ),
     ]

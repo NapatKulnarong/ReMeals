@@ -37,6 +37,7 @@ class Recipient(models.Model):
         related_name="recipients",
         null=True,
         blank=True,
+        db_column="community_id",
     )
 
     def __str__(self):

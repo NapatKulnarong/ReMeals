@@ -7,6 +7,8 @@ services:
     container_name: remeals-backend
     env_file:
       - .env
+    environment:
+      RUNNING_IN_DOCKER: "1"
     volumes:
       - ./backend:/app/backend
     ports:

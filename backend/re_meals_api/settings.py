@@ -86,17 +86,20 @@ WSGI_APPLICATION = 're_meals_api.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+POSTGRES_HOST = os.environ.get("POSTGRES_HOST", "localhost")
+if POSTGRES_HOST == "db" and os.environ.get("RUNNING_IN_DOCKER") != "1":
+    POSTGRES_HOST = os.environ.get("POSTGRES_HOST_FALLBACK", "localhost")
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.environ.get("POSTGRES_DB", "remeals"),
         "USER": os.environ.get("POSTGRES_USER", "remealsuser"),
         "PASSWORD": os.environ.get("POSTGRES_PASSWORD", ""),
-        "HOST": os.environ.get("POSTGRES_HOST", "localhost"),
+        "HOST": POSTGRES_HOST,
         "PORT": os.environ.get("POSTGRES_PORT", "5432"),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
