@@ -398,7 +398,8 @@ class FoodItemTests(APITestCase):
             is_distributed=False
         )
 
-        res = self.client.patch("/api/fooditems/F0001/", {"is_distributed": True}, format="json")
+        payload = {"is_claimed": False, "is_distributed": True}
+        res = self.client.patch("/api/fooditems/F0001/", payload, format="json")
         # Expected failure because is_claimed is False
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
