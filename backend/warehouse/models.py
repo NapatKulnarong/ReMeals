@@ -2,7 +2,7 @@ from django.db import models
 
 class Warehouse(models.Model):
     warehouse_id = models.CharField(max_length=10, primary_key=True)
-    address = models.CharField(max_length=100)
+    address = models.CharField(max_length=300)
     capacity = models.FloatField()
     stored_date = models.DateField()
     exp_date = models.DateField()

@@ -261,8 +261,12 @@ class FoodItemTests(APITestCase):
             donation=donation,
         )
 
-        self.assertEqual(item.restaurant_chain_id, self.chain.chain_id)
-        self.assertEqual(item.restaurant_chain.chain_name, "KFC Group")
+        self.assertIsNotNone(item.donation.restaurant.chain)
+        self.assertEqual(item.donation.restaurant.chain_id, self.chain.chain_id)
+        self.assertEqual(
+            item.donation.restaurant.chain.chain_name,
+            "KFC Group",
+        )
 
 
     # 12. List only expired items

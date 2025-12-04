@@ -1,4 +1,5 @@
 from django.db import models
+from restaurants.models import Restaurant
 
 class User(models.Model):
     user_id = models.CharField(max_length=10, primary_key=True)
@@ -15,7 +16,12 @@ class User(models.Model):
     
 class Donor(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    restaurant_id = models.CharField(max_length=10)
+    restaurant_id = models.ForeignKey(
+        Restaurant,
+        on_delete=models.CASCADE,
+        db_column="restaurant_id",
+        related_name="donors",
+    )
 
     def __str__(self):
         return f"Donor {self.user.user_id}"
