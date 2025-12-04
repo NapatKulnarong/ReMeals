@@ -70,8 +70,10 @@ The platform manages multiple stakeholders:
 ### Prerequisites
 
 - Node.js (v18+)
+- Python 3.12+ (for the Django backend)
+- Django 5.2.8 (as pinned in `backend/requirements.txt`)
 - PostgreSQL (v15+)
-- Docker & Docker Compose (optional)
+- Docker & Docker Compose
 
 ### Installation
 
