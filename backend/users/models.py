@@ -31,7 +31,13 @@ class DeliveryStaff(models.Model):
 class Recipient(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     address = models.CharField(max_length=300)
-    community_id = models.CharField(max_length=10)
+    community_id = models.ForeignKey(
+        "community.Community",
+        on_delete=models.CASCADE,
+        related_name="recipients",
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return f"Recipient {self.user.user_id}"

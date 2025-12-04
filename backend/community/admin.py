@@ -1,10 +1,5 @@
 from django.contrib import admin
-from .models import Warehouse, Community
-
-@admin.register(Warehouse)
-class WarehouseAdmin(admin.ModelAdmin):
-    list_display = ("warehouse_id", "address", "capacity", "stored_date", "exp_date")
-    search_fields = ("warehouse_id", "address")
+from .models import Community
 
 @admin.register(Community)
 class CommunityAdmin(admin.ModelAdmin):

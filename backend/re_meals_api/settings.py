@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'restaurants',
     'donation',
     'community',
+    'warehouse'
 ]
 
 MIDDLEWARE = [
