@@ -15,7 +15,7 @@ class DonorAdmin(admin.ModelAdmin):
     search_fields = ("user__username", "user__fname", "user__lname", "restaurant_id")
 
 @admin.register(Recipient)
-class Recipient(admin.ModelAdmin):
+class RecipientAdmin(admin.ModelAdmin):
     list_display = ("user", "address", "community_id")
     search_fields = ("user__fname", "user__lname", "community_id")
 
