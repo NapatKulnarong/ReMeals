@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     'donation',
     "fooditem",
     'community',
-    'warehouse'
+    'warehouse',
+    "delivery",
 ]
 
 MIDDLEWARE = [

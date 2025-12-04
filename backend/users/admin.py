@@ -19,5 +19,12 @@ class RecipientAdmin(admin.ModelAdmin):
     list_display = ("user", "address", "community_id")
     search_fields = ("user__fname", "user__lname", "community_id")
 
-admin.site.register(DeliveryStaff)
-admin.site.register(UserAdminModel)
+@admin.register(DeliveryStaff)
+class DeliveryStaffAdmin(admin.ModelAdmin):
+    list_display = ("user", "assigned_area", "is_available")
+    list_filter = ("is_available",)
+    search_fields = ("user__fname", "user__lname", "assigned_area")
+
+@admin.register(UserAdminModel)
+class PlatformAdmin(admin.ModelAdmin):
+    list_display = ("user",)
