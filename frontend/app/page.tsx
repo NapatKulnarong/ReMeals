@@ -35,6 +35,9 @@ type LoggedUser = {
   userId: string;
   isAdmin: boolean;
   isDeliveryStaff: boolean;
+  fname?: string;
+  lname?: string;
+  phone?: string;
 };
 
 type Restaurant = {
@@ -1823,6 +1826,106 @@ function AccessDenied({ message }: { message: string }) {
   );
 }
 
+function ProfileModal({
+  user,
+  onClose,
+  onSave,
+}: {
+  user: LoggedUser;
+  onClose: () => void;
+  onSave: (user: Partial<LoggedUser>) => void;
+}) {
+  const [form, setForm] = useState({
+    username: user.username,
+    email: user.email,
+    fname: user.fname ?? "",
+    lname: user.lname ?? "",
+    phone: user.phone ?? "",
+  });
+
+  return (
+    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+      <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-2xl">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Edit profile</h3>
+            <p className="text-xs text-gray-500">Update your personal information.</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-sm font-semibold text-gray-500 hover:text-gray-800"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-gray-700">First name</label>
+              <input
+                className={INPUT_STYLES}
+                value={form.fname}
+                onChange={(e) => setForm((prev) => ({ ...prev, fname: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-gray-700">Last name</label>
+              <input
+                className={INPUT_STYLES}
+                value={form.lname}
+                onChange={(e) => setForm((prev) => ({ ...prev, lname: e.target.value }))}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-gray-700">Username</label>
+            <input
+              className={INPUT_STYLES}
+              value={form.username}
+              onChange={(e) => setForm((prev) => ({ ...prev, username: e.target.value }))}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-gray-700">Email</label>
+            <input
+              className={INPUT_STYLES}
+              value={form.email}
+              onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-gray-700">Phone</label>
+            <input
+              className={INPUT_STYLES}
+              value={form.phone}
+              onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
+            />
+          </div>
+        </div>
+
+        <div className="mt-5 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => onSave(form)}
+            className="rounded-lg bg-[#111828] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0f1628]"
+          >
+            Save changes
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AdminDashboard() {
   const [donations, setDonations] = useState<DonationApiRecord[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -2792,6 +2895,7 @@ export default function Home() {
   const [showAuthModal, setShowAuthModal] = useState(false); // whether popup is visible
   const [authMode, setAuthMode] = useState<AuthMode>("signup"); // current auth tab
   const [currentUser, setCurrentUser] = useState<LoggedUser | null>(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const navItems: NavItem[] = currentUser?.isAdmin
     ? [
@@ -2831,6 +2935,12 @@ export default function Home() {
         }}
         tabs={navItems}
         isAdmin={currentUser?.isAdmin}
+        currentUser={currentUser ? { username: currentUser.username, email: currentUser.email } : undefined}
+        onProfileClick={() => setShowProfileModal(true)}
+        onLogout={() => {
+          setCurrentUser(null);
+          setActiveTab(1);
+        }}
       />
       {/* Right side: content area */}
       {/* relative is IMPORTANT so the modal overlay stays inside this area only */}
@@ -2861,6 +2971,19 @@ export default function Home() {
                 setActiveTab(1);
               }
               setShowAuthModal(false);
+            }}
+          />
+        )}
+
+        {showProfileModal && currentUser && (
+          <ProfileModal
+            user={currentUser}
+            onClose={() => setShowProfileModal(false)}
+            onSave={(updated) => {
+              setCurrentUser((prev) =>
+                prev ? { ...prev, ...updated } : prev
+              );
+              setShowProfileModal(false);
             }}
           />
         )}

@@ -16,6 +16,9 @@ type SidebarProps = {
   activeTab: number;                  // Which tab is currently selected
   onTabChange: (tab: number) => void; // Function to update the selected tab
   onAuthClick: () => void;            // callback for auth button
+  onLogout?: () => void;
+  onProfileClick?: () => void;
+  currentUser?: { username: string; email: string };
   tabs: SidebarTab[];
   isAdmin?: boolean;
 };
@@ -24,6 +27,9 @@ export default function Sidebar({
   activeTab,
   onTabChange,
   onAuthClick,
+  onLogout,
+  onProfileClick,
+  currentUser,
   tabs,
   isAdmin = false,
 }: SidebarProps) {
@@ -152,12 +158,33 @@ export default function Sidebar({
 
       {/* Bottom section: Sign up / Login button */}
       <div className="mt-6 border-t border-gray-300 pt-4">
-        <button
-            onClick={onAuthClick}
-            className="w-full rounded-xl bg-gray-900 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-gray-800"
-        >
-            Sign up / Login
-        </button>
+        {currentUser ? (
+          <div className="space-y-2">
+            <button
+              onClick={onProfileClick}
+              className="w-full rounded-xl bg-gray-900 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-gray-800"
+            >
+              {currentUser.username}
+            </button>
+            <div className="flex justify-between text-xs text-gray-600">
+              <span className="truncate">{currentUser.email}</span>
+              <button
+                onClick={onLogout}
+                className="font-semibold text-[#C46A24] hover:underline"
+                type="button"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+              onClick={onAuthClick}
+              className="w-full rounded-xl bg-gray-900 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-gray-800"
+          >
+              Sign up / Login
+          </button>
+        )}
 
       </div>
 
