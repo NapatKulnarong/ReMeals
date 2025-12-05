@@ -18,3 +18,8 @@ class CommunitySerializer(serializers.ModelSerializer):
             "population",
             "warehouse_id",
         ]
+
+    def validate_population(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Population must be zero or greater.")
+        return value
