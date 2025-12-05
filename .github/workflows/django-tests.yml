@@ -77,11 +77,13 @@ jobs:
     - name: Set up Node
       uses: actions/setup-node@v4
       with:
-        node-version: 18
+        node-version: 22
+        cache: "npm"
+        cache-dependency-path: frontend/package-lock.json
 
     - name: Install frontend dependencies
       working-directory: frontend
-      run: npm install
+      run: npm ci
 
     - name: Build frontend
       working-directory: frontend

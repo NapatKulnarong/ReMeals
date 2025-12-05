@@ -118,7 +118,7 @@ docker-compose up -d
 - PostgreSQL + pgAdmin
 
 ### Frontend
-- Next.js (React 19)
+- Next.js (React 19) — requires Node.js >= 20.9
 - Tailwind CSS
 
 ### DevOps
