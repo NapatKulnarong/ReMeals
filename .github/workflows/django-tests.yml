@@ -1,4 +1,4 @@
-name: Django Tests
+name: CI Pipeline
 
 on:
   push:
@@ -7,7 +7,8 @@ on:
     branches: [ "main" ]
 
 jobs:
-  test:
+  backend-tests:
+    name: Backend Django Tests
     runs-on: ubuntu-latest
 
     services:
@@ -18,7 +19,7 @@ jobs:
           POSTGRES_PASSWORD: testpass
           POSTGRES_DB: testdb
         ports:
-          - 5432:5432  
+          - 5432:5432
         options: >-
           --health-cmd="pg_isready -U testuser -d testdb"
           --health-interval=5s
@@ -29,7 +30,7 @@ jobs:
       POSTGRES_USER: testuser
       POSTGRES_PASSWORD: testpass
       POSTGRES_DB: testdb
-      POSTGRES_HOST: 127.0.0.1  
+      POSTGRES_HOST: 127.0.0.1
       POSTGRES_PORT: 5432
 
     steps:
@@ -58,10 +59,30 @@ jobs:
 
     - name: Run migrations
       working-directory: backend
-      run: |
-        python manage.py migrate --noinput
+      run: python manage.py migrate --noinput
 
-    - name: Run tests
+    - name: Run Django tests
       working-directory: backend
-      run: |
-        python manage.py test --verbosity=2
+      run: python manage.py test --verbosity=2
+
+
+  frontend-build:
+    name: Frontend Build Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+
+    - name: Install frontend dependencies
+      working-directory: frontend
+      run: npm install
+
+    - name: Build frontend
+      working-directory: frontend
+      run: npm run build
