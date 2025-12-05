@@ -113,19 +113,18 @@ docker-compose up -d
 ## 🛠️ Technology Stack
 
 ### Backend
-- Node.js / Express
-- PostgreSQL
-- Prisma ORM
+- Python 3.12 / Django 5
+- Django REST Framework
+- PostgreSQL + pgAdmin
 
 ### Frontend
-- React
+- Next.js (React 19)
 - Tailwind CSS
-- Recharts (for analytics)
 
 ### DevOps
-- Docker
-- GitHub Actions
-- AWS / Heroku
+- Docker & Docker Compose
+- GitHub Actions (CI)
+- Dockerized Postgres services for local development
 
 ## 📁 Project Structure
 ```
