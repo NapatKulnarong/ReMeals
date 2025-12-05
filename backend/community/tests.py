@@ -215,3 +215,176 @@ class CommunityWarehouseAPITests(TestCase):
             reverse("community-list"), data=payload, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    # 16. Serializer rejects population less than zero
+    def test_serializer_rejects_negative_population(self):
+        payload = {
+            "community_id": "NEG001",
+            "name": "NegativeTown",
+            "address": "Nope",
+            "received_time": timezone.now(),
+            "population": -5,
+            "warehouse_id": self.warehouse.warehouse_id,
+        }
+        serializer = CommunitySerializer(data=payload)
+        self.assertFalse(serializer.is_valid())
+
+    # 17. Serializer rejects missing community_id
+    def test_serializer_requires_community_id(self):
+        payload = {
+            "name": "MissingId",
+            "address": "Somewhere",
+            "received_time": timezone.now(),
+            "population": 50,
+            "warehouse_id": self.warehouse.warehouse_id,
+        }
+        serializer = CommunitySerializer(data=payload)
+        self.assertFalse(serializer.is_valid())
+
+    # 18. API rejects community creation without name
+    def test_create_community_requires_name(self):
+        payload = {
+            "community_id": "NONAME",
+            "address": "Road 123",
+            "received_time": timezone.now().isoformat(),
+            "population": 25,
+            "warehouse_id": self.warehouse.warehouse_id,
+        }
+        response = self.authenticated_client.post(
+            reverse("community-list"), data=payload, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    # 19. Authenticated user can delete a community
+    def test_authenticated_user_can_delete_community(self):
+        detail_url = reverse("community-detail", args=[self.community.community_id])
+        response = self.authenticated_client.delete(detail_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(
+            Community.objects.filter(community_id=self.community.community_id).exists()
+        )
+
+    # 20. Listing communities returns empty list after deletion
+    def test_list_empty_after_deletion(self):
+        self.community.delete()
+        response = self.authenticated_client.get(reverse("community-list"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), [])
+
+    # 21. Serializer can create a community instance from data
+    def test_serializer_can_create_instance(self):
+        payload = {
+            "community_id": "C0200",
+            "name": "Serializer Create",
+            "address": "100 Road",
+            "received_time": timezone.now(),
+            "population": 321,
+            "warehouse_id": self.warehouse.warehouse_id,
+        }
+        serializer = CommunitySerializer(data=payload)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        instance = serializer.save()
+        self.assertEqual(instance.community_id, "C0200")
+
+    # 22. API rejects community creation when warehouse does not exist
+    def test_create_community_invalid_warehouse(self):
+        payload = {
+            "community_id": "C0201",
+            "name": "Invalid Warehouse",
+            "address": "No Warehouse",
+            "received_time": timezone.now().isoformat(),
+            "population": 111,
+            "warehouse_id": "NOT_FOUND",
+        }
+        response = self.authenticated_client.post(
+            reverse("community-list"), data=payload, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    # 23. Authenticated user can update community population
+    def test_authenticated_user_updates_population(self):
+        detail_url = reverse("community-detail", args=[self.community.community_id])
+        response = self.authenticated_client.patch(
+            detail_url, {"population": 1500}, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.community.refresh_from_db()
+        self.assertEqual(self.community.population, 1500)
+
+    # 24. Deleting a non-existent community returns 404
+    def test_delete_nonexistent_community_returns_404(self):
+        response = self.authenticated_client.delete(
+            reverse("community-detail", args=["UNKNOWN"])
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    # 25. Serializer accepts ISO formatted received_time strings
+    def test_serializer_accepts_iso_received_time(self):
+        payload = {
+            "community_id": "C0202",
+            "name": "ISO Time",
+            "address": "Time Lane",
+            "received_time": timezone.now().isoformat(),
+            "population": 222,
+            "warehouse_id": self.warehouse.warehouse_id,
+        }
+        serializer = CommunitySerializer(data=payload)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+
+    # 26. Serializer rejects non-numeric population
+    def test_serializer_rejects_non_numeric_population(self):
+        payload = {
+            "community_id": "C0300",
+            "name": "Bad Population",
+            "address": "String St",
+            "received_time": timezone.now(),
+            "population": "invalid",
+            "warehouse_id": self.warehouse.warehouse_id,
+        }
+        serializer = CommunitySerializer(data=payload)
+        self.assertFalse(serializer.is_valid())
+
+    # 27. API returns 400 when population is negative
+    def test_api_rejects_negative_population(self):
+        payload = {
+            "community_id": "NEGAPI",
+            "name": "Negative API",
+            "address": "Bad Road",
+            "received_time": timezone.now().isoformat(),
+            "population": -10,
+            "warehouse_id": self.warehouse.warehouse_id,
+        }
+        response = self.authenticated_client.post(
+            reverse("community-list"), data=payload, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    # 28. Serializer reflects partial update values
+    def test_serializer_partial_update(self):
+        serializer = CommunitySerializer(
+            instance=self.community, data={"name": "Partial"}, partial=True
+        )
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        instance = serializer.save()
+        self.assertEqual(instance.name, "Partial")
+
+    # 29. API filtering by nonexistent warehouse returns empty list
+    def test_filter_by_invalid_warehouse_returns_empty(self):
+        response = self.authenticated_client.get(
+            f"{reverse('community-list')}?warehouse_id=NOTREAL"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), [])
+
+    # 30. Serializer rejects overly long community name
+    def test_serializer_rejects_long_name(self):
+        payload = {
+            "community_id": "LONG1",
+            "name": "A" * 256,
+            "address": "Long Name Street",
+            "received_time": timezone.now(),
+            "population": 123,
+            "warehouse_id": self.warehouse.warehouse_id,
+        }
+        serializer = CommunitySerializer(data=payload)
+        self.assertFalse(serializer.is_valid())
