@@ -1410,8 +1410,8 @@ function DonationRequestSection() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#CCE9DB] bg-white/80 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-[#4A8F6F]">
+          <div className="rounded-2xl border border-[#F3C7A0] bg-[#FFF7EF] p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#C46A24]">
               Community details
             </p>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -1447,8 +1447,8 @@ function DonationRequestSection() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#CCE9DB] bg-white/80 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-[#4A8F6F]">
+          <div className="rounded-2xl border border-[#F3C7A0] bg-[#FFF7EF] p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#C46A24]">
               Recipient details
             </p>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -1482,12 +1482,12 @@ function DonationRequestSection() {
             </div>
           </div>
 
-          <div className="space-y-4 rounded-2xl border border-[#DFF4EB] bg-white p-4">
+          <div className="space-y-4 rounded-2xl border border-[#F4C7A0] bg-[#FFF7EF] p-4">
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold text-gray-700">Requested items</p>
               <button
                 type="button"
-                className="text-xs font-semibold uppercase tracking-wide text-[#157347]"
+                className="text-xs font-semibold uppercase tracking-wide text-[#C46A24]"
                 onClick={handleAddNeed}
               >
                 + Add need
@@ -1497,10 +1497,12 @@ function DonationRequestSection() {
             {form.needs.map((need, index) => (
               <div
                 key={need.id}
-                className="grid gap-3 rounded-2xl border border-dashed border-[#CBE4D8] bg-[#F7FFFB] p-4"
+                className="grid gap-3 rounded-2xl border border-dashed border-[#F3C7A0] bg-[#FFF9F2] p-4"
               >
                 <div className="flex items-center justify-between">
-                  <p className="text-xs text-gray-500">Need #{index + 1}</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-[#C46A24]">
+                    Need #{index + 1}
+                  </p>
                   <button
                     type="button"
                     className="text-xs font-semibold text-red-500 underline-offset-2 hover:underline"
@@ -1704,17 +1706,17 @@ function DonationRequestSection() {
                         </p>
                       </div>
                       <span
-                        className={[
-                          "rounded-full px-3 py-1 text-xs font-semibold",
-                          need.urgency === "Critical"
-                            ? "bg-[#FDECEA] text-[#B42318]"
-                            : need.urgency === "High"
-                              ? "bg-[#FFF1C9] text-[#92400E]"
-                              : "bg-[#FFE7D1] text-[#C25D16]",
-                        ].join(" ")}
-                      >
-                        {need.urgency}
-                      </span>
+                    className={[
+                      "rounded-full px-3 py-1 text-xs font-semibold",
+                      need.urgency === "Critical"
+                        ? "bg-[#FDECEA] text-[#B42318]"
+                        : need.urgency === "High"
+                          ? "bg-[#FFEAD1] text-[#B45B1F]"
+                          : "bg-[#FFF3E6] text-[#C25D16]",
+                    ].join(" ")}
+                  >
+                    {need.urgency}
+                  </span>
                     </div>
                   ))}
                 </div>
