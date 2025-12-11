@@ -30,7 +30,7 @@ class DonationTests(APITestCase):
     def test_create_donation(self):
         data = {
             "donation_id": "D001",
-            "status": False,
+            "status": "pending",
             "restaurant": "R001"
         }
 
@@ -57,23 +57,23 @@ class DonationTests(APITestCase):
 
     # 4. Filter donations by status
     def test_filter_by_status(self):
-        Donation.objects.create(donation_id="D001", restaurant=self.restaurant, status=False)
-        Donation.objects.create(donation_id="D002", restaurant=self.restaurant, status=True)
+        Donation.objects.create(donation_id="D001", restaurant=self.restaurant, status="pending")
+        Donation.objects.create(donation_id="D002", restaurant=self.restaurant, status="accepted")
 
-        response = self.client.get("/api/donations/?status=true")
+        response = self.client.get("/api/donations/?status=accepted")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["donation_id"], "D002")
 
     # 5. Patch donation status
     def test_update_donation_status(self):
-        Donation.objects.create(donation_id="D001", restaurant=self.restaurant, status=False)
+        Donation.objects.create(donation_id="D001", restaurant=self.restaurant, status="pending")
 
-        response = self.client.patch("/api/donations/D001/", {"status": True}, format="json")
+        response = self.client.patch("/api/donations/D001/", {"status": "accepted"}, format="json")
         self.assertEqual(response.status_code, 200)
 
         updated = Donation.objects.get(donation_id="D001")
-        self.assertTrue(updated.status)
+        self.assertEqual(updated.status, "accepted")
 
     # 6. Deleting restaurant should delete its donations (CASCADE)
     def test_cascade_delete(self):
@@ -86,7 +86,7 @@ class DonationTests(APITestCase):
     def test_create_invalid_restaurant(self):
         data = {
             "donation_id": "D010",
-            "status": False,
+            "status": "pending",
             "restaurant": "NOPE"
         }
         response = self.client.post("/api/donations/", data, format="json")
@@ -98,7 +98,7 @@ class DonationTests(APITestCase):
         Donation.objects.create(donation_id="D001", restaurant=self.restaurant)
         data = {
             "donation_id": "D001",
-            "status": False,
+            "status": "pending",
             "restaurant": "R001"
         }
         response = self.client.post("/api/donations/", data, format="json")
@@ -118,11 +118,11 @@ class DonationTests(APITestCase):
         self.client.delete("/api/donations/D001/")
         self.assertEqual(Donation.objects.count(), 0)
 
-    # 11. Filtering donations with status=false returns correct ones
+    # 11. Filtering donations with status=pending returns correct ones
     def test_filter_status_false(self):
-        Donation.objects.create(donation_id="D1", restaurant=self.restaurant, status=False)
-        Donation.objects.create(donation_id="D2", restaurant=self.restaurant, status=True)
-        response = self.client.get("/api/donations/?status=false")
+        Donation.objects.create(donation_id="D1", restaurant=self.restaurant, status="pending")
+        Donation.objects.create(donation_id="D2", restaurant=self.restaurant, status="accepted")
+        response = self.client.get("/api/donations/?status=pending")
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["donation_id"], "D1")
 
@@ -134,10 +134,10 @@ class DonationTests(APITestCase):
 
     # 13. Updating only status should not modify donation_id or restaurant
     def test_partial_update_status_only(self):
-        Donation.objects.create(donation_id="D001", restaurant=self.restaurant, status=False)
-        self.client.patch("/api/donations/D001/", {"status": True}, format="json")
+        Donation.objects.create(donation_id="D001", restaurant=self.restaurant, status="pending")
+        self.client.patch("/api/donations/D001/", {"status": "accepted"}, format="json")
         d = Donation.objects.get(donation_id="D001")
-        self.assertTrue(d.status)
+        self.assertEqual(d.status, "accepted")
         self.assertEqual(d.donation_id, "D001")
         self.assertEqual(d.restaurant.restaurant_id, "R001")
 
@@ -167,7 +167,7 @@ class DonationTests(APITestCase):
     # 16. Donation fails when missing required donation_id
     def test_create_missing_donation_id(self):
         data = {
-            "status": False,
+            "status": "pending",
             "restaurant": "R001"
         }
         response = self.client.post("/api/donations/", data, format="json")
@@ -197,27 +197,27 @@ class DonationTests(APITestCase):
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["donation_id"], "D2")
 
-    # 19. Invalid boolean in status filter should return 0 results
+    # 19. Invalid status value in filter should return 0 results
     def test_invalid_status_param(self):
-        Donation.objects.create(donation_id="D1", restaurant=self.restaurant, status=False)
+        Donation.objects.create(donation_id="D1", restaurant=self.restaurant, status="pending")
         response = self.client.get("/api/donations/?status=maybe")
         self.assertEqual(len(response.data), 0)
 
     # 20. PUT donation allowed but FK cannot change
     def test_put_without_changing_fk(self):
-        Donation.objects.create(donation_id="D1", restaurant=self.restaurant, status=False)
+        Donation.objects.create(donation_id="D1", restaurant=self.restaurant, status="pending")
         data = {
             "donation_id": "D1",
-            "status": True,
+            "status": "accepted",
             "restaurant": "R001"
         }
         response = self.client.put("/api/donations/D1/", data, format="json")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(Donation.objects.get(donation_id="D1").status)
+        self.assertEqual(Donation.objects.get(donation_id="D1").status, "accepted")
 
     # 21. PUT donation cannot change restaurant
     def test_put_cannot_change_restaurant(self):
-        Donation.objects.create(donation_id="D1", restaurant=self.restaurant, status=False)
+        Donation.objects.create(donation_id="D1", restaurant=self.restaurant, status="pending")
 
         r2_chain = RestaurantChain.objects.create(chain_id="CHAIN03", chain_name="Burger Group")
         r2 = Restaurant.objects.create(
@@ -231,20 +231,20 @@ class DonationTests(APITestCase):
 
         data = {
             "donation_id": "D1",
-            "status": True,
+            "status": "accepted",
             "restaurant": "R002"
         }
         response = self.client.put("/api/donations/D1/", data, format="json")
         self.assertEqual(response.status_code, 400)
 
-    # 22. Creating donation without status defaults to False
+    # 22. Creating donation without status defaults to pending
     def test_create_without_status_defaults_false(self):
         self.client.post("/api/donations/", {
             "donation_id": "D1",
             "restaurant": "R001"
         }, format="json")
         d = Donation.objects.get(donation_id="D1")
-        self.assertFalse(d.status)
+        self.assertEqual(d.status, "pending")
 
     # 23. Massive creation 50 donations
     def test_mass_create(self):
@@ -265,17 +265,17 @@ class DonationTests(APITestCase):
 
     # 25. PATCH with same donation_id should succeed and keep original ID
     def test_patch_same_donation_id(self):
-        Donation.objects.create(donation_id="D1", restaurant=self.restaurant, status=False)
+        Donation.objects.create(donation_id="D1", restaurant=self.restaurant, status="pending")
 
         response = self.client.patch("/api/donations/D1/", {
             "donation_id": "D1",
-            "status": True
+            "status": "accepted"
         }, format="json")
 
         self.assertEqual(response.status_code, 200)
 
         d = Donation.objects.get(donation_id="D1")
-        self.assertTrue(d.status)
+        self.assertEqual(d.status, "accepted")
 
     # 26. Donation API ignores unknown fields
     def test_unknown_fields_ignored(self):
@@ -304,13 +304,13 @@ class DonationTests(APITestCase):
 
     # 30. Patch without body should return 200 and do nothing
     def test_empty_patch(self):
-        Donation.objects.create(donation_id="D1", restaurant=self.restaurant, status=False)
+        Donation.objects.create(donation_id="D1", restaurant=self.restaurant, status="pending")
         response = self.client.patch("/api/donations/D1/", {}, format="json")
         self.assertEqual(response.status_code, 200)
 
     # 31. PUT without status should keep original status
     def test_put_without_status_keeps_status(self):
-        Donation.objects.create(donation_id="D1", restaurant=self.restaurant, status=True)
+        Donation.objects.create(donation_id="D1", restaurant=self.restaurant, status="accepted")
 
         response = self.client.put("/api/donations/D1/", {
             "donation_id": "D1",
@@ -320,20 +320,20 @@ class DonationTests(APITestCase):
         self.assertEqual(response.status_code, 200)
 
         d = Donation.objects.get(donation_id="D1")
-        self.assertTrue(d.status)
+        self.assertEqual(d.status, "accepted")
 
     # 32. Filtering donation with restaurant_id + status together
     def test_filter_multiple_params(self):
-        Donation.objects.create(donation_id="D1", restaurant=self.restaurant, status=False)
-        Donation.objects.create(donation_id="D2", restaurant=self.restaurant, status=True)
+        Donation.objects.create(donation_id="D1", restaurant=self.restaurant, status="pending")
+        Donation.objects.create(donation_id="D2", restaurant=self.restaurant, status="accepted")
 
-        response = self.client.get("/api/donations/?restaurant_id=R001&status=true")
+        response = self.client.get("/api/donations/?restaurant_id=R001&status=accepted")
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["donation_id"], "D2")
 
     # 33. Donation response contains required fields
     def test_donation_response_structure(self):
-        Donation.objects.create(donation_id="D1", restaurant=self.restaurant, status=True)
+        Donation.objects.create(donation_id="D1", restaurant=self.restaurant, status="accepted")
 
         response = self.client.get("/api/donations/D1/")
         self.assertEqual(response.status_code, 200)
@@ -346,7 +346,7 @@ class DonationTests(APITestCase):
         data = {
             "donation_id": "DUP",
             "restaurant": "R001",
-            "status": False,
+            "status": "pending",
         }
         response = self.client.post("/api/donations/", data, format="json")
         self.assertEqual(response.status_code, 201)

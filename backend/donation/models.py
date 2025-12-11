@@ -3,9 +3,15 @@ from restaurants.models import Restaurant
 
 
 class Donation(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('declined', 'Declined'),
+    ]
+
     donation_id = models.CharField(max_length=10, primary_key=True)
     donated_at = models.DateTimeField(auto_now_add=True)
-    status = models.BooleanField(default=False) # False = pending, True = completed
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
     restaurant = models.ForeignKey(
         Restaurant,

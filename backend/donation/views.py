@@ -43,10 +43,13 @@ class DonationViewSet(viewsets.ModelViewSet):
 
         if status_param is not None:
             status_param = status_param.lower()
-            if status_param in ["true", "1"]:
-                qs = qs.filter(status=True)
+            # Support both new enum values and legacy boolean values for backward compatibility
+            if status_param in ["pending", "accepted", "declined"]:
+                qs = qs.filter(status=status_param)
+            elif status_param in ["true", "1", "completed"]:
+                qs = qs.filter(status="accepted")
             elif status_param in ["false", "0"]:
-                qs = qs.filter(status=False)
+                qs = qs.filter(status="pending")
             else:
                 return qs.none()
 
