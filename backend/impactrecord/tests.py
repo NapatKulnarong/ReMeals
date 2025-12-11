@@ -16,7 +16,7 @@ class ImpactRecordTests(APITestCase):
 
         # 1.Create restaurant
         self.restaurant = Restaurant.objects.create(
-            restaurant_id="R001",
+            restaurant_id="RES001",
             address="Bangkok",
             name="KFC",
             branch_name="Central Plaza",
@@ -25,13 +25,13 @@ class ImpactRecordTests(APITestCase):
 
         # 2.Create donation
         self.donation = Donation.objects.create(
-            donation_id="D001",
+            donation_id="DON001",
             restaurant=self.restaurant
         )
 
         # Create food item (not distributed yet)
         self.food = FoodItem.objects.create(
-            food_id="F001",
+            food_id="FOO001",
             name="Apple",
             quantity=10,
             unit="pcs",
@@ -49,11 +49,11 @@ class ImpactRecordTests(APITestCase):
         (only auto-created when is_distributed changes).
         """
         data = {
-            "impact_id": "I001",
+            "impact_id": "IMP001",
             "meals_saved": 5,
             "weight_saved_kg": 1.2,
             "co2_reduced_kg": 3.5,
-            "food": "F001"
+            "food": "FOO001"
         }
         res = self.client.post("/api/impact/", data, format="json")
         self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -78,7 +78,7 @@ class ImpactRecordTests(APITestCase):
 
         # First impact created
         ImpactRecord.objects.create(
-            impact_id="I001",
+            impact_id="IMP001",
             meals_saved=5,
             weight_saved_kg=1.2,
             co2_reduced_kg=3.5,

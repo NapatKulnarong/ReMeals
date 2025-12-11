@@ -1,0 +1,23 @@
+[
+  {
+    "model": "restaurant_chain.restaurantchain",
+    "pk": "CHA001",
+    "fields": {
+      "chain_name": "KFC Thailand"
+    }
+  },
+  {
+    "model": "restaurant_chain.restaurantchain",
+    "pk": "CHA002",
+    "fields": {
+      "chain_name": "The Pizza Company"
+    }
+  },
+  {
+    "model": "restaurant_chain.restaurantchain",
+    "pk": "CHA003",
+    "fields": {
+      "chain_name": "Sizzler"
+    }
+  }
+]

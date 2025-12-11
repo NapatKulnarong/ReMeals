@@ -1,0 +1,61 @@
+[
+  {
+    "model": "users.admin",
+    "pk": 1,
+    "fields": {
+      "user": "SEED001"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 1,
+    "fields": {
+      "user": "SEED002",
+      "restaurant_id": "RES001"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 2,
+    "fields": {
+      "user": "SEED003",
+      "restaurant_id": "RES003"
+    }
+  },
+  {
+    "model": "users.deliverystaff",
+    "pk": 1,
+    "fields": {
+      "user": "SEED004",
+      "assigned_area": "Bangkok Central",
+      "is_available": true
+    }
+  },
+  {
+    "model": "users.deliverystaff",
+    "pk": 2,
+    "fields": {
+      "user": "SEED005",
+      "assigned_area": "Samut Prakan",
+      "is_available": true
+    }
+  },
+  {
+    "model": "users.recipient",
+    "pk": 1,
+    "fields": {
+      "user": "SEED006",
+      "address": "123 Klong Toey, Bangkok 10110",
+      "community_id": "COM001"
+    }
+  },
+  {
+    "model": "users.recipient",
+    "pk": 2,
+    "fields": {
+      "user": "SEED007",
+      "address": "456 Bang Khen, Bangkok 10220",
+      "community_id": "COM002"
+    }
+  }
+]

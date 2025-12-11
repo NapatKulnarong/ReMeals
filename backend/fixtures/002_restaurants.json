@@ -1,0 +1,46 @@
+[
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES001",
+    "fields": {
+      "name": "KFC",
+      "branch_name": "Central World",
+      "address": "999/9 Rama I Rd, Pathum Wan, Bangkok 10330",
+      "is_chain": true,
+      "chain": "CHA001"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES002",
+    "fields": {
+      "name": "KFC",
+      "branch_name": "Siam Paragon",
+      "address": "991 Rama I Rd, Pathum Wan, Bangkok 10330",
+      "is_chain": true,
+      "chain": "CHA001"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES003",
+    "fields": {
+      "name": "The Pizza Company",
+      "branch_name": "Mega Bangna",
+      "address": "39 Bangna-Trad Road, Bang Kaeo, Bang Phli, Samut Prakan 10540",
+      "is_chain": true,
+      "chain": "CHA002"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES004",
+    "fields": {
+      "name": "Sizzler",
+      "branch_name": "EmQuartier",
+      "address": "693, 695 Sukhumvit Rd, Khlong Tan Nuea, Watthana, Bangkok 10110",
+      "is_chain": true,
+      "chain": "CHA003"
+    }
+  }
+]

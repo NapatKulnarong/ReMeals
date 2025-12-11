@@ -1,0 +1,93 @@
+[
+  {
+    "model": "users.user",
+    "pk": "SEED001",
+    "fields": {
+      "username": "admin",
+      "fname": "System",
+      "lname": "Administrator",
+      "bod": "1990-01-01",
+      "phone": "0812345001",
+      "email": "admin@remeals.com",
+      "password": "pbkdf2_sha256$600000$VqJl9eEqYQdH$8K1V8VJ2Z5vN0mKZ6Q7FjlVKWvJZJqVqJl9eEqYQdHxGQ7FjlVKWvJZJqVqJl9eEqYQdH="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "SEED002",
+    "fields": {
+      "username": "donor1",
+      "fname": "Findlay",
+      "lname": "Kline",
+      "bod": "1985-05-15",
+      "phone": "0812345002",
+      "email": "findlay.kl@gmail.com",
+      "password": "pbkdf2_sha256$600000$VqJl9eEqYQdH$8K1V8VJ2Z5vN0mKZ6Q7FjlVKWvJZJqVqJl9eEqYQdHxGQ7FjlVKWvJZJqVqJl9eEqYQdH="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "SEED003",
+    "fields": {
+      "username": "donor2",
+      "fname": "Lili",
+      "lname": "Byrd",
+      "bod": "1988-08-20",
+      "phone": "0812345003",
+      "email": "lili.byrd@gmail.com",
+      "password": "pbkdf2_sha256$600000$VqJl9eEqYQdH$8K1V8VJ2Z5vN0mKZ6Q7FjlVKWvJZJqVqJl9eEqYQdHxGQ7FjlVKWvJZJqVqJl9eEqYQdH="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "SEED004",
+    "fields": {
+      "username": "delivery1",
+      "fname": "Cordelia",
+      "lname": "Lynn",
+      "bod": "1992-03-10",
+      "phone": "0812345004",
+      "email": "cordelia.ly@gmail.com",
+      "password": "pbkdf2_sha256$600000$VqJl9eEqYQdH$8K1V8VJ2Z5vN0mKZ6Q7FjlVKWvJZJqVqJl9eEqYQdHxGQ7FjlVKWvJZJqVqJl9eEqYQdH="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "SEED005",
+    "fields": {
+      "username": "delivery2",
+      "fname": "Gideon",
+      "lname": "Curry",
+      "bod": "1995-07-25",
+      "phone": "0812345005",
+      "email": "gideon.cu@gmail.com",
+      "password": "pbkdf2_sha256$600000$VqJl9eEqYQdH$8K1V8VJ2Z5vN0mKZ6Q7FjlVKWvJZJqVqJl9eEqYQdHxGQ7FjlVKWvJZJqVqJl9eEqYQdH="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "SEED006",
+    "fields": {
+      "username": "recipient1",
+      "fname": "Aston",
+      "lname": "Merritt",
+      "bod": "1980-11-05",
+      "phone": "0812345006",
+      "email": "aston.me@gmail.com",
+      "password": "pbkdf2_sha256$600000$VqJl9eEqYQdH$8K1V8VJ2Z5vN0mKZ6Q7FjlVKWvJZJqVqJl9eEqYQdHxGQ7FjlVKWvJZJqVqJl9eEqYQdH="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "SEED007",
+    "fields": {
+      "username": "recipient2",
+      "fname": "Keeley",
+      "lname": "Bradford",
+      "bod": "1983-02-14",
+      "phone": "0812345007",
+      "email": "keeley.br@gmail.com",
+      "password": "pbkdf2_sha256$600000$VqJl9eEqYQdH$8K1V8VJ2Z5vN0mKZ6Q7FjlVKWvJZJqVqJl9eEqYQdHxGQ7FjlVKWvJZJqVqJl9eEqYQdH="
+    }
+  }
+]

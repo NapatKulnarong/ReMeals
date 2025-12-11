@@ -22,23 +22,23 @@ class DeliveryAPITests(APITestCase):
         self.client.force_authenticate(self.auth_user)
 
         self.warehouse = Warehouse.objects.create(
-            warehouse_id="W001",
+            warehouse_id="WAR001",
             address="123 Storage Ave",
             capacity=750.0,
             stored_date=date(2025, 1, 1),
             exp_date=date(2025, 3, 1),
         )
         self.community = Community.objects.create(
-            community_id="C001",
+            community_id="COM001",
             name="North Block",
             address="45 Main Street",
             received_time=timezone.now(),
             population=120,
             warehouse_id=self.warehouse,
         )
-        self.chain = RestaurantChain.objects.create(chain_id="CHAIN01", chain_name="KFC Group")
+        self.chain = RestaurantChain.objects.create(chain_id="CHA01", chain_name="KFC Group")
         self.restaurant = Restaurant.objects.create(
-            restaurant_id="R001",
+            restaurant_id="RES001",
             address="77 Food Park",
             name="GoodEats",
             branch_name="Central",
@@ -46,7 +46,7 @@ class DeliveryAPITests(APITestCase):
             chain=self.chain,
         )
         self.donation = Donation.objects.create(
-            donation_id="DN001",
+            donation_id="DON001",
             restaurant=self.restaurant,
         )
         self.delivery_user = DomainUser.objects.create(

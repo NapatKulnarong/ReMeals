@@ -12,7 +12,7 @@ class RestaurantTests(APITestCase):
     # 1. Create single restaurant (no chain)
     def test_create_restaurant(self):
         data = {
-            "restaurant_id": "R0001",
+            "restaurant_id": "RES0001",
             "address": "Bangkok",
             "name": "KFC",
             "branch_name": "Central World",
@@ -27,11 +27,11 @@ class RestaurantTests(APITestCase):
     # 2. Create branch restaurant with chain_id
     def test_create_branch_restaurant(self):
         chain = RestaurantChain.objects.create(
-            chain_id="CHAIN01",
+            chain_id="CHA01",
             chain_name="KFC Group",
         )
         Restaurant.objects.create(
-            restaurant_id="R0001",
+            restaurant_id="RES0001",
             address="Bangkok",
             name="KFC",
             branch_name="HQ",
@@ -40,7 +40,7 @@ class RestaurantTests(APITestCase):
         )
 
         data = {
-            "restaurant_id": "R0002",
+            "restaurant_id": "RES0002",
             "address": "Bangkok",
             "name": "KFC",
             "branch_name": "Siam",
@@ -51,13 +51,13 @@ class RestaurantTests(APITestCase):
         res = self.client.post("/api/restaurants/", data, format="json")
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
-        branch = Restaurant.objects.get(restaurant_id="R0002")
+        branch = Restaurant.objects.get(restaurant_id="RES0002")
         self.assertEqual(branch.chain_id, chain.chain_id)
 
     # 3. List restaurants
     def test_list_restaurants(self):
         Restaurant.objects.create(
-            restaurant_id="R0001",
+            restaurant_id="RES0001",
             address="Bangkok",
             name="Pizza Hut",
             branch_name="MBK",
@@ -71,21 +71,21 @@ class RestaurantTests(APITestCase):
     # 4. Retrieve a restaurant detail
     def test_retrieve_restaurant(self):
         Restaurant.objects.create(
-            restaurant_id="R0001",
+            restaurant_id="RES0001",
             address="Bangkok",
             name="Sukishi",
             branch_name="Terminal 21",
             is_chain=False
         )
 
-        res = self.client.get("/api/restaurants/R0001/")
+        res = self.client.get("/api/restaurants/RES0001/")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data["restaurant_id"], "R0001")
+        self.assertEqual(res.data["restaurant_id"], "RES0001")
 
     # 5. Update restaurant info
     def test_update_restaurant(self):
         Restaurant.objects.create(
-            restaurant_id="R0001",
+            restaurant_id="RES0001",
             address="Bangkok",
             name="McDonald's",
             branch_name="Siam",
@@ -93,33 +93,33 @@ class RestaurantTests(APITestCase):
         )
 
         res = self.client.patch(
-            "/api/restaurants/R0001/",
+            "/api/restaurants/RES0001/",
             {"name": "McDonalds Edited"},
             format="json"
         )
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        r = Restaurant.objects.get(restaurant_id="R0001")
+        r = Restaurant.objects.get(restaurant_id="RES0001")
         self.assertEqual(r.name, "McDonalds Edited")
 
     # 6. Delete restaurant
     def test_delete_restaurant(self):
         Restaurant.objects.create(
-            restaurant_id="R0001",
+            restaurant_id="RES0001",
             address="Bangkok",
             name="Shabushi",
             branch_name="IconSiam",
             is_chain=False
         )
 
-        res = self.client.delete("/api/restaurants/R0001/")
+        res = self.client.delete("/api/restaurants/RES0001/")
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Restaurant.objects.count(), 0)
 
     # 7. chain_id must reference existing restaurant chain
     def test_chain_must_exist(self):
         data = {
-            "restaurant_id": "R0002",
+            "restaurant_id": "RES0002",
             "address": "Bangkok",
             "name": "BBQ Plaza",
             "branch_name": "Rama 9",
@@ -133,7 +133,7 @@ class RestaurantTests(APITestCase):
     # 8. chain_id can be null
     def test_chain_can_be_null(self):
         data = {
-            "restaurant_id": "R0003",
+            "restaurant_id": "RES0003",
             "address": "Bangkok",
             "name": "S&P",
             "branch_name": "Central Pinklao",
@@ -144,17 +144,17 @@ class RestaurantTests(APITestCase):
         res = self.client.post("/api/restaurants/", data, format="json")
         self.assertEqual(res.status_code, 201)
 
-        r = Restaurant.objects.get(restaurant_id="R0003")
+        r = Restaurant.objects.get(restaurant_id="RES0003")
         self.assertIsNone(r.chain)
 
     # 9. View branches under a chain
     def test_view_chain_branches(self):
         chain = RestaurantChain.objects.create(
-            chain_id="CHAIN1000",
+            chain_id="CHA1000",
             chain_name="KFC Group",
         )
         Restaurant.objects.create(
-            restaurant_id="R1000",
+            restaurant_id="RES1000",
             address="Bangkok",
             name="KFC",
             branch_name="HQ",
@@ -162,7 +162,7 @@ class RestaurantTests(APITestCase):
             chain=chain,
         )
         Restaurant.objects.create(
-            restaurant_id="R1001",
+            restaurant_id="RES1001",
             address="Bangkok",
             name="KFC",
             branch_name="Siam",
@@ -175,7 +175,7 @@ class RestaurantTests(APITestCase):
     # 10. Invalid missing fields should return 400
     def test_invalid_missing_fields(self):
         data = {
-            "restaurant_id": "R0001",
+            "restaurant_id": "RES0001",
             "name": "MK"
             # missing address, branch_name, is_chain
         }
@@ -222,11 +222,11 @@ class RestaurantTests(APITestCase):
     # 14. Update chain relationship (assign a chain later)
     def test_assign_chain_after_creation(self):
         chain = RestaurantChain.objects.create(
-            chain_id="HEAD01",
+            chain_id="CHAHEAD01",
             chain_name="The Mall Group",
         )
         Restaurant.objects.create(
-            restaurant_id="HEADR01",
+            restaurant_id="RESHEADR01",
             address="HQ",
             name="The Mall",
             branch_name="Head",
@@ -234,7 +234,7 @@ class RestaurantTests(APITestCase):
             chain=chain,
         )
         branch = Restaurant.objects.create(
-            restaurant_id="BR001",
+            restaurant_id="RESBR001",
             address="Bangkok",
             name="The Mall",
             branch_name="Rama 3",
@@ -252,11 +252,11 @@ class RestaurantTests(APITestCase):
     # 15. Remove chain relationship
     def test_remove_chain(self):
         chain_obj = RestaurantChain.objects.create(
-            chain_id="C01",
+            chain_id="CHAC01",
             chain_name="KFC Group",
         )
         Restaurant.objects.create(
-            restaurant_id="H01",
+            restaurant_id="RESH01",
             address="HQ",
             name="KFC",
             branch_name="HQ",
@@ -264,7 +264,7 @@ class RestaurantTests(APITestCase):
             chain=chain_obj,
         )
         branch = Restaurant.objects.create(
-            restaurant_id="B01",
+            restaurant_id="RESB01",
             address="Bangkok",
             name="KFC",
             branch_name="Central",
@@ -283,11 +283,11 @@ class RestaurantTests(APITestCase):
     # 16. Deleting chain should not delete branches (SET_NULL)
     def test_delete_chain_does_not_delete_branches(self):
         chain_obj = RestaurantChain.objects.create(
-            chain_id="C01",
+            chain_id="CHAC01",
             chain_name="BBQ Plaza Group",
         )
         Restaurant.objects.create(
-            restaurant_id="C01",
+            restaurant_id="RESC01",
             address="HQ",
             name="BBQ Plaza",
             branch_name="HQ",
@@ -295,7 +295,7 @@ class RestaurantTests(APITestCase):
             chain=chain_obj,
         )
         branch = Restaurant.objects.create(
-            restaurant_id="B01",
+            restaurant_id="RESB01",
             address="Bangkok",
             name="BBQ Plaza",
             branch_name="Siam",
@@ -307,13 +307,13 @@ class RestaurantTests(APITestCase):
 
         branch.refresh_from_db()
         self.assertIsNone(branch.chain)  # SET_NULL
-        self.assertTrue(Restaurant.objects.filter(restaurant_id="B01").exists())
-        self.assertTrue(Restaurant.objects.filter(restaurant_id="C01").exists())
+        self.assertTrue(Restaurant.objects.filter(restaurant_id="RESB01").exists())
+        self.assertTrue(Restaurant.objects.filter(restaurant_id="RESC01").exists())
 
     # 17. Duplicate restaurant_id should fail (PK conflict)
     def test_duplicate_id(self):
         Restaurant.objects.create(
-            restaurant_id="R1234",
+            restaurant_id="RES1234",
             address="Bangkok",
             name="Test",
             branch_name="Test",
@@ -321,7 +321,7 @@ class RestaurantTests(APITestCase):
         )
 
         data = {
-            "restaurant_id": "R1234",
+            "restaurant_id": "RES1234",
             "address": "Bangkok",
             "name": "Duplicate",
             "branch_name": "Dup",
@@ -333,14 +333,14 @@ class RestaurantTests(APITestCase):
     # 18. List restaurants sorted by restaurant_id (default ordering)
     def test_list_sorted_by_id(self):
         Restaurant.objects.create(
-            restaurant_id="Z010",
+            restaurant_id="RESZ010",
             address="Bangkok",
             name="A",
             branch_name="B",
             is_chain=False
         )
         Restaurant.objects.create(
-            restaurant_id="A001",
+            restaurant_id="RESA001",
             address="Bangkok",
             name="A",
             branch_name="B",
@@ -359,14 +359,14 @@ class RestaurantTests(APITestCase):
     # 20. Search by name (manual filter)
     def test_filter_by_name(self):
         Restaurant.objects.create(
-            restaurant_id="R100",
+            restaurant_id="RES100",
             address="Bangkok",
             name="Sushi Zanmai",
             branch_name="Icon",
             is_chain=False
         )
         Restaurant.objects.create(
-            restaurant_id="R101",
+            restaurant_id="RES101",
             address="Bangkok",
             name="Shabushi",
             branch_name="Siam",
@@ -383,10 +383,10 @@ class RestaurantTests(APITestCase):
     # 21. List only chain restaurants (is_chain = True)
     def test_filter_only_chains(self):
         Restaurant.objects.create(
-            restaurant_id="R1", address="A", name="AA", branch_name="B", is_chain=True
+            restaurant_id="RES1", address="A", name="AA", branch_name="B", is_chain=True
         )
         Restaurant.objects.create(
-            restaurant_id="R2", address="A", name="BB", branch_name="B", is_chain=False
+            restaurant_id="RES2", address="A", name="BB", branch_name="B", is_chain=False
         )
 
         res = self.client.get("/api/restaurants/?is_chain=true")
@@ -397,7 +397,7 @@ class RestaurantTests(APITestCase):
     # 22. Multiple field update at once
     def test_update_multiple_fields(self):
         r = Restaurant.objects.create(
-            restaurant_id="RM1",
+            restaurant_id="RESM1",
             address="Old",
             name="OldName",
             branch_name="OldBranch",
@@ -409,7 +409,7 @@ class RestaurantTests(APITestCase):
             "name": "New Name",
             "branch_name": "New Branch"
         }
-        res = self.client.patch("/api/restaurants/RM1/", data, format="json")
+        res = self.client.patch("/api/restaurants/RESM1/", data, format="json")
         r.refresh_from_db()
 
         self.assertEqual(res.status_code, 200)
@@ -420,7 +420,7 @@ class RestaurantTests(APITestCase):
     # 23. Invalid chain type (must be string)
     def test_invalid_chain_data_type(self):
         data = {
-            "restaurant_id": "R200",
+            "restaurant_id": "RES200",
             "address": "Bangkok",
             "name": "Test",
             "branch_name": "Branch",
@@ -449,11 +449,11 @@ class RestaurantTests(APITestCase):
     # 25. Branches count when multiple branches exist
     def test_chain_branch_count(self):
         chain_obj = RestaurantChain.objects.create(
-            chain_id="CHAIN1",
+            chain_id="CHA1",
             chain_name="MK Group",
         )
         Restaurant.objects.create(
-            restaurant_id="HEAD001",
+            restaurant_id="RESHEAD001",
             address="HQ",
             name="MK",
             branch_name="HQ",
@@ -461,7 +461,7 @@ class RestaurantTests(APITestCase):
             chain=chain_obj,
         )
         Restaurant.objects.create(
-            restaurant_id="BR001",
+            restaurant_id="RESBR001",
             address="BKK",
             name="MK",
             branch_name="A",
@@ -469,7 +469,7 @@ class RestaurantTests(APITestCase):
             chain=chain_obj,
         )
         Restaurant.objects.create(
-            restaurant_id="BR002",
+            restaurant_id="RESBR002",
             address="BKK",
             name="MK",
             branch_name="B",
@@ -494,9 +494,9 @@ class RestaurantTests(APITestCase):
     # 27. Test JSON structure correctness
     def test_response_structure(self):
         Restaurant.objects.create(
-            restaurant_id="RS1", address="A", name="B", branch_name="C", is_chain=False
+            restaurant_id="RESS1", address="A", name="B", branch_name="C", is_chain=False
         )
-        res = self.client.get("/api/restaurants/RS1/")
+        res = self.client.get("/api/restaurants/RESS1/")
         self.assertEqual(res.status_code, 200)
 
         expected_keys = {
@@ -512,11 +512,11 @@ class RestaurantTests(APITestCase):
     # 28. Test chain cannot point to itself
     def test_chain_cannot_be_self(self):
         chain = RestaurantChain.objects.create(
-            chain_id="SELF",
+            chain_id="CHASELF",
             chain_name="Self Chain",
         )
         r = Restaurant.objects.create(
-            restaurant_id="SELF",
+            restaurant_id="RESSELF",
             address="A",
             name="Self",
             branch_name="Self",
@@ -525,7 +525,7 @@ class RestaurantTests(APITestCase):
         )
 
         res = self.client.patch(
-            "/api/restaurants/SELF/",
+            "/api/restaurants/RESSELF/",
             {"chain": chain.chain_id},
             format="json"
         )
@@ -539,30 +539,30 @@ class RestaurantTests(APITestCase):
     # 29. Partial update without specifying fields (empty PATCH)
     def test_empty_patch(self):
         r = Restaurant.objects.create(
-            restaurant_id="E01",
+            restaurant_id="RESE01",
             address="Bangkok",
             name="TestName",
             branch_name="TestBranch",
             is_chain=False,
         )
 
-        res = self.client.patch("/api/restaurants/E01/", {}, format="json")
+        res = self.client.patch("/api/restaurants/RESE01/", {}, format="json")
         self.assertEqual(res.status_code, 200)
         # nothing should change
-        self.assertEqual(Restaurant.objects.get(restaurant_id="E01").name, "TestName")
+        self.assertEqual(Restaurant.objects.get(restaurant_id="RESE01").name, "TestName")
 
     # 30. Delete restaurant does not affect unrelated restaurants
     def test_delete_one_does_not_affect_others(self):
         Restaurant.objects.create(
-            restaurant_id="D1", address="A", name="A", branch_name="A", is_chain=False
+            restaurant_id="RESD1", address="A", name="A", branch_name="A", is_chain=False
         )
         Restaurant.objects.create(
-            restaurant_id="D2", address="A", name="A", branch_name="A", is_chain=False
+            restaurant_id="RESD2", address="A", name="A", branch_name="A", is_chain=False
         )
 
-        self.client.delete("/api/restaurants/D1/")
+        self.client.delete("/api/restaurants/RESD1/")
         self.assertEqual(Restaurant.objects.count(), 1)
-        self.assertTrue(Restaurant.objects.filter(restaurant_id="D2").exists())
+        self.assertTrue(Restaurant.objects.filter(restaurant_id="RESD2").exists())
 
     # 31. List endpoint returns empty list when no restaurants exist
     def test_list_empty(self):
@@ -573,7 +573,7 @@ class RestaurantTests(APITestCase):
     # 32. Partial update toggles is_chain flag
     def test_patch_toggle_is_chain(self):
         Restaurant.objects.create(
-            restaurant_id="T01",
+            restaurant_id="RES901",
             address="Addr",
             name="Toggle",
             branch_name="Branch",
@@ -581,17 +581,17 @@ class RestaurantTests(APITestCase):
         )
 
         res = self.client.patch(
-            "/api/restaurants/T01/",
+            "/api/restaurants/RES901/",
             {"is_chain": True},
             format="json",
         )
         self.assertEqual(res.status_code, 200)
-        self.assertTrue(Restaurant.objects.get(restaurant_id="T01").is_chain)
+        self.assertTrue(Restaurant.objects.get(restaurant_id="RES901").is_chain)
 
     # 33. PUT request overwrites restaurant fields
     def test_put_updates_all_fields(self):
         Restaurant.objects.create(
-            restaurant_id="P01",
+            restaurant_id="RESP01",
             address="Old",
             name="Old",
             branch_name="Old",
@@ -599,23 +599,23 @@ class RestaurantTests(APITestCase):
         )
 
         payload = {
-            "restaurant_id": "P01",
+            "restaurant_id": "RESP01",
             "address": "New Address",
             "name": "New Name",
             "branch_name": "New Branch",
             "is_chain": True,
             "chain": None,
         }
-        res = self.client.put("/api/restaurants/P01/", payload, format="json")
+        res = self.client.put("/api/restaurants/RESP01/", payload, format="json")
         self.assertEqual(res.status_code, 200)
-        updated = Restaurant.objects.get(restaurant_id="P01")
+        updated = Restaurant.objects.get(restaurant_id="RESP01")
         self.assertEqual(updated.address, "New Address")
         self.assertTrue(updated.is_chain)
 
     # 34. Create restaurant without chain field defaults to None
     def test_create_without_chain_field(self):
         data = {
-            "restaurant_id": "NOC1",
+            "restaurant_id": "RESNOC1",
             "address": "Bangkok",
             "name": "NoChain",
             "branch_name": "Solo",
@@ -623,7 +623,7 @@ class RestaurantTests(APITestCase):
         }
         res = self.client.post("/api/restaurants/", data, format="json")
         self.assertEqual(res.status_code, 201)
-        self.assertIsNone(Restaurant.objects.get(restaurant_id="NOC1").chain)
+        self.assertIsNone(Restaurant.objects.get(restaurant_id="RESNOC1").chain)
 
     # 35. Deleting non-existent restaurant returns 404
     def test_delete_nonexistent_restaurant(self):
@@ -633,11 +633,11 @@ class RestaurantTests(APITestCase):
     # 36. Patching chain to invalid id should fail
     def test_patch_invalid_chain_reference(self):
         chain_obj = RestaurantChain.objects.create(
-            chain_id="CHAINOK",
+            chain_id="CHAOK",
             chain_name="Ok Chain",
         )
         branch = Restaurant.objects.create(
-            restaurant_id="PATCH01",
+            restaurant_id="RESPATCH01",
             address="Bangkok",
             name="Branch",
             branch_name="One",
@@ -655,7 +655,7 @@ class RestaurantTests(APITestCase):
     # 37. PUT requires all mandatory fields
     def test_put_missing_required_fields(self):
         Restaurant.objects.create(
-            restaurant_id="PUTREQ",
+            restaurant_id="RESPUTREQ",
             address="Bangkok",
             name="Req",
             branch_name="ReqBranch",
@@ -663,10 +663,10 @@ class RestaurantTests(APITestCase):
         )
 
         payload = {
-            "restaurant_id": "PUTREQ",
+            "restaurant_id": "RESPUTREQ",
             "address": "Only Address",
         }
-        res = self.client.put("/api/restaurants/PUTREQ/", payload, format="json")
+        res = self.client.put("/api/restaurants/RESPUTREQ/", payload, format="json")
         self.assertEqual(res.status_code, 400)
 
     # 38. Creating with blank name should be rejected
@@ -684,23 +684,23 @@ class RestaurantTests(APITestCase):
     # 39. Omitting is_chain defaults to False
     def test_is_chain_defaults_false(self):
         data = {
-            "restaurant_id": "DEF1",
+            "restaurant_id": "RESDEF1",
             "address": "Bangkok",
             "name": "Default",
             "branch_name": "Solo",
         }
         res = self.client.post("/api/restaurants/", data, format="json")
         self.assertEqual(res.status_code, 201)
-        self.assertFalse(Restaurant.objects.get(restaurant_id="DEF1").is_chain)
+        self.assertFalse(Restaurant.objects.get(restaurant_id="RESDEF1").is_chain)
 
     # 40. Retrieve response includes chain id if set
     def test_retrieve_contains_chain_value(self):
         chain_obj = RestaurantChain.objects.create(
-            chain_id="INCLUDE1",
+            chain_id="CHAINCLUDE1",
             chain_name="Include Chain",
         )
         Restaurant.objects.create(
-            restaurant_id="INCLUDE1R",
+            restaurant_id="RESCHAINCLUDE1R",
             address="Bangkok",
             name="Include",
             branch_name="Branch",
@@ -708,6 +708,6 @@ class RestaurantTests(APITestCase):
             chain=chain_obj,
         )
 
-        res = self.client.get("/api/restaurants/INCLUDE1R/")
+        res = self.client.get("/api/restaurants/RESCHAINCLUDE1R/")
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.data["chain"], chain_obj.chain_id)
