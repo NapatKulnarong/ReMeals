@@ -3,6 +3,8 @@ from rest_framework.response import Response
 
 from drf_yasg.utils import swagger_auto_schema
 
+from django.contrib.auth.hashers import make_password, check_password
+
 from .serializers import SignupSerializer, LoginSerializer
 from .models import User
 
@@ -48,7 +50,7 @@ def signup(request):
         bod=bod,
         phone=data.get("phone"),
         email=data.get("email"),
-        password=data.get("password"),
+        password=make_password(data.get("password")),
     )
 
     return Response({"message": "Signup successful"}, status=200)
@@ -71,7 +73,7 @@ def login(request):
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=404)
 
-    if password != user.password:
+    if not check_password(password, user.password):
         return Response({"error": "Invalid password"}, status=400)
 
     return Response({

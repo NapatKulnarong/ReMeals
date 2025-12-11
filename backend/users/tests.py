@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.contrib.auth.hashers import make_password
 from users.models import User
 import json
 
@@ -35,7 +36,7 @@ class AuthTests(TestCase):
             bod="2000-01-01",
             phone="0000000000",
             email="vince@gmail.com",
-            password="hashed"
+            password=make_password("hashed")
         )
 
         data = {
@@ -66,7 +67,7 @@ class AuthTests(TestCase):
             bod="2000-01-01",
             phone="0000000000",
             email="login@gmail.com",
-            password="12345"
+            password=make_password("12345")
         )
 
         data = {
@@ -145,7 +146,7 @@ class AuthTests(TestCase):
             bod="2000-01-01",
             phone="0000000000",
             email="wrongpass@gmail.com",
-            password="correctpass"
+            password=make_password("correctpass")
         )
 
         data = {
@@ -162,7 +163,7 @@ class AuthTests(TestCase):
         self.assertEqual(response.status_code, 400)
 
     # 8. Login works with username identifier
-    def test_login_with_username(self): 
+    def test_login_with_username(self):
         User.objects.create(
             user_id="U0003",
             username="idlogin",
@@ -171,7 +172,7 @@ class AuthTests(TestCase):
             bod="2000-01-01",
             phone="0000000000",
             email="idlogin@gmail.com",
-            password="12345"
+            password=make_password("12345")
         )
 
         data = {
@@ -294,7 +295,7 @@ class AuthTests(TestCase):
             bod="2000-01-01",
             phone="0099999999",
             email="real@gmail.com",
-            password="12345",
+            password=make_password("12345"),
         )
 
         data = {
@@ -345,7 +346,7 @@ class AuthTests(TestCase):
             bod="2000-01-01",
             phone="0800000000",
             email="exist@gmail.com",
-            password="12345"
+            password=make_password("12345")
         )
 
         data = {
@@ -388,7 +389,7 @@ class AuthTests(TestCase):
             bod="2000-01-01",
             phone="0900000000",
             email="pwnone@gmail.com",
-            password="12345"
+            password=make_password("12345")
         )
 
         data = {
@@ -508,7 +509,7 @@ class AuthTests(TestCase):
             bod="2000-01-01",
             phone="0999999999",
             email="dup@example.com",
-            password="12345",
+            password=make_password("12345"),
         )
 
         data = {
@@ -561,7 +562,7 @@ class AuthTests(TestCase):
             bod="2000-01-01",
             phone="0900000001",
             email="emaillogin@example.com",
-            password="pass123",
+            password=make_password("pass123"),
         )
 
         data = {
@@ -633,7 +634,7 @@ class AuthTests(TestCase):
             bod="2000-01-01",
             phone="0912345000",
             email="resp@example.com",
-            password="pwresp",
+            password=make_password("pwresp"),
         )
 
         data = {
@@ -694,7 +695,7 @@ class AuthTests(TestCase):
             bod="2000-01-01",
             phone="0900000002",
             email="casetest@example.com",
-            password="casepass",
+            password=make_password("casepass"),
         )
 
         data = {
