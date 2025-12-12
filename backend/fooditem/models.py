@@ -34,6 +34,7 @@ class FoodItem(models.Model):
                 self.__class__,
                 "food_id",
                 self.PREFIX,
+                padding=7,
             )
         super().save(*args, **kwargs)
 

@@ -1,0 +1,58 @@
+[
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000001",
+    "fields": {
+      "name": "Cooked Rice",
+      "quantity": 25,
+      "unit": "box",
+      "expire_date": "2025-02-01",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000002",
+    "fields": {
+      "name": "Fried Chicken",
+      "quantity": 15,
+      "unit": "tray",
+      "expire_date": "2025-01-20",
+      "is_expired": false,
+      "is_claimed": true,
+      "is_distributed": false,
+      "donation": "DON0000002"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000003",
+    "fields": {
+      "name": "Salad Packs",
+      "quantity": 30,
+      "unit": "pack",
+      "expire_date": "2025-01-18",
+      "is_expired": true,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000003"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000004",
+    "fields": {
+      "name": "Pasta Boxes",
+      "quantity": 40,
+      "unit": "box",
+      "expire_date": "2025-02-10",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": true,
+      "donation": "DON0000004"
+    }
+  }
+]

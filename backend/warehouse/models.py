@@ -4,7 +4,7 @@ from re_meals_api.id_utils import generate_prefixed_id
 
 
 class Warehouse(models.Model):
-    PREFIX = "WAR"
+    PREFIX = "WAH"
 
     warehouse_id = models.CharField(max_length=10, primary_key=True)
     address = models.CharField(max_length=300)
@@ -18,6 +18,7 @@ class Warehouse(models.Model):
                 self.__class__,
                 "warehouse_id",
                 self.PREFIX,
+                padding=7,
             )
         super().save(*args, **kwargs)
 

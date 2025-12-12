@@ -3,30 +3,30 @@
     "model": "users.admin",
     "pk": 1,
     "fields": {
-      "user": "SEED001"
+      "user": "ADM0000001"
     }
   },
   {
     "model": "users.donor",
     "pk": 1,
     "fields": {
-      "user": "SEED002",
-      "restaurant_id": "RES001"
+      "user": "DON0000001",
+      "restaurant_id": "RES0000001"
     }
   },
   {
     "model": "users.donor",
     "pk": 2,
     "fields": {
-      "user": "SEED003",
-      "restaurant_id": "RES003"
+      "user": "DON0000002",
+      "restaurant_id": "RES0000003"
     }
   },
   {
     "model": "users.deliverystaff",
     "pk": 1,
     "fields": {
-      "user": "SEED004",
+      "user": "DEL0000001",
       "assigned_area": "Bangkok Central",
       "is_available": true
     }
@@ -35,7 +35,7 @@
     "model": "users.deliverystaff",
     "pk": 2,
     "fields": {
-      "user": "SEED005",
+      "user": "DEL0000002",
       "assigned_area": "Samut Prakan",
       "is_available": true
     }
@@ -44,18 +44,18 @@
     "model": "users.recipient",
     "pk": 1,
     "fields": {
-      "user": "SEED006",
+      "user": "REC0000001",
       "address": "123 Klong Toey, Bangkok 10110",
-      "community_id": "COM001"
+      "community_id": "COM0000001"
     }
   },
   {
     "model": "users.recipient",
     "pk": 2,
     "fields": {
-      "user": "SEED007",
+      "user": "REC0000002",
       "address": "456 Bang Khen, Bangkok 10220",
-      "community_id": "COM002"
+      "community_id": "COM0000002"
     }
   }
 ]

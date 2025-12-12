@@ -36,5 +36,6 @@ class Donation(models.Model):
                 self.__class__,
                 "donation_id",
                 self.PREFIX,
+                padding=7,
             )
         super().save(*args, **kwargs)

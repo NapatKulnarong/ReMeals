@@ -26,11 +26,11 @@ def _parse_datetime_param(value):
 
 
 class DonationViewSet(viewsets.ModelViewSet):
-    queryset = Donation.objects.all()
+    queryset = Donation.objects.select_related("restaurant").all()
     serializer_class = DonationSerializer
 
     def get_queryset(self):
-        qs = Donation.objects.all()
+        qs = Donation.objects.select_related("restaurant").all()
         params = self.request.query_params
 
         restaurant_id = params.get("restaurant_id")

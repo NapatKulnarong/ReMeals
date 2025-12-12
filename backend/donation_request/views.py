@@ -5,6 +5,6 @@ from .serializers import DonationRequestSerializer
 
 
 class DonationRequestViewSet(viewsets.ModelViewSet):
-    queryset = DonationRequest.objects.prefetch_related("items").all()
+    queryset = DonationRequest.objects.all()
     serializer_class = DonationRequestSerializer
     permission_classes = [permissions.AllowAny]

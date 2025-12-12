@@ -1,35 +1,35 @@
 [
   {
     "model": "community.community",
-    "pk": "COM001",
+    "pk": "COM0000001",
     "fields": {
       "name": "Klong Toey Community",
       "address": "Klong Toey, Bangkok 10110",
       "received_time": "2025-01-15T10:00:00Z",
       "population": 500,
-      "warehouse_id": "WAR001"
+      "warehouse_id": "WAH0000001"
     }
   },
   {
     "model": "community.community",
-    "pk": "COM002",
+    "pk": "COM0000002",
     "fields": {
       "name": "Bang Khen Community Center",
       "address": "Bang Khen, Bangkok 10220",
       "received_time": "2025-01-15T11:00:00Z",
       "population": 300,
-      "warehouse_id": "WAR002"
+      "warehouse_id": "WAH0000002"
     }
   },
   {
     "model": "community.community",
-    "pk": "COM003",
+    "pk": "COM0000003",
     "fields": {
       "name": "Pathum Thani Relief Center",
       "address": "Pathum Thani 12000",
       "received_time": "2025-01-15T12:00:00Z",
       "population": 750,
-      "warehouse_id": "WAR003"
+      "warehouse_id": "WAH0000003"
     }
   }
 ]

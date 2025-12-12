@@ -1,0 +1,38 @@
+[
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000001",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-01-05T12:00:00Z",
+      "dropoff_time": "02:00:00",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "pending",
+      "notes": "Pickup scheduled after lunch rush",
+      "delivered_quantity": null,
+      "warehouse_id": "WAH0000001",
+      "user_id": "DEL0000001",
+      "donation_id": "DON0000001",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000002",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-01-06T08:30:00Z",
+      "dropoff_time": "03:30:00",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "in_transit",
+      "notes": "Cold-chain truck assigned",
+      "delivered_quantity": 120,
+      "warehouse_id": "WAH0000002",
+      "user_id": "DEL0000002",
+      "donation_id": "DON0000002",
+      "community_id": "COM0000002"
+    }
+  }
+]

@@ -6,7 +6,6 @@ from .models import Delivery
 from .serializers import DeliverySerializer
 from impactrecord.models import ImpactRecord
 from fooditem.models import FoodItem
-from donation_request.models import RequestItem
 import uuid
 
 
@@ -65,7 +64,7 @@ class DeliveryViewSet(viewsets.ModelViewSet):
                 return Response({"detail": "Not permitted."}, status=403)
             allowed_fields = {"status", "notes", "dropoff_time", "delivered_quantity"}
         else:
-            allowed_fields = {"status", "notes", "dropoff_time", "delivered_quantity", "request_item"}
+            allowed_fields = {"status", "notes", "dropoff_time", "delivered_quantity"}
 
         data = {k: v for k, v in request.data.items() if k in allowed_fields}
         if not data:

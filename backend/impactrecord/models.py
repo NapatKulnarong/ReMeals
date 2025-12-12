@@ -30,6 +30,7 @@ class ImpactRecord(models.Model):
                 self.__class__,
                 "impact_id",
                 self.PREFIX,
+                padding=7,
             )
         super().save(*args, **kwargs)
 

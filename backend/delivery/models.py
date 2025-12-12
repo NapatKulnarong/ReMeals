@@ -3,24 +3,25 @@ from warehouse.models import Warehouse
 from community.models import Community
 from donation.models import Donation
 from users.models import User
-from donation_request.models import RequestItem
-import uuid
+from re_meals_api.id_utils import generate_prefixed_id
+
 
 class Delivery(models.Model):
+    PREFIX = "DLV"
 
     DELIVERY_TYPE_CHOICES = [
         ("donation", "Donation"),
-        ("distribution", "Distribution")
-        ]
+        ("distribution", "Distribution"),
+    ]
     PICKUP_LOCATION_CHOICES = [
         ("restaurant", "Restaurant"),
         ("warehouse", "Warehouse"),
-        ]
+    ]
     DROPOFF_LOCATION_CHOICES = [
         ("warehouse", "Warehouse"),
         ("community", "Community"),
-        ]
-    
+    ]
+
     delivery_id = models.CharField(max_length=10, primary_key=True)
     delivery_type = models.CharField(max_length=20, choices=DELIVERY_TYPE_CHOICES)
     pickup_time = models.DateTimeField()
@@ -36,13 +37,6 @@ class Delivery(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     notes = models.TextField(blank=True, default="")
     delivered_quantity = models.IntegerField(null=True, blank=True)
-    request_item = models.ForeignKey(
-        RequestItem,
-        on_delete=models.SET_NULL,
-        related_name="deliveries",
-        null=True,
-        blank=True,
-    )
 
     warehouse_id = models.ForeignKey(
         Warehouse,
@@ -79,6 +73,12 @@ class Delivery(models.Model):
     def __str__(self):
         return f"Delivery {self.delivery_id} ({self.delivery_type})"
 
-    @staticmethod
-    def generate_id():
-        return uuid.uuid4().hex[:10].upper()
+    def save(self, *args, **kwargs):
+        if not self.delivery_id:
+            self.delivery_id = generate_prefixed_id(
+                self.__class__,
+                "delivery_id",
+                self.PREFIX,
+                padding=7,
+            )
+        super().save(*args, **kwargs)

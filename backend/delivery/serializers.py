@@ -5,7 +5,8 @@ from users.models import User
 from warehouse.models import Warehouse
 from community.models import Community
 from donation.models import Donation
-        
+
+
 class DeliverySerializer(serializers.ModelSerializer):
     user_id = serializers.SlugRelatedField(
         slug_field="user_id",
@@ -31,7 +32,7 @@ class DeliverySerializer(serializers.ModelSerializer):
         allow_null=True,
         required=False,
     )
-    
+
     class Meta:
         model = Delivery
         fields = [
@@ -48,8 +49,8 @@ class DeliverySerializer(serializers.ModelSerializer):
             "status",
             "notes",
             "delivered_quantity",
-            "request_item",
         ]
+        read_only_fields = ["delivery_id"]
 
     def validate_status(self, value):
         allowed = {"pending", "in_transit", "delivered", "cancelled"}

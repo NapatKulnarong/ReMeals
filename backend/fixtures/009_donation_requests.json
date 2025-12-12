@@ -1,0 +1,30 @@
+[
+  {
+    "model": "donation_request.donationrequest",
+    "pk": "REQ0000001",
+    "fields": {
+      "title": "Fresh meals for Ban Klang",
+      "community_name": "Ban Klang Community",
+      "recipient_address": "12 Ban Klang Alley, Bangkok",
+      "expected_delivery": "2025-01-20T09:00:00Z",
+      "people_count": 150,
+      "contact_phone": "0812345678",
+      "notes": "Priority for elderly residents",
+      "created_at": "2024-12-12T09:00:00Z"
+    }
+  },
+  {
+    "model": "donation_request.donationrequest",
+    "pk": "REQ0000002",
+    "fields": {
+      "title": "Emergency rations for coastal families",
+      "community_name": "Ban Sam Phao",
+      "recipient_address": "Ban Sam Phao Coastal Shelter",
+      "expected_delivery": "2025-01-22T11:00:00Z",
+      "people_count": 220,
+      "contact_phone": "0819876543",
+      "notes": "Flooded area, limited cold storage",
+      "created_at": "2024-12-15T15:30:00Z"
+    }
+  }
+]

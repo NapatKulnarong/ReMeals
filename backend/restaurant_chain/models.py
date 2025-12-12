@@ -15,6 +15,7 @@ class RestaurantChain(models.Model):
                 self.__class__,
                 "chain_id",
                 self.PREFIX,
+                padding=7,
             )
         super().save(*args, **kwargs)
 

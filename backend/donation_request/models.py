@@ -1,7 +1,11 @@
 from django.db import models
 
+from re_meals_api.id_utils import generate_prefixed_id
+
 
 class DonationRequest(models.Model):
+    PREFIX = "REQ"
+
     request_id = models.CharField(max_length=10, primary_key=True)
     title = models.CharField(max_length=120)
     community_name = models.CharField(max_length=120)
@@ -19,26 +23,12 @@ class DonationRequest(models.Model):
     def __str__(self):
         return f"DonationRequest {self.request_id}"
 
-
-class RequestItem(models.Model):
-    URGENCY_CHOICES = [
-        ("Normal", "Normal"),
-        ("High", "High"),
-        ("Critical", "Critical"),
-    ]
-
-    need_id = models.CharField(max_length=12, primary_key=True)
-    request = models.ForeignKey(
-        DonationRequest,
-        on_delete=models.CASCADE,
-        related_name="items",
-    )
-    item = models.CharField(max_length=150)
-    quantity = models.PositiveIntegerField()
-    urgency = models.CharField(max_length=20, choices=URGENCY_CHOICES, default="Normal")
-
-    class Meta:
-        db_table = "donation_request_item"
-
-    def __str__(self):
-        return f"{self.item} ({self.quantity})"
+    def save(self, *args, **kwargs):
+        if not self.request_id:
+            self.request_id = generate_prefixed_id(
+                self.__class__,
+                "request_id",
+                self.PREFIX,
+                padding=7,
+            )
+        super().save(*args, **kwargs)

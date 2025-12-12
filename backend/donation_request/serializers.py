@@ -1,16 +1,10 @@
 from rest_framework import serializers
 
-from .models import DonationRequest, RequestItem
-
-
-class RequestItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RequestItem
-        fields = ["need_id", "item", "quantity", "urgency"]
+from .models import DonationRequest
 
 
 class DonationRequestSerializer(serializers.ModelSerializer):
-    items = RequestItemSerializer(many=True)
+    request_id = serializers.CharField(read_only=True)
 
     class Meta:
         model = DonationRequest
@@ -24,30 +18,5 @@ class DonationRequestSerializer(serializers.ModelSerializer):
             "contact_phone",
             "notes",
             "created_at",
-            "items",
         ]
-        read_only_fields = ["created_at"]
-
-    def create(self, validated_data):
-        items_data = validated_data.pop("items", [])
-        donation_request = DonationRequest.objects.create(**validated_data)
-
-        for item in items_data:
-            RequestItem.objects.create(request=donation_request, **item)
-
-        return donation_request
-
-    def update(self, instance, validated_data):
-        items_data = validated_data.pop("items", None)
-
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-
-        instance.save()
-
-        if items_data is not None:
-            instance.items.all().delete()
-            for item in items_data:
-                RequestItem.objects.create(request=instance, **item)
-
-        return instance
+        read_only_fields = ["created_at", "request_id"]

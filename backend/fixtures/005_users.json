@@ -1,7 +1,7 @@
 [
   {
     "model": "users.user",
-    "pk": "SEED001",
+    "pk": "ADM0000001",
     "fields": {
       "username": "admin",
       "fname": "System",
@@ -9,12 +9,12 @@
       "bod": "1990-01-01",
       "phone": "0812345001",
       "email": "admin@remeals.com",
-      "password": "pbkdf2_sha256$600000$VqJl9eEqYQdH$8K1V8VJ2Z5vN0mKZ6Q7FjlVKWvJZJqVqJl9eEqYQdHxGQ7FjlVKWvJZJqVqJl9eEqYQdH="
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
     }
   },
   {
     "model": "users.user",
-    "pk": "SEED002",
+    "pk": "DON0000001",
     "fields": {
       "username": "donor1",
       "fname": "Findlay",
@@ -22,12 +22,12 @@
       "bod": "1985-05-15",
       "phone": "0812345002",
       "email": "findlay.kl@gmail.com",
-      "password": "pbkdf2_sha256$600000$VqJl9eEqYQdH$8K1V8VJ2Z5vN0mKZ6Q7FjlVKWvJZJqVqJl9eEqYQdHxGQ7FjlVKWvJZJqVqJl9eEqYQdH="
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
     }
   },
   {
     "model": "users.user",
-    "pk": "SEED003",
+    "pk": "DON0000002",
     "fields": {
       "username": "donor2",
       "fname": "Lili",
@@ -35,12 +35,12 @@
       "bod": "1988-08-20",
       "phone": "0812345003",
       "email": "lili.byrd@gmail.com",
-      "password": "pbkdf2_sha256$600000$VqJl9eEqYQdH$8K1V8VJ2Z5vN0mKZ6Q7FjlVKWvJZJqVqJl9eEqYQdHxGQ7FjlVKWvJZJqVqJl9eEqYQdH="
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
     }
   },
   {
     "model": "users.user",
-    "pk": "SEED004",
+    "pk": "DEL0000001",
     "fields": {
       "username": "delivery1",
       "fname": "Cordelia",
@@ -48,12 +48,12 @@
       "bod": "1992-03-10",
       "phone": "0812345004",
       "email": "cordelia.ly@gmail.com",
-      "password": "pbkdf2_sha256$600000$VqJl9eEqYQdH$8K1V8VJ2Z5vN0mKZ6Q7FjlVKWvJZJqVqJl9eEqYQdHxGQ7FjlVKWvJZJqVqJl9eEqYQdH="
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
     }
   },
   {
     "model": "users.user",
-    "pk": "SEED005",
+    "pk": "DEL0000002",
     "fields": {
       "username": "delivery2",
       "fname": "Gideon",
@@ -61,12 +61,12 @@
       "bod": "1995-07-25",
       "phone": "0812345005",
       "email": "gideon.cu@gmail.com",
-      "password": "pbkdf2_sha256$600000$VqJl9eEqYQdH$8K1V8VJ2Z5vN0mKZ6Q7FjlVKWvJZJqVqJl9eEqYQdHxGQ7FjlVKWvJZJqVqJl9eEqYQdH="
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
     }
   },
   {
     "model": "users.user",
-    "pk": "SEED006",
+    "pk": "REC0000001",
     "fields": {
       "username": "recipient1",
       "fname": "Aston",
@@ -74,12 +74,12 @@
       "bod": "1980-11-05",
       "phone": "0812345006",
       "email": "aston.me@gmail.com",
-      "password": "pbkdf2_sha256$600000$VqJl9eEqYQdH$8K1V8VJ2Z5vN0mKZ6Q7FjlVKWvJZJqVqJl9eEqYQdHxGQ7FjlVKWvJZJqVqJl9eEqYQdH="
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
     }
   },
   {
     "model": "users.user",
-    "pk": "SEED007",
+    "pk": "REC0000002",
     "fields": {
       "username": "recipient2",
       "fname": "Keeley",
@@ -87,7 +87,7 @@
       "bod": "1983-02-14",
       "phone": "0812345007",
       "email": "keeley.br@gmail.com",
-      "password": "pbkdf2_sha256$600000$VqJl9eEqYQdH$8K1V8VJ2Z5vN0mKZ6Q7FjlVKWvJZJqVqJl9eEqYQdHxGQ7FjlVKWvJZJqVqJl9eEqYQdH="
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
     }
   }
 ]

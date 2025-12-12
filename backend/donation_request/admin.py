@@ -1,11 +1,6 @@
 from django.contrib import admin
 
-from .models import DonationRequest, RequestItem
-
-
-class RequestItemInline(admin.TabularInline):
-    model = RequestItem
-    extra = 0
+from .models import DonationRequest
 
 
 @admin.register(DonationRequest)
@@ -19,4 +14,3 @@ class DonationRequestAdmin(admin.ModelAdmin):
         "created_at",
     )
     search_fields = ("request_id", "title", "community_name")
-    inlines = [RequestItemInline]

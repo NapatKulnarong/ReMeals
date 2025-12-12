@@ -29,14 +29,15 @@ class DonationTests(APITestCase):
     # 1. Create donation successfully
     def test_create_donation(self):
         data = {
-            "donation_id": "DON001",
             "status": "pending",
             "restaurant": "RES001"
         }
 
         response = self.client.post("/api/donations/", data, format="json")
         self.assertEqual(response.status_code, 201)
-        self.assertTrue(Donation.objects.filter(donation_id="DON001").exists())
+        generated_id = response.data["donation_id"]
+        self.assertTrue(generated_id.startswith("DON"))
+        self.assertTrue(Donation.objects.filter(donation_id=generated_id).exists())
 
     # 2. List all donations
     def test_list_donations(self):
@@ -94,7 +95,7 @@ class DonationTests(APITestCase):
         self.assertEqual(Donation.objects.count(), 0)
 
     # 8. Creating duplicate donation_id should fail
-    def test_create_duplicate_donation_id(self):
+    def test_create_duplicate_donation_id_is_ignored(self):
         Donation.objects.create(donation_id="DON001", restaurant=self.restaurant)
         data = {
             "donation_id": "DON001",
@@ -102,8 +103,9 @@ class DonationTests(APITestCase):
             "restaurant": "RES001"
         }
         response = self.client.post("/api/donations/", data, format="json")
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(Donation.objects.count(), 1)
+        self.assertEqual(response.status_code, 201)
+        self.assertNotEqual(response.data["donation_id"], "DON001")
+        self.assertEqual(Donation.objects.count(), 2)
 
     # 9. Get specific donation by ID
     def test_get_single_donation(self):
@@ -165,13 +167,15 @@ class DonationTests(APITestCase):
         self.assertEqual(response.status_code, 400)
 
     # 16. Donation fails when missing required donation_id
-    def test_create_missing_donation_id(self):
+    def test_create_without_donation_id_auto_generates(self):
         data = {
             "status": "pending",
             "restaurant": "RES001"
         }
         response = self.client.post("/api/donations/", data, format="json")
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 201)
+        generated_id = response.data["donation_id"]
+        self.assertTrue(Donation.objects.filter(donation_id=generated_id).exists())
 
     # 17. Filter date_from returns only newer donations
     def test_filter_date_from(self):
@@ -239,11 +243,11 @@ class DonationTests(APITestCase):
 
     # 22. Creating donation without status defaults to pending
     def test_create_without_status_defaults_false(self):
-        self.client.post("/api/donations/", {
-            "donation_id": "DON1",
+        response = self.client.post("/api/donations/", {
             "restaurant": "RES001"
         }, format="json")
-        d = Donation.objects.get(donation_id="DON1")
+        self.assertEqual(response.status_code, 201)
+        d = Donation.objects.get(donation_id=response.data["donation_id"])
         self.assertEqual(d.status, "pending")
 
     # 23. Massive creation 50 donations
@@ -338,16 +342,25 @@ class DonationTests(APITestCase):
         response = self.client.get("/api/donations/DON1/")
         self.assertEqual(response.status_code, 200)
 
-        expected_keys = {"donation_id", "donated_at", "status", "restaurant"}
+        expected_keys = {
+            "donation_id",
+            "donated_at",
+            "status",
+            "restaurant",
+            "restaurant_name",
+            "restaurant_branch",
+            "restaurant_address",
+        }
         self.assertEqual(set(response.data.keys()), expected_keys)
 
     # 34. Creating donation with uppercase restaurant ID should work
     def test_create_uppercase_restaurant_id(self):
         data = {
-            "donation_id": "DONUP",
             "restaurant": "RES001",
             "status": "pending",
         }
         response = self.client.post("/api/donations/", data, format="json")
         self.assertEqual(response.status_code, 201)
-        self.assertTrue(Donation.objects.filter(donation_id="DONUP").exists())
+        self.assertTrue(
+            Donation.objects.filter(donation_id=response.data["donation_id"]).exists()
+        )

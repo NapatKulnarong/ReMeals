@@ -95,7 +95,6 @@ class DeliveryAPITests(APITestCase):
     # 2. Successfully create a new delivery
     def test_create_delivery_successfully(self):
         payload = {
-            "delivery_id": "DLV0002",
             "delivery_type": "distribution",
             "pickup_time": timezone.now().isoformat(),
             "dropoff_time": "03:30:00",
@@ -110,7 +109,9 @@ class DeliveryAPITests(APITestCase):
         response = self.client.post(self.list_url, payload, format="json", **self.admin_headers)
 
         self.assertEqual(response.status_code, 201)
-        self.assertTrue(Delivery.objects.filter(delivery_id="DLV0002").exists())
+        created_id = response.data["delivery_id"]
+        self.assertTrue(created_id.startswith("DLV"))
+        self.assertTrue(Delivery.objects.filter(delivery_id=created_id).exists())
 
     # 3. Reject creation when delivery_type is invalid
     def test_create_delivery_rejects_invalid_type(self):
@@ -154,7 +155,7 @@ class DeliveryAPITests(APITestCase):
         self.assertEqual(response.data, [])
 
     # 6. Cannot reuse an existing delivery_id
-    def test_create_delivery_duplicate_id_fails(self):
+    def test_create_delivery_duplicate_id_is_ignored(self):
         payload = {
             "delivery_id": self.existing_delivery.delivery_id,
             "delivery_type": "distribution",
@@ -169,7 +170,8 @@ class DeliveryAPITests(APITestCase):
         }
 
         response = self.client.post(self.list_url, payload, format="json", **self.admin_headers)
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 201)
+        self.assertNotEqual(response.data["delivery_id"], self.existing_delivery.delivery_id)
         self.assertEqual(
             Delivery.objects.filter(delivery_id=self.existing_delivery.delivery_id).count(), 1
         )
@@ -198,7 +200,6 @@ class DeliveryAPITests(APITestCase):
     # 8. Cannot create delivery without required foreign keys
     def test_create_delivery_missing_foreign_keys(self):
         payload = {
-            "delivery_id": "DLV0004",
             "delivery_type": "donation",
             "pickup_time": timezone.now().isoformat(),
             "dropoff_time": "01:30:00",
@@ -212,7 +213,6 @@ class DeliveryAPITests(APITestCase):
     # 9. Dropoff time accepts HH:MM formatted strings
     def test_create_delivery_accepts_dropoff_time_string(self):
         payload = {
-            "delivery_id": "DLV0005",
             "delivery_type": "donation",
             "pickup_time": timezone.now().isoformat(),
             "dropoff_time": "04:45:00",
@@ -226,7 +226,7 @@ class DeliveryAPITests(APITestCase):
 
         response = self.client.post(self.list_url, payload, format="json", **self.admin_headers)
         self.assertEqual(response.status_code, 201)
-        created = Delivery.objects.get(delivery_id="DLV0005")
+        created = Delivery.objects.get(delivery_id=response.data["delivery_id"])
         self.assertEqual(created.dropoff_time, timedelta(hours=4, minutes=45))
 
     # 10. Detail endpoint returns 404 for unknown delivery_id
