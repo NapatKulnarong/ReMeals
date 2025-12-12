@@ -404,8 +404,342 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
   return response.json() as Promise<T>;
 }
 
+// Home Page Component
+function HomePage() {
+  const stats = [
+    { label: "Meals rescued", value: "2,340", helper: "+128 today" },
+    { label: "Communities served", value: "48", helper: "active deliveries" },
+    { label: "Avg. pickup", value: "22 mins", helper: "from restaurant ping" },
+    { label: "Food saved", value: "3.8 tons", helper: "kept out of landfills" },
+  ];
+
+  const journey = [
+    {
+      step: "1",
+      title: "Share what you have or need",
+      copy:
+        "Restaurants log surplus portions; communities outline what will feed their neighbors best.",
+      accent: "bg-[#EAF1EA] text-[#1F4D36]",
+    },
+    {
+      step: "2",
+      title: "We match and schedule",
+      copy:
+        "Re-Meals pairs donations with nearby requests and coordinates pickup windows that protect freshness.",
+      accent: "bg-[#EAF1EA] text-[#1F4D36]",
+    },
+    {
+      step: "3",
+      title: "Deliver with care",
+      copy:
+        "Delivery staff move meals to warehouses or directly to communities with cold-chain friendly steps.",
+      accent: "bg-[#EAF1EA] text-[#1F4D36]",
+    },
+  ];
+
+  const promises = [
+    {
+      icon: "🧊",
+      title: "Food-safe handling",
+      copy: "Temperature-friendly guidance and quick routes keep every dish safe to serve.",
+    },
+    {
+      icon: "🛰️",
+      title: "Smart matching",
+      copy: "We prioritize the closest, best-fit requests to reduce travel and waste.",
+    },
+    {
+      icon: "🤝",
+      title: "Real partnership",
+      copy: "Restaurants, drivers, and community leads stay in the loop with clear updates.",
+    },
+  ];
+
+  return (
+    <div className="mx-auto max-w-6xl space-y-12">
+      <div className="relative overflow-hidden rounded-[32px] border border-[#E4E0D7] bg-gradient-to-br from-[#F8F7F3] via-white to-[#EEF3EE] p-10 shadow-xl">
+        <div className="relative grid items-center gap-10 lg:grid-cols-[1.15fr,0.85fr]">
+          <div className="space-y-6">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#1F4D36] shadow-sm">
+              <span aria-hidden className="text-lg">
+                ✦
+              </span>
+              <span>Rescue more. Waste less.</span>
+            </div>
+            <h1 className="text-4xl leading-tight text-gray-900 sm:text-5xl sm:leading-tight">
+              Rescue surplus meals.{" "}
+              <span className="text-[#1F4D36]">Fuel local relief.</span>
+            </h1>
+            <p className="max-w-2xl text-lg text-gray-700">
+              Re-Meals links restaurants, drivers, and community leaders so good food never sits idle.
+              Share donations, request support, and move meals where they are needed most.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2 rounded-full bg-[#1F4D36] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[#1F4D36]/20">
+                <span>Share a donation</span>
+                <span aria-hidden className="text-lg">
+                  →
+                </span>
+              </div>
+              <div className="flex items-center gap-2 rounded-full border border-[#F2C14E] bg-white px-5 py-3 text-sm font-semibold text-[#8B5B1F] shadow-sm">
+                <span>Request support</span>
+                <span aria-hidden className="text-lg">
+                  ❤
+                </span>
+              </div>
+              <span className="text-sm text-gray-600">
+                Use the sidebar to start — we guide both donors and recipients.
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-3 text-sm text-gray-700">
+              <div className="flex items-center gap-2 rounded-xl bg-white px-4 py-3 shadow-sm">
+                <span className="text-lg" aria-hidden>
+                  🚚
+                </span>
+                <span>Coordinated pickups & drop-offs</span>
+              </div>
+              <div className="flex items-center gap-2 rounded-xl bg-white px-4 py-3 shadow-sm">
+                <span className="text-lg" aria-hidden>
+                  🧊
+                </span>
+                <span>Freshness-first handling</span>
+              </div>
+            </div>
+          </div>
+          <div className="relative rounded-3xl border border-[#E4E0D7] bg-white p-6 shadow-lg">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#2F855A]">
+                  Impact snapshot
+                </p>
+                <h3 className="text-2xl font-bold text-gray-900">This week on Re-Meals</h3>
+              </div>
+              <div className="rounded-full bg-[#E9F7EF] px-3 py-1 text-xs font-semibold text-[#1F4D36]">
+                Live
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {stats.map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-2xl border border-[#E4E0D7] bg-white px-4 py-3 shadow-sm"
+                >
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    {item.label}
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">{item.value}</p>
+                  <p className="text-xs font-semibold text-[#1F4D36]">{item.helper}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 rounded-2xl bg-[#1F4D36] px-4 py-3 text-sm text-white shadow-md">
+              <div className="flex items-center gap-2">
+                <span className="text-lg" aria-hidden>
+                  ✨
+                </span>
+                <p className="leading-tight">
+                  Tap "Donate" or "Request food" from the sidebar to add your drop in minutes.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1.1fr,0.9fr]">
+        <div className="rounded-[28px] border border-[#E4E0D7] bg-[#F8F7F3] p-7 shadow-lg">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-[#2F855A]">
+                For restaurants
+              </p>
+              <h2 className="text-3xl font-semibold text-gray-900">Donate surplus easily</h2>
+            </div>
+            <span className="rounded-full bg-white px-3 py-1 text-sm font-semibold text-[#2F855A] shadow-sm">
+              Reduce waste
+            </span>
+          </div>
+          <p className="mt-3 text-gray-700">
+            Log extra meals with quantities, expiry, and packaging notes so our delivery team can pick up while everything stays fresh.
+          </p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl border border-[#E4E0D7] bg-white p-4 shadow-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-lg" aria-hidden>
+                  💚
+                </span>
+                <p className="text-sm font-semibold text-gray-900">Smart item logging</p>
+              </div>
+              <p className="mt-1 text-sm text-gray-700">
+                Capture portions, units, and expiry in seconds so we know what to rescue first.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-[#E4E0D7] bg-white p-4 shadow-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-lg" aria-hidden>
+                  🧭
+                </span>
+                <p className="text-sm font-semibold text-gray-900">Route-friendly pickups</p>
+              </div>
+              <p className="mt-1 text-sm text-gray-700">
+                Drivers see your window and plan efficient routes to minimize food time in transit.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-[#E4E0D7] bg-white p-4 shadow-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-lg" aria-hidden>
+                  📦
+                </span>
+                <p className="text-sm font-semibold text-gray-900">Packaging guidance</p>
+              </div>
+              <p className="mt-1 text-sm text-gray-700">
+                Tips for sealing, labeling, and keeping items cool before pickup arrives.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-[#E4E0D7] bg-white p-4 shadow-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-lg" aria-hidden>
+                  🎧
+                </span>
+                <p className="text-sm font-semibold text-gray-900">Concierge support</p>
+              </div>
+              <p className="mt-1 text-sm text-gray-700">
+                Need help? Tag the admin team and we'll follow up before your shift ends.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-[28px] border border-[#E4E0D7] bg-[#FFFAF1] p-7 shadow-lg">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-[#D77B28]">
+                For communities
+              </p>
+              <h2 className="text-3xl font-semibold text-gray-900">Request food support</h2>
+            </div>
+            <span className="rounded-full bg-white px-3 py-1 text-sm font-semibold text-[#C46A24] shadow-sm">
+              Right-sized aid
+            </span>
+          </div>
+          <p className="mt-3 text-gray-700">
+            Share what your neighbors need, when, and where. We align donations to your delivery window and capacity.
+          </p>
+          <div className="mt-5 space-y-3">
+            <div className="flex items-start gap-3 rounded-2xl border border-[#E4E0D7] bg-white p-4 shadow-sm">
+              <span className="text-lg" aria-hidden>
+                🍽️
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Structured needs list</p>
+                <p className="text-sm text-gray-700">
+                  Outline items, quantities, and urgency so matching stays accurate.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 rounded-2xl border border-[#E4E0D7] bg-white p-4 shadow-sm">
+              <span className="text-lg" aria-hidden>
+                🏠
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Clear drop-off details</p>
+                <p className="text-sm text-gray-700">
+                  Provide addresses, access notes, and an ideal delivery time for smooth arrivals.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 rounded-2xl border border-[#E4E0D7] bg-white p-4 shadow-sm">
+              <span className="text-lg" aria-hidden>
+                📱
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Stay updated</p>
+                <p className="text-sm text-gray-700">
+                  Track confirmations from our team and know when a delivery is on the way.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-[32px] border border-[#E4E0D7] bg-white p-8 shadow-lg">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-[#8B4C1F]">
+              How Re-Meals works
+            </p>
+            <h2 className="text-3xl font-semibold text-gray-900">Three guided steps</h2>
+          </div>
+          <div className="flex items-center gap-2 rounded-full bg-[#FFF9EC] px-4 py-2 text-xs font-semibold text-[#8B4C1F]">
+            <span className="text-lg" aria-hidden>
+              🧭
+            </span>
+            <span>We handle the routing</span>
+          </div>
+        </div>
+        <div className="mt-6 grid gap-4 lg:grid-cols-3">
+          {journey.map((item) => (
+            <div
+              key={item.step}
+              className="rounded-2xl border border-[#E4E0D7] bg-[#FFFBF3] p-5 shadow-sm"
+            >
+              <div className={`mb-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${item.accent}`}>
+                <span>Step {item.step}</span>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
+              <p className="mt-2 text-sm text-gray-700">{item.copy}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        {promises.map((item) => (
+          <div
+            key={item.title}
+            className="rounded-[24px] border border-[#E4E0D7] bg-gradient-to-br from-[#F7F4EE] via-white to-[#F0F2F0] p-6 shadow-md"
+          >
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm">
+              <span className="text-xl" aria-hidden>
+                {item.icon}
+              </span>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900">{item.title}</h3>
+            <p className="mt-2 text-sm text-gray-700">{item.copy}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="rounded-[32px] border border-[#E0E7DE] bg-gradient-to-br from-[#EEF3EE] via-white to-[#F8F7F3] p-10 shadow-xl">
+        <div className="flex flex-col items-start gap-5 text-left sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900">
+              Ready to keep good food moving?
+            </h2>
+            <p className="mt-2 text-lg text-gray-700">
+              Use the sidebar to log a donation, request food, or manage deliveries.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <div className="rounded-2xl border border-[#1F4D36] bg-[#1F4D36] px-6 py-3 text-sm font-semibold text-white shadow-sm">
+              Donate surplus meals
+            </div>
+            <div className="rounded-2xl border border-[#F2C14E] bg-white px-6 py-3 text-sm font-semibold text-[#8B5B1F] shadow-sm">
+              Request food support
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Content of each tab
 function TabContent({ tab, currentUser }: { tab: number; currentUser: LoggedUser | null }) {
+  if (tab === 0) {
+    return <HomePage />;
+  }
   if (tab === 1) {
     return <DonationSection />;
   }
@@ -3115,7 +3449,7 @@ function AuthModal({
 }
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState(1); // which Part is active
+  const [activeTab, setActiveTab] = useState(0); // Start with home page
   const [showAuthModal, setShowAuthModal] = useState(false); // whether popup is visible
   const [authMode, setAuthMode] = useState<AuthMode>("signup"); // current auth tab
   const [currentUser, setCurrentUser] = useState<LoggedUser | null>(null);
@@ -3123,24 +3457,33 @@ export default function Home() {
 
   const navItems: NavItem[] = currentUser?.isAdmin
     ? [
+        { id: 0, label: "Home", icon: <span aria-hidden>🏠</span> },
         { id: 3, label: "Dashboard", icon: <span aria-hidden>🛠️</span> },
         { id: 4, label: "Delivery", icon: <span aria-hidden>🚚</span> },
       ]
     : currentUser?.isDeliveryStaff
-      ? [{ id: 4, label: "Delivery board", icon: <span aria-hidden>🚚</span> }]
+      ? [
+          { id: 0, label: "Home", icon: <span aria-hidden>🏠</span> },
+          { id: 4, label: "Delivery board", icon: <span aria-hidden>🚚</span> },
+        ]
       : [
+          { id: 0, label: "Home", icon: <span aria-hidden>🏠</span> },
           { id: 1, label: "Donate", icon: <span aria-hidden>💚</span> },
           { id: 2, label: "Request food", icon: <span aria-hidden>🍽️</span> },
         ];
 
   const normalizedActiveTab = useMemo(() => {
-    if (!currentUser && activeTab > 2) {
-      return 1;
+    // Home page (0) is always accessible
+    if (activeTab === 0) {
+      return 0;
     }
-    if (currentUser?.isAdmin && activeTab < 3) {
+    if (!currentUser && activeTab > 2) {
+      return 0; // Redirect to home if not logged in
+    }
+    if (currentUser?.isAdmin && activeTab > 0 && activeTab < 3) {
       return 3;
     }
-    if (!currentUser?.isAdmin && currentUser?.isDeliveryStaff && activeTab < 4) {
+    if (!currentUser?.isAdmin && currentUser?.isDeliveryStaff && activeTab > 0 && activeTab < 4) {
       return 4;
     }
     return activeTab;
@@ -3163,7 +3506,7 @@ export default function Home() {
         onProfileClick={() => setShowProfileModal(true)}
         onLogout={() => {
           setCurrentUser(null);
-          setActiveTab(1);
+          setActiveTab(0); // Redirect to home after logout
         }}
       />
       {/* Right side: content area */}

@@ -35,8 +35,54 @@ export default function Sidebar({
   isAdmin = false,
   isDriver = false,
 }: SidebarProps) {
-  const primaryTabs = tabs.slice(0, 2);
-  const secondaryTabs = tabs.slice(2);
+  const homeTab = tabs.find(tab => tab.id === 0);
+  const primaryTabs = tabs.filter(tab => tab.id === 1 || tab.id === 2);
+  const secondaryTabs = tabs.filter(tab => tab.id > 2);
+
+  const Icon = ({ id, className }: { id: number; className?: string }) => {
+    if (id === 0) {
+      return (
+        <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+          <path d="M3 10.25 12 3l9 7.25V21a.75.75 0 0 1-.75.75H15a.75.75 0 0 1-.75-.75v-4.5h-4.5V21A.75.75 0 0 1 9 21.75H3.75A.75.75 0 0 1 3 21Z" />
+        </svg>
+      );
+    }
+    if (id === 1) {
+      return (
+        <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+          <path d="M12 21s-6.5-4.4-9-9a5.25 5.25 0 0 1 9-5 5.25 5.25 0 0 1 9 5c-2.5 4.6-9 9-9 9Z" />
+        </svg>
+      );
+    }
+    if (id === 2) {
+      return (
+        <svg viewBox="0 0 24 24" className={className} fill="currentColor">
+          <path d="M7 6h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-4.4l-2.6 2.6a.75.75 0 0 1-1.28-.53V16H7a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" />
+          <path d="M10.25 10.25h3.5a.75.75 0 0 1 0 1.5h-3.5a.75.75 0 0 1 0-1.5Z" />
+          <path d="M10.25 12.75h2a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5Z" />
+        </svg>
+      );
+    }
+    if (id === 3) {
+      return (
+        <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+          <path d="m14.97 4.97 4.06 4.06a3.5 3.5 0 0 1-3.9 5.7l-1.47 1.47a2 2 0 0 1-2.83 0l-.56-.56-3.09 3.1a1 1 0 0 1-1.42 0l-1.53-1.54a1 1 0 0 1 0-1.41l3.1-3.09-.57-.57a2 2 0 0 1 0-2.83l1.47-1.47a3.5 3.5 0 0 1 5.7-3.92Z" />
+        </svg>
+      );
+    }
+    if (id === 4) {
+      return (
+        <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+          <path d="M2.25 5.25A.75.75 0 0 1 3 4.5h10.5a.75.75 0 0 1 .75.75v4.5h2.42a.75.75 0 0 1 .59.28l2.09 2.54a.75.75 0 0 1 .18.48v3.95H19.5a2 2 0 1 1-4 0h-5a2 2 0 1 1-4 0H2.25Zm13.5 6v2.5h3v-1.4l-1.15-1.1Z" />
+        </svg>
+      );
+    }
+    return (
+      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <circle cx="12" cy="12" r="4" />
+      </svg>
+    );
+  };
 
   return (
     // Sidebar container: flex-col + justify-between lets us push the auth button to the bottom
@@ -45,10 +91,10 @@ export default function Sidebar({
             sticky top-0            /* lock sidebar position */
             z-10
             flex h-screen w-64 flex-col justify-between
-            bg-[#F9F6F3]
+            bg-[#D48B68]
             px-4 py-6
-            shadow-2xl shadow-black/15 
-            border border-black/5    
+            shadow-2xl shadow-black/15
+            border border-[#B86A49]
             "
     >
       <div>
@@ -83,30 +129,49 @@ export default function Sidebar({
 
       {/* NAVIGATION BUTTONS */}
       <nav className="flex flex-col gap-4 mt-2">
-        <div className="grid grid-cols-2 gap-3">
-          {primaryTabs.map((tab) => {
+        {/* Home Button */}
+        {homeTab && (
+          <button
+            onClick={() => onTabChange(homeTab.id)}
+            className={[
+              "flex items-center justify-between rounded-2xl border px-4 py-3 text-left text-sm font-semibold shadow-sm transition duration-200",
+              activeTab === homeTab.id
+                ? "border-[#B86A49] bg-[#F1CBB5] text-[#4B2415] shadow-md"
+                : "border-[#E6B9A2] bg-white text-[#70402B] hover:border-[#B86A49] hover:shadow",
+            ].join(" ")}
+          >
+            <span>{homeTab.label}</span>
+            <span aria-hidden className="h-5 w-5 text-[#B86A49]">
+              <Icon id={homeTab.id} className="h-5 w-5" />
+            </span>
+          </button>
+        )}
+
+        {primaryTabs.length > 0 && (
+          <div className="grid grid-cols-2 gap-3">
+            {primaryTabs.map((tab) => {
             const isActive = activeTab === tab.id;
             const palette =
               tab.id === 1
                 ? {
-                    activeBg: "bg-[#E9F7EF]",
-                    activeBorder: "border-[#A7D6B6]",
-                    activeText: "text-[#1F4D36]",
-                    inactiveBorder: "border-[#DCE9E1]",
-                    inactiveText: "text-[#2F4F3A]",
-                    iconActive: "bg-white text-[#1F4D36]",
-                    iconInactive: "bg-[#F0F7F2] text-[#3C6E52]",
-                    hoverBorder: "hover:border-[#A7D6B6]",
+                    activeBg: "bg-[#F1CBB5]",
+                    activeBorder: "border-[#B86A49]",
+                    activeText: "text-[#4B2415]",
+                    inactiveBorder: "border-[#E6B9A2]",
+                    inactiveText: "text-[#70402B]",
+                    iconActive: "bg-white text-[#B86A49]",
+                    iconInactive: "bg-[#F3D6C3] text-[#9A5335]",
+                    hoverBorder: "hover:border-[#B86A49]",
                   }
                 : {
-                    activeBg: "bg-[#FFF3E6]",
-                    activeBorder: "border-[#F3C7A0]",
-                    activeText: "text-[#8B4C1F]",
-                    inactiveBorder: "border-[#F2E3D6]",
-                    inactiveText: "text-[#6B4A2A]",
-                    iconActive: "bg-white text-[#C4641A]",
-                    iconInactive: "bg-[#FFF5EC] text-[#C4641A]",
-                    hoverBorder: "hover:border-[#F3C7A0]",
+                    activeBg: "bg-[#E9B79C]",
+                    activeBorder: "border-[#B86A49]",
+                    activeText: "text-[#4B2415]",
+                    inactiveBorder: "border-[#E6B9A2]",
+                    inactiveText: "text-[#70402B]",
+                    iconActive: "bg-white text-[#A95B3C]",
+                    iconInactive: "bg-[#F3D6C3] text-[#9A5335]",
+                    hoverBorder: "hover:border-[#B86A49]",
                   };
             return (
               <button
@@ -122,20 +187,23 @@ export default function Sidebar({
                 <div className="flex h-full flex-col items-center justify-center gap-2">
                   <span
                     className={[
-                      "flex h-10 w-10 items-center justify-center rounded-full text-lg transition",
+                      "flex h-10 w-10 items-center justify-center rounded-full transition",
                       isActive ? palette.iconActive : palette.iconInactive,
                     ].join(" ")}
+                    aria-hidden
                   >
-                    {tab.icon}
+                    <Icon id={tab.id} className="h-5 w-5" />
                   </span>
                   <span>{tab.label}</span>
                 </div>
               </button>
             );
           })}
-        </div>
+          </div>
+        )}
 
-        <div className="flex flex-col gap-1">
+        {secondaryTabs.length > 0 && (
+          <div className="flex flex-col gap-1">
           {secondaryTabs.map((tab) => {
             const isActive = activeTab === tab.id;
 
@@ -146,20 +214,19 @@ export default function Sidebar({
                 className={[
                   "flex items-center justify-between rounded-lg px-4 py-3 text-left text-sm font-semibold transition-colors",
                   isActive
-                    ? "bg-[#F9DE84] text-gray-900"
-                    : "text-gray-700 hover:bg-[#F9DE84]/50 hover:text-gray-900",
+                    ? "bg-[#E9B79C] text-[#3F1C10]"
+                    : "text-[#70402B] hover:bg-[#F1CBB5] hover:text-[#3F1C10]",
                 ].join(" ")}
               >
                 <span>{tab.label}</span>
-                {tab.icon ? (
-                  <span className="text-lg" aria-hidden>
-                    {tab.icon}
-                  </span>
-                ) : null}
+                <span aria-hidden className="h-5 w-5 text-[#B86A49]">
+                  <Icon id={tab.id} className="h-5 w-5" />
+                </span>
               </button>
             );
           })}
-        </div>
+          </div>
+        )}
       </nav>
       </div>
 
@@ -169,7 +236,7 @@ export default function Sidebar({
           <div className="space-y-2">
             <button
               onClick={onProfileClick}
-              className="w-full rounded-xl bg-gray-900 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-gray-800"
+              className="w-full rounded-xl border border-[#B86A49] bg-[#F2D6C3] px-4 py-3 text-center text-sm font-semibold text-[#4B2415] transition hover:border-[#9F583C] hover:text-[#3A1A0F]"
             >
               {currentUser.username}
             </button>
@@ -187,7 +254,7 @@ export default function Sidebar({
         ) : (
           <button
               onClick={onAuthClick}
-              className="w-full rounded-xl bg-gray-900 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-gray-800"
+              className="w-full rounded-xl border border-[#B86A49] bg-[#F2D6C3] px-4 py-3 text-center text-sm font-semibold text-[#4B2415] transition hover:border-[#9F583C] hover:text-[#3A1A0F]"
           >
               Sign up / Login
           </button>
