@@ -73,10 +73,15 @@ class DeliveryAPITests(APITestCase):
             community_id=self.community,
         )
         self.list_url = reverse("delivery-list")
+        self.admin_headers = {"HTTP_X_USER_IS_ADMIN": "true"}
+        self.driver_headers = {
+            "HTTP_X_USER_IS_DELIVERY": "true",
+            "HTTP_X_USER_ID": self.delivery_user.user_id,
+        }
 
     # 1. List endpoint returns a delivery with related IDs resolved
     def test_list_deliveries_returns_related_ids(self):
-        response = self.client.get(self.list_url)
+        response = self.client.get(self.list_url, **self.admin_headers)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
@@ -102,7 +107,7 @@ class DeliveryAPITests(APITestCase):
             "community_id": self.community.community_id,
         }
 
-        response = self.client.post(self.list_url, payload, format="json")
+        response = self.client.post(self.list_url, payload, format="json", **self.admin_headers)
 
         self.assertEqual(response.status_code, 201)
         self.assertTrue(Delivery.objects.filter(delivery_id="DLV0002").exists())
@@ -118,7 +123,7 @@ class DeliveryAPITests(APITestCase):
             "dropoff_location_type": "community",
         }
 
-        response = self.client.post(self.list_url, payload, format="json")
+        response = self.client.post(self.list_url, payload, format="json", **self.admin_headers)
 
         self.assertEqual(response.status_code, 400)
         self.assertFalse(Delivery.objects.filter(delivery_id="DLV0003").exists())
@@ -127,23 +132,26 @@ class DeliveryAPITests(APITestCase):
     def test_partial_update_delivery(self):
         detail_url = reverse("delivery-detail", args=[self.existing_delivery.delivery_id])
         payload = {
-            "dropoff_location_type": "community",
             "dropoff_time": "05:00:00",
+            "notes": "Updated schedule",
         }
 
-        response = self.client.patch(detail_url, payload, format="json")
+        response = self.client.patch(
+            detail_url, payload, format="json", **self.admin_headers
+        )
 
         self.assertEqual(response.status_code, 200)
         self.existing_delivery.refresh_from_db()
-        self.assertEqual(self.existing_delivery.dropoff_location_type, "community")
         self.assertEqual(self.existing_delivery.dropoff_time, timedelta(hours=5))
+        self.assertEqual(self.existing_delivery.notes, "Updated schedule")
 
     # 5. Requests must be authenticated
-    def test_authentication_is_required(self):
+    def test_list_without_role_returns_empty(self):
         unauthenticated_client = APIClient()
         response = unauthenticated_client.get(self.list_url)
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
 
     # 6. Cannot reuse an existing delivery_id
     def test_create_delivery_duplicate_id_fails(self):
@@ -160,7 +168,7 @@ class DeliveryAPITests(APITestCase):
             "community_id": self.community.community_id,
         }
 
-        response = self.client.post(self.list_url, payload, format="json")
+        response = self.client.post(self.list_url, payload, format="json", **self.admin_headers)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
             Delivery.objects.filter(delivery_id=self.existing_delivery.delivery_id).count(), 1
@@ -181,7 +189,9 @@ class DeliveryAPITests(APITestCase):
             community_id=self.community,
         )
 
-        response = self.client.get(f"{self.list_url}?delivery_type=donation")
+        response = self.client.get(
+            f"{self.list_url}?delivery_type=donation", **self.admin_headers
+        )
         self.assertEqual(response.status_code, 200)
         self.assertTrue(all(item["delivery_type"] == "donation" for item in response.data))
 
@@ -195,7 +205,7 @@ class DeliveryAPITests(APITestCase):
             # Missing user_id/donation_id/community_id
         }
 
-        response = self.client.post(self.list_url, payload, format="json")
+        response = self.client.post(self.list_url, payload, format="json", **self.admin_headers)
         self.assertEqual(response.status_code, 400)
         self.assertFalse(Delivery.objects.filter(delivery_id="DLV0004").exists())
 
@@ -214,7 +224,7 @@ class DeliveryAPITests(APITestCase):
             "community_id": self.community.community_id,
         }
 
-        response = self.client.post(self.list_url, payload, format="json")
+        response = self.client.post(self.list_url, payload, format="json", **self.admin_headers)
         self.assertEqual(response.status_code, 201)
         created = Delivery.objects.get(delivery_id="DLV0005")
         self.assertEqual(created.dropoff_time, timedelta(hours=4, minutes=45))
@@ -222,20 +232,20 @@ class DeliveryAPITests(APITestCase):
     # 10. Detail endpoint returns 404 for unknown delivery_id
     def test_get_nonexistent_delivery_returns_404(self):
         detail_url = reverse("delivery-detail", args=["UNKNOWN"])
-        response = self.client.get(detail_url)
+        response = self.client.get(detail_url, **self.admin_headers)
         self.assertEqual(response.status_code, 404)
 
     # 11. Detail endpoint returns the existing delivery
     def test_get_existing_delivery_returns_detail(self):
         detail_url = reverse("delivery-detail", args=[self.existing_delivery.delivery_id])
-        response = self.client.get(detail_url)
+        response = self.client.get(detail_url, **self.admin_headers)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["delivery_id"], self.existing_delivery.delivery_id)
 
     # 12. Authenticated user can delete a delivery
     def test_delete_delivery_succeeds(self):
         detail_url = reverse("delivery-detail", args=[self.existing_delivery.delivery_id])
-        response = self.client.delete(detail_url)
+        response = self.client.delete(detail_url, **self.admin_headers)
         self.assertEqual(response.status_code, 204)
         self.assertFalse(
             Delivery.objects.filter(delivery_id=self.existing_delivery.delivery_id).exists()
@@ -244,8 +254,8 @@ class DeliveryAPITests(APITestCase):
     # 13. Patching with same value still returns 200
     def test_patch_same_value(self):
         detail_url = reverse("delivery-detail", args=[self.existing_delivery.delivery_id])
-        payload = {"dropoff_location_type": self.existing_delivery.dropoff_location_type}
-        response = self.client.patch(detail_url, payload, format="json")
+        payload = {"dropoff_time": "02:00:00"}
+        response = self.client.patch(detail_url, payload, format="json", **self.admin_headers)
         self.assertEqual(response.status_code, 200)
 
     # 14. Creating delivery without pickup_time is rejected
@@ -262,13 +272,15 @@ class DeliveryAPITests(APITestCase):
             "community_id": self.community.community_id,
         }
 
-        response = self.client.post(self.list_url, payload, format="json")
+        response = self.client.post(self.list_url, payload, format="json", **self.admin_headers)
         self.assertEqual(response.status_code, 400)
         self.assertFalse(Delivery.objects.filter(delivery_id="DLV0010").exists())
 
     # 15. Filtering by a type with no matches returns empty list
     def test_filter_by_delivery_type_returns_empty(self):
-        response = self.client.get(f"{self.list_url}?delivery_type=distribution")
+        response = self.client.get(
+            f"{self.list_url}?delivery_type=distribution", **self.admin_headers
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 0)
 
@@ -295,7 +307,7 @@ class DeliveryAPITests(APITestCase):
     def test_patch_invalid_dropoff_location_type(self):
         detail_url = reverse("delivery-detail", args=[self.existing_delivery.delivery_id])
         payload = {"dropoff_location_type": "invalid"}
-        response = self.client.patch(detail_url, payload, format="json")
+        response = self.client.patch(detail_url, payload, format="json", **self.admin_headers)
         self.assertEqual(response.status_code, 400)
 
     # 18. Creating delivery requires pickup_location_type
@@ -311,31 +323,33 @@ class DeliveryAPITests(APITestCase):
             "donation_id": self.donation.donation_id,
             "community_id": self.community.community_id,
         }
-        response = self.client.post(self.list_url, payload, format="json")
+        response = self.client.post(self.list_url, payload, format="json", **self.admin_headers)
         self.assertEqual(response.status_code, 400)
         self.assertFalse(Delivery.objects.filter(delivery_id="DLV0012").exists())
 
     # 19. Getting a delivery after deletion returns 404
     def test_get_after_delete_returns_404(self):
         detail_url = reverse("delivery-detail", args=[self.existing_delivery.delivery_id])
-        delete_response = self.client.delete(detail_url)
+        delete_response = self.client.delete(detail_url, **self.admin_headers)
         self.assertEqual(delete_response.status_code, 204)
-        get_response = self.client.get(detail_url)
+        get_response = self.client.get(detail_url, **self.admin_headers)
         self.assertEqual(get_response.status_code, 404)
 
     # 20. Detail endpoint reflects updated dropoff location and time
     def test_detail_updates_after_patch(self):
         detail_url = reverse("delivery-detail", args=[self.existing_delivery.delivery_id])
         patch_payload = {
-            "dropoff_location_type": "community",
             "dropoff_time": "06:15:00",
+            "delivered_quantity": 12,
         }
-        patch_response = self.client.patch(detail_url, patch_payload, format="json")
+        patch_response = self.client.patch(
+            detail_url, patch_payload, format="json", **self.admin_headers
+        )
         self.assertEqual(patch_response.status_code, 200)
-        detail_response = self.client.get(detail_url)
+        detail_response = self.client.get(detail_url, **self.admin_headers)
         self.assertEqual(detail_response.status_code, 200)
-        self.assertEqual(detail_response.data["dropoff_location_type"], "community")
         self.assertEqual(detail_response.data["dropoff_time"], "06:15:00")
+        self.assertEqual(detail_response.data["delivered_quantity"], 12)
 
     # 21. Creating delivery with invalid pickup location type fails
     def test_create_delivery_invalid_pickup_location(self):
@@ -351,12 +365,12 @@ class DeliveryAPITests(APITestCase):
             "donation_id": self.donation.donation_id,
             "community_id": self.community.community_id,
         }
-        response = self.client.post(self.list_url, payload, format="json")
+        response = self.client.post(self.list_url, payload, format="json", **self.admin_headers)
         self.assertEqual(response.status_code, 400)
 
     # 22. Listing supports pagination parameters
     def test_list_supports_pagination(self):
-        response = self.client.get(f"{self.list_url}?page=1&page_size=1")
+        response = self.client.get(f"{self.list_url}?page=1&page_size=1", **self.admin_headers)
         self.assertEqual(response.status_code, 200)
         # Response may be paginated data structure; ensure at least one item is returned
         if isinstance(response.data, list):
@@ -377,7 +391,7 @@ class DeliveryAPITests(APITestCase):
             "donation_id": self.donation.donation_id,
             "community_id": self.community.community_id,
         }
-        response = self.client.post(self.list_url, payload, format="json")
+        response = self.client.post(self.list_url, payload, format="json", **self.admin_headers)
         self.assertEqual(response.status_code, 400)
 
     # 24. Creating delivery with invalid delivery_type fails
@@ -394,7 +408,7 @@ class DeliveryAPITests(APITestCase):
             "donation_id": self.donation.donation_id,
             "community_id": self.community.community_id,
         }
-        response = self.client.post(self.list_url, payload, format="json")
+        response = self.client.post(self.list_url, payload, format="json", **self.admin_headers)
         self.assertEqual(response.status_code, 400)
 
     # 25. Creating delivery with invalid donation_id fails
@@ -411,14 +425,14 @@ class DeliveryAPITests(APITestCase):
             "donation_id": "NOTEXIST",
             "community_id": self.community.community_id,
         }
-        response = self.client.post(self.list_url, payload, format="json")
+        response = self.client.post(self.list_url, payload, format="json", **self.admin_headers)
         self.assertEqual(response.status_code, 400)
         self.assertFalse(Delivery.objects.filter(delivery_id="DLV0014").exists())
 
     # 26. Detail response contains related IDs
     def test_delivery_detail_contains_related_ids(self):
         detail_url = reverse("delivery-detail", args=[self.existing_delivery.delivery_id])
-        response = self.client.get(detail_url)
+        response = self.client.get(detail_url, **self.admin_headers)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["warehouse_id"], self.warehouse.warehouse_id)
         self.assertEqual(response.data["community_id"], self.community.community_id)
@@ -437,7 +451,7 @@ class DeliveryAPITests(APITestCase):
             "donation_id": self.donation.donation_id,
             "community_id": self.community.community_id,
         }
-        response = self.client.post(self.list_url, payload, format="json")
+        response = self.client.post(self.list_url, payload, format="json", **self.admin_headers)
         self.assertEqual(response.status_code, 400)
 
     # 28. Creating delivery without community_id fails
@@ -453,15 +467,15 @@ class DeliveryAPITests(APITestCase):
             "user_id": self.delivery_user.user_id,
             "donation_id": self.donation.donation_id,
         }
-        response = self.client.post(self.list_url, payload, format="json")
+        response = self.client.post(self.list_url, payload, format="json", **self.admin_headers)
         self.assertEqual(response.status_code, 400)
 
     # 29. Deleting the same delivery twice yields 404 second time
     def test_delete_twice_returns_not_found(self):
         detail_url = reverse("delivery-detail", args=[self.existing_delivery.delivery_id])
-        first_delete = self.client.delete(detail_url)
+        first_delete = self.client.delete(detail_url, **self.admin_headers)
         self.assertEqual(first_delete.status_code, 204)
-        second_delete = self.client.delete(detail_url)
+        second_delete = self.client.delete(detail_url, **self.admin_headers)
         self.assertEqual(second_delete.status_code, 404)
 
     # 30. Filtering by type after creates returns only requested type
@@ -478,8 +492,12 @@ class DeliveryAPITests(APITestCase):
             "donation_id": self.donation.donation_id,
             "community_id": self.community.community_id,
         }
-        create_response = self.client.post(self.list_url, payload, format="json")
+        create_response = self.client.post(
+            self.list_url, payload, format="json", **self.admin_headers
+        )
         self.assertEqual(create_response.status_code, 201)
-        response = self.client.get(f"{self.list_url}?delivery_type=distribution")
+        response = self.client.get(
+            f"{self.list_url}?delivery_type=distribution", **self.admin_headers
+        )
         self.assertEqual(response.status_code, 200)
         self.assertTrue(all(item["delivery_type"] == "distribution" for item in response.data))

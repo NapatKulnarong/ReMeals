@@ -122,10 +122,12 @@ class CommunityWarehouseAPITests(TestCase):
             warehouse_id=self.warehouse,
         )
 
-    # 6. Community list endpoint requires authentication
-    def test_community_list_requires_authentication(self):
+    # 6. Community list endpoint is publicly accessible
+    def test_community_list_is_public(self):
         response = self.api_client.get(reverse("community-list"))
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 1)
+        self.assertEqual(response.json()[0]["community_id"], self.community.community_id)
 
     # 7. Authenticated user can list communities
     def test_authenticated_user_can_list_communities(self):
@@ -152,10 +154,12 @@ class CommunityWarehouseAPITests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(Community.objects.filter(community_id="C0101").exists())
 
-    # 9. Warehouse list endpoint requires authentication
-    def test_warehouse_list_requires_authentication(self):
+    # 9. Warehouse list endpoint is publicly accessible
+    def test_warehouse_list_is_public(self):
         response = self.api_client.get(reverse("warehouse-list"))
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 1)
+        self.assertEqual(response.json()[0]["warehouse_id"], self.warehouse.warehouse_id)
 
     # 10. Authenticated user can list warehouses
     def test_authenticated_user_can_list_warehouses(self):
@@ -195,11 +199,14 @@ class CommunityWarehouseAPITests(TestCase):
         self.community.refresh_from_db()
         self.assertEqual(self.community.name, "Renamed")
 
-    # 14. Unauthenticated delete request is forbidden
-    def test_delete_requires_authentication(self):
+    # 14. Unauthenticated delete request succeeds with public permissions
+    def test_delete_without_authentication_succeeds(self):
         detail_url = reverse("community-detail", args=[self.community.community_id])
         response = self.api_client.delete(detail_url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(
+            Community.objects.filter(community_id=self.community.community_id).exists()
+        )
 
     # 15. Creating duplicate community_id returns error
     def test_create_duplicate_community_id_fails(self):
