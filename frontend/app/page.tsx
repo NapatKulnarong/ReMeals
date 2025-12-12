@@ -2820,7 +2820,18 @@ function AuthModal({
         email: "",
         password: "",
       });
-      onModeChange("login");
+
+      // Automatically log the user in after successful signup
+      if (payload.username && payload.email) {
+        onAuthSuccess?.({
+          username: payload.username,
+          email: payload.email,
+          userId: payload.user_id ?? "",
+          isAdmin: Boolean(payload.is_admin),
+          isDeliveryStaff: Boolean(payload.is_delivery_staff),
+        });
+        onClose();
+      }
     } catch (error) {
       console.error("Signup error", error);
       setSignupStatus({

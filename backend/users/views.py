@@ -64,8 +64,12 @@ def signup(request):
         password=make_password(data.get("password")),
     )
 
+    is_admin = False
+    is_delivery_staff = False
+
     if user.email.lower() in _admin_emails():
         Admin.objects.get_or_create(user=user)
+        is_admin = True
     if user.email.lower() in _delivery_staff_emails():
         DeliveryStaff.objects.get_or_create(
             user=user,
@@ -74,8 +78,16 @@ def signup(request):
                 "is_available": True,
             },
         )
+        is_delivery_staff = True
 
-    return Response({"message": "Signup successful"}, status=200)
+    return Response({
+        "message": "Signup successful",
+        "username": user.username,
+        "email": user.email,
+        "user_id": user.user_id,
+        "is_admin": is_admin,
+        "is_delivery_staff": is_delivery_staff,
+    }, status=200)
 
 @swagger_auto_schema(method="post", request_body=LoginSerializer)
 @api_view(["POST"])
