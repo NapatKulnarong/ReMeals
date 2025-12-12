@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 
 const API_BASE_URL =
@@ -131,16 +131,6 @@ type DonationRequestRecord = DonationRequestForm & {
   createdAt: string;
 };
 
-type DonationRequestApiRecord = DonationRequestForm & {
-  request_id: string;
-  items: Array<{
-    need_id: string;
-    item: string;
-    quantity: number;
-    urgency: string;
-  }>;
-};
-
 type DonationApiRecord = {
   donation_id: string;
   donated_at: string;
@@ -213,6 +203,7 @@ type DeliveryRecordApi = {
   community_id: string;
    status: "pending" | "in_transit" | "delivered" | "cancelled";
    notes?: string;
+   delivered_quantity?: number;
 };
 
 const POPULAR_RESTAURANT_SUGGESTIONS: RestaurantSuggestion[] = [
@@ -337,14 +328,16 @@ const API_PATHS = {
 
 const getCurrentTimestamp = () => new Date().toISOString();
 
-const buildAuthHeaders = (user?: LoggedUser | null) =>
-  user
-    ? {
-        "X-USER-ID": user.userId,
-        "X-USER-IS-ADMIN": String(user.isAdmin),
-        "X-USER-IS-DELIVERY": String(user.isDeliveryStaff),
-      }
-    : {};
+const buildAuthHeaders = (user?: LoggedUser | null): Record<string, string> => {
+  if (!user) {
+    return {};
+  }
+  return {
+    "X-USER-ID": user.userId,
+    "X-USER-IS-ADMIN": String(user.isAdmin),
+    "X-USER-IS-DELIVERY": String(user.isDeliveryStaff),
+  };
+};
 
 const formatDisplayDate = (value: string) => {
   if (!value) {
@@ -2489,7 +2482,7 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
                   {requests.flatMap((req) =>
                     req.items.map((item) => (
                       <option key={item.need_id} value={item.need_id}>
-                        {req.communityName} • {item.item} ({item.quantity})
+                        {req.community_name} • {item.item} ({item.quantity})
                       </option>
                     ))
                   )}
