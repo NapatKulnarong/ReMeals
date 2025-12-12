@@ -353,7 +353,7 @@ const toDateTimeLocalValue = (value: string) => {
 };
 
 const INPUT_STYLES = `
-  w-full rounded-2xl border border-[#E4DCCD] bg-white px-3 py-2 text-sm
+  w-full h-9 rounded-[7px] border border-[#E4DCCD] bg-white px-3 text-sm
   text-gray-800 outline-none transition focus:border-[#E3B261] focus:ring-2
   focus:ring-[#E3B261]/40
 `.replace(/\s+/g, " ");
@@ -1162,7 +1162,7 @@ function DonationSection() {
   };
 
   return (
-    <div className="grid grid-cols-5 gap-6 h-full">
+    <div className="grid grid-cols-5 gap-6" style={{ height: 'calc(100vh - 4rem)' }}>
       <div className="col-span-3 flex flex-col rounded-[32px] border border-[#C7D2C0] bg-[#F6F2EC] p-8 shadow-2xl shadow-[#C7D2C0]/30">
         <div className="mb-6 flex items-center justify-between">
           <div>
@@ -1775,8 +1775,8 @@ function DonationRequestSection() {
   };
 
   return (
-    <div className="space-y-10">
-      <div className="rounded-[32px] border border-[#E6B9A2] bg-[#F6F2EC] p-8 shadow-2xl shadow-[#E6B9A2]/35">
+    <div className="grid grid-cols-5 gap-6" style={{ height: 'calc(100vh - 4rem)' }}>
+      <div className="col-span-3 flex flex-col rounded-[32px] border border-[#E6B9A2] bg-[#F6F2EC] p-8 shadow-2xl shadow-[#E6B9A2]/35 overflow-hidden">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-[#B86A49]">
@@ -1791,10 +1791,11 @@ function DonationRequestSection() {
           </span>
         </div>
 
-        <form className="space-y-8" onSubmit={handleSubmit}>
+        <div className="flex-1 overflow-y-auto pr-2">
+          <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-semibold text-gray-700">
+              <label className="ml-[2px] mb-2 block text-sm font-semibold text-gray-700">
                 Request title
               </label>
               <input
@@ -1809,7 +1810,7 @@ function DonationRequestSection() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-semibold text-gray-700">
+              <label className="ml-[2px] mb-2 block text-sm font-semibold text-gray-700">
                 Expected delivery window
               </label>
               <input
@@ -1907,7 +1908,7 @@ function DonationRequestSection() {
             {form.needs.map((need, index) => (
               <div
                 key={need.id}
-                className="grid gap-3 rounded-2xl border border-dashed border-[#E6B9A2] bg-[#F8F3EE] p-4"
+                className="grid gap-3 rounded-[7px] border border-dashed border-[#E6B9A2] bg-[#F8F3EE] p-4"
               >
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-gray-500">
@@ -1978,11 +1979,11 @@ function DonationRequestSection() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-semibold text-gray-700">
+            <label className="ml-[2px] mb-2 block text-sm font-semibold text-gray-700">
               Additional notes (optional)
             </label>
             <textarea
-              className={`${INPUT_STYLES} h-24`}
+              className={`${INPUT_STYLES} h-24 pt-2`}
               placeholder="Distribution plan, vulnerable households, delivery constraints..."
               value={form.notes}
               onChange={(event) =>
@@ -2025,9 +2026,10 @@ function DonationRequestSection() {
             )}
           </div>
         </form>
+        </div>
       </div>
 
-      <div className="space-y-5 rounded-[32px] border border-[#E6B9A2] bg-[#F6F2EC] p-8">
+      <div className="col-span-2 flex flex-col rounded-[32px] border border-[#E6B9A2] bg-[#F6F2EC] p-8 overflow-hidden">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-[#B86A49]">
@@ -2043,9 +2045,10 @@ function DonationRequestSection() {
         </div>
 
         {requestsError && (
-          <p className="text-sm font-semibold text-red-500">{requestsError}</p>
+          <p className="text-sm font-semibold text-red-500 mb-4">{requestsError}</p>
         )}
 
+        <div className="flex-1 overflow-y-auto pr-2 mt-6">
         {loadingRequests ? (
           <p className="rounded-2xl border border-dashed border-gray-300 bg-white/80 p-6 text-sm text-gray-500">
             Loading requests...
@@ -2155,6 +2158,7 @@ function DonationRequestSection() {
             ))}
           </div>
         )}
+        </div>
       </div>
     </div>
   );
@@ -3499,7 +3503,7 @@ export default function Home() {
       />
       {/* Right side: content area */}
       {/* relative is IMPORTANT so the modal overlay stays inside this area only */}
-      <section className="relative flex-1 h-screen overflow-y-auto p-8">
+      <section className="relative flex-1 h-screen overflow-y-auto px-8 py-8">
         <TabContent tab={normalizedActiveTab} currentUser={currentUser} />
 
         {currentUser && (
