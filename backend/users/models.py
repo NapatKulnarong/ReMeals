@@ -34,7 +34,9 @@ class Donor(models.Model):
     )
 
     class Meta:
-        unique_together = ['user', 'restaurant_id']  # User can't be donor at same restaurant twice
+        constraints = [
+            models.UniqueConstraint(fields=['user'], name='unique_donor_user'),
+        ]
 
     def __str__(self):
         return f"Donor {self.user.user_id}"
@@ -60,6 +62,11 @@ class Recipient(models.Model):
         blank=True,
         db_column="community_id",
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user'], name='unique_recipient_user'),
+        ]
 
     def __str__(self):
         return f"Recipient {self.user.user_id}"

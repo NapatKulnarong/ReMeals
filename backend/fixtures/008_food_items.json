@@ -17,6 +17,20 @@
     "model": "fooditem.fooditem",
     "pk": "FOO0000002",
     "fields": {
+      "name": "Grilled Fish",
+      "quantity": 18,
+      "unit": "tray",
+      "expire_date": "2025-01-25",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000003",
+    "fields": {
       "name": "Fried Chicken",
       "quantity": 15,
       "unit": "tray",
@@ -29,7 +43,21 @@
   },
   {
     "model": "fooditem.fooditem",
-    "pk": "FOO0000003",
+    "pk": "FOO0000004",
+    "fields": {
+      "name": "Tamarind Soup",
+      "quantity": 10,
+      "unit": "pot",
+      "expire_date": "2025-01-21",
+      "is_expired": false,
+      "is_claimed": true,
+      "is_distributed": true,
+      "donation": "DON0000002"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000005",
     "fields": {
       "name": "Salad Packs",
       "quantity": 30,
@@ -43,7 +71,21 @@
   },
   {
     "model": "fooditem.fooditem",
-    "pk": "FOO0000004",
+    "pk": "FOO0000006",
+    "fields": {
+      "name": "Fruit Cups",
+      "quantity": 40,
+      "unit": "cup",
+      "expire_date": "2025-01-19",
+      "is_expired": true,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000003"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000007",
     "fields": {
       "name": "Pasta Boxes",
       "quantity": 40,
@@ -53,6 +95,244 @@
       "is_claimed": false,
       "is_distributed": true,
       "donation": "DON0000004"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000008",
+    "fields": {
+      "name": "Tomato Sauce",
+      "quantity": 12,
+      "unit": "jar",
+      "expire_date": "2025-03-05",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000004"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000009",
+    "fields": {
+      "name": "Green Curry",
+      "quantity": 20,
+      "unit": "tray",
+      "expire_date": "2025-01-23",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000005"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000010",
+    "fields": {
+      "name": "Steamed Rice",
+      "quantity": 40,
+      "unit": "box",
+      "expire_date": "2025-01-24",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000005"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000011",
+    "fields": {
+      "name": "Tofu Stir Fry",
+      "quantity": 18,
+      "unit": "tray",
+      "expire_date": "2025-01-22",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000006"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000012",
+    "fields": {
+      "name": "Noodle Bowls",
+      "quantity": 24,
+      "unit": "bowl",
+      "expire_date": "2025-01-25",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000006"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000013",
+    "fields": {
+      "name": "Sushi Platters",
+      "quantity": 12,
+      "unit": "platter",
+      "expire_date": "2025-01-17",
+      "is_expired": false,
+      "is_claimed": true,
+      "is_distributed": true,
+      "donation": "DON0000007"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000014",
+    "fields": {
+      "name": "Miso Soup",
+      "quantity": 30,
+      "unit": "liter",
+      "expire_date": "2025-01-19",
+      "is_expired": false,
+      "is_claimed": true,
+      "is_distributed": true,
+      "donation": "DON0000007"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000015",
+    "fields": {
+      "name": "Thai Basil Chicken",
+      "quantity": 28,
+      "unit": "tray",
+      "expire_date": "2025-01-24",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000008"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000016",
+    "fields": {
+      "name": "Egg Custards",
+      "quantity": 60,
+      "unit": "cup",
+      "expire_date": "2025-01-18",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000008"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000017",
+    "fields": {
+      "name": "Bread Loaves",
+      "quantity": 35,
+      "unit": "loaf",
+      "expire_date": "2025-01-26",
+      "is_expired": false,
+      "is_claimed": true,
+      "is_distributed": false,
+      "donation": "DON0000009"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000018",
+    "fields": {
+      "name": "Pumpkin Soup",
+      "quantity": 25,
+      "unit": "liter",
+      "expire_date": "2025-01-28",
+      "is_expired": false,
+      "is_claimed": true,
+      "is_distributed": false,
+      "donation": "DON0000009"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000019",
+    "fields": {
+      "name": "Cold Cuts",
+      "quantity": 18,
+      "unit": "platter",
+      "expire_date": "2025-01-27",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000010"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000020",
+    "fields": {
+      "name": "Cheese Blocks",
+      "quantity": 22,
+      "unit": "block",
+      "expire_date": "2025-02-15",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000010"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000021",
+    "fields": {
+      "name": "Vegetable Stir Fry",
+      "quantity": 32,
+      "unit": "tray",
+      "expire_date": "2025-01-22",
+      "is_expired": false,
+      "is_claimed": true,
+      "is_distributed": true,
+      "donation": "DON0000011"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000022",
+    "fields": {
+      "name": "Rice Vermicelli",
+      "quantity": 45,
+      "unit": "pack",
+      "expire_date": "2025-02-05",
+      "is_expired": false,
+      "is_claimed": true,
+      "is_distributed": true,
+      "donation": "DON0000011"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000023",
+    "fields": {
+      "name": "Protein Shakes",
+      "quantity": 50,
+      "unit": "bottle",
+      "expire_date": "2025-03-01",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000012"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000024",
+    "fields": {
+      "name": "Fresh Fruit Hampers",
+      "quantity": 26,
+      "unit": "hamper",
+      "expire_date": "2025-01-29",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000012"
     }
   }
 ]

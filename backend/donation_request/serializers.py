@@ -5,6 +5,9 @@ from .models import DonationRequest
 
 class DonationRequestSerializer(serializers.ModelSerializer):
     request_id = serializers.CharField(read_only=True)
+    created_by_user_id = serializers.CharField(
+        source="created_by.user_id", read_only=True, allow_null=True
+    )
 
     class Meta:
         model = DonationRequest
@@ -18,5 +21,6 @@ class DonationRequestSerializer(serializers.ModelSerializer):
             "contact_phone",
             "notes",
             "created_at",
+            "created_by_user_id",
         ]
-        read_only_fields = ["created_at", "request_id"]
+        read_only_fields = ["created_at", "request_id", "created_by_user_id"]

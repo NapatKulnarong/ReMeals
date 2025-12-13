@@ -271,5 +271,83 @@
       "email": "keeley.br@gmail.com",
       "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
     }
+  },
+  {
+    "model": "users.user",
+    "pk": "REC0000003",
+    "fields": {
+      "username": "recipient3",
+      "fname": "Marisa",
+      "lname": "Thongchai",
+      "bod": "1984-07-12",
+      "phone": "0812345008",
+      "email": "marisa.thongchai@example.com",
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "REC0000004",
+    "fields": {
+      "username": "recipient4",
+      "fname": "Preecha",
+      "lname": "Saetang",
+      "bod": "1979-03-28",
+      "phone": "0812345009",
+      "email": "preecha.saetang@example.com",
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "REC0000005",
+    "fields": {
+      "username": "recipient5",
+      "fname": "Chanita",
+      "lname": "Boonsri",
+      "bod": "1985-10-05",
+      "phone": "0812345014",
+      "email": "chanita.boonsri@example.com",
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "REC0000006",
+    "fields": {
+      "username": "recipient6",
+      "fname": "Somchai",
+      "lname": "Ritthidet",
+      "bod": "1982-12-19",
+      "phone": "0812345015",
+      "email": "somchai.ritthidet@example.com",
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "REC0000007",
+    "fields": {
+      "username": "recipient7",
+      "fname": "Waraporn",
+      "lname": "Inthanon",
+      "bod": "1988-06-02",
+      "phone": "0812345016",
+      "email": "waraporn.inthanon@example.com",
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "REC0000008",
+    "fields": {
+      "username": "recipient8",
+      "fname": "Praneet",
+      "lname": "Sirikul",
+      "bod": "1981-09-23",
+      "phone": "0812345017",
+      "email": "praneet.sirikul@example.com",
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
+    }
   }
 ]

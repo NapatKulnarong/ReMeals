@@ -1,6 +1,7 @@
 from django.db import models
 
 from re_meals_api.id_utils import generate_prefixed_id
+from users.models import User
 
 
 class DonationRequest(models.Model):
@@ -15,6 +16,13 @@ class DonationRequest(models.Model):
     contact_phone = models.CharField(max_length=30, blank=True)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="donation_requests",
+    )
 
     class Meta:
         db_table = "donation_request"

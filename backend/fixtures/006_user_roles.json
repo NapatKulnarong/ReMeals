@@ -19,7 +19,7 @@
     "pk": 2,
     "fields": {
       "user": "DON0000002",
-      "restaurant_id": "RES0000002"
+      "restaurant_id": "RES0000001"
     }
   },
   {
@@ -27,7 +27,7 @@
     "pk": 3,
     "fields": {
       "user": "DON0000003",
-      "restaurant_id": "RES0000003"
+      "restaurant_id": "RES0000002"
     }
   },
   {
@@ -35,7 +35,7 @@
     "pk": 4,
     "fields": {
       "user": "DON0000004",
-      "restaurant_id": "RES0000004"
+      "restaurant_id": "RES0000002"
     }
   },
   {
@@ -43,7 +43,7 @@
     "pk": 5,
     "fields": {
       "user": "DON0000005",
-      "restaurant_id": "RES0000005"
+      "restaurant_id": "RES0000003"
     }
   },
   {
@@ -51,7 +51,7 @@
     "pk": 6,
     "fields": {
       "user": "DON0000006",
-      "restaurant_id": "RES0000006"
+      "restaurant_id": "RES0000003"
     }
   },
   {
@@ -59,7 +59,7 @@
     "pk": 7,
     "fields": {
       "user": "DON0000007",
-      "restaurant_id": "RES0000007"
+      "restaurant_id": "RES0000004"
     }
   },
   {
@@ -67,7 +67,7 @@
     "pk": 8,
     "fields": {
       "user": "DON0000008",
-      "restaurant_id": "RES0000008"
+      "restaurant_id": "RES0000005"
     }
   },
   {
@@ -75,7 +75,7 @@
     "pk": 9,
     "fields": {
       "user": "DON0000009",
-      "restaurant_id": "RES0000009"
+      "restaurant_id": "RES0000005"
     }
   },
   {
@@ -83,7 +83,7 @@
     "pk": 10,
     "fields": {
       "user": "DON0000010",
-      "restaurant_id": "RES0000010"
+      "restaurant_id": "RES0000006"
     }
   },
   {
@@ -91,7 +91,7 @@
     "pk": 11,
     "fields": {
       "user": "DON0000011",
-      "restaurant_id": "RES0000011"
+      "restaurant_id": "RES0000006"
     }
   },
   {
@@ -99,7 +99,7 @@
     "pk": 12,
     "fields": {
       "user": "DON0000012",
-      "restaurant_id": "RES0000012"
+      "restaurant_id": "RES0000007"
     }
   },
   {
@@ -170,8 +170,62 @@
     "pk": 2,
     "fields": {
       "user": "REC0000002",
-      "address": "456 Bang Khen, Bangkok 10220",
+      "address": "12/5 Rama 4 Rd, Bangkok 10110",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "users.recipient",
+    "pk": 3,
+    "fields": {
+      "user": "REC0000003",
+      "address": "22 Phahon Yothin Rd, Bangkok 10220",
       "community_id": "COM0000002"
+    }
+  },
+  {
+    "model": "users.recipient",
+    "pk": 4,
+    "fields": {
+      "user": "REC0000004",
+      "address": "199 Chaeng Watthana Rd, Bangkok 10220",
+      "community_id": "COM0000002"
+    }
+  },
+  {
+    "model": "users.recipient",
+    "pk": 5,
+    "fields": {
+      "user": "REC0000005",
+      "address": "45 Pathum Thani Rd, Pathum Thani 12000",
+      "community_id": "COM0000003"
+    }
+  },
+  {
+    "model": "users.recipient",
+    "pk": 6,
+    "fields": {
+      "user": "REC0000006",
+      "address": "88 Lat Krabang Rd, Bangkok 10520",
+      "community_id": "COM0000004"
+    }
+  },
+  {
+    "model": "users.recipient",
+    "pk": 7,
+    "fields": {
+      "user": "REC0000007",
+      "address": "55 Bang Na-Trat Rd, Bangkok 10260",
+      "community_id": "COM0000005"
+    }
+  },
+  {
+    "model": "users.recipient",
+    "pk": 8,
+    "fields": {
+      "user": "REC0000008",
+      "address": "33 Samut Prakan Rd, Bang Phli 10540",
+      "community_id": "COM0000006"
     }
   }
 ]

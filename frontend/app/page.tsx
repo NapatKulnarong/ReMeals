@@ -124,6 +124,7 @@ type DonationRequestForm = {
 type DonationRequestRecord = DonationRequestForm & {
   id: string;
   createdAt: string;
+  ownerUserId?: string | null;
 };
 
 type DonationApiRecord = {
@@ -159,6 +160,7 @@ type DonationRequestApiRecord = {
   contact_phone: string;
   notes: string;
   created_at: string;
+  created_by_user_id?: string | null;
 };
 
 type Warehouse = {
@@ -1678,26 +1680,70 @@ function DonationRequestSection({
   const [requestsError, setRequestsError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const prioritizeRequests = useCallback(
+    (list: DonationRequestRecord[]) => {
+      const userId = currentUser?.userId;
+      if (!list.length) {
+        return list;
+      }
+      return [...list].sort((a, b) => {
+        const aOwned = Boolean(userId && a.ownerUserId === userId);
+        const bOwned = Boolean(userId && b.ownerUserId === userId);
+        if (aOwned !== bOwned) {
+          return aOwned ? -1 : 1;
+        }
+        const aTime = new Date(a.createdAt).getTime();
+        const bTime = new Date(b.createdAt).getTime();
+        const safeATime = Number.isNaN(aTime) ? 0 : aTime;
+        const safeBTime = Number.isNaN(bTime) ? 0 : bTime;
+        return safeBTime - safeATime;
+      });
+    },
+    [currentUser?.userId]
+  );
+
+  const canManageRequest = useCallback(
+    (request: DonationRequestRecord) => {
+      if (!currentUser) {
+        return false;
+      }
+      if (currentUser.isAdmin) {
+        return true;
+      }
+      return request.ownerUserId === currentUser.userId;
+    },
+    [currentUser]
+  );
+
+  useEffect(() => {
+    setRequests((prev) => prioritizeRequests(prev));
+  }, [prioritizeRequests]);
+
   useEffect(() => {
     let ignore = false;
     async function loadRequests() {
       setLoadingRequests(true);
       setRequestsError(null);
       try {
-        const data = await apiFetch<DonationRequestApiRecord[]>("/donation-requests/");
+        const data = await apiFetch<DonationRequestApiRecord[]>("/donation-requests/", {
+          headers: buildAuthHeaders(currentUser),
+        });
         if (!ignore) {
           setRequests(
-            data.map((record) => ({
-              id: record.request_id,
-              requestTitle: record.title,
-              communityName: record.community_name,
-              numberOfPeople: String(record.people_count),
-              expectedDelivery: record.expected_delivery,
-              recipientAddress: record.recipient_address,
-              contactPhone: record.contact_phone ?? "",
-              notes: record.notes ?? "",
-              createdAt: record.created_at,
-            }))
+            prioritizeRequests(
+              data.map((record) => ({
+                id: record.request_id,
+                requestTitle: record.title,
+                communityName: record.community_name,
+                numberOfPeople: String(record.people_count),
+                expectedDelivery: record.expected_delivery,
+                recipientAddress: record.recipient_address,
+                contactPhone: record.contact_phone ?? "",
+                notes: record.notes ?? "",
+                createdAt: record.created_at,
+                ownerUserId: record.created_by_user_id ?? null,
+              }))
+            )
           );
         }
       } catch (error) {
@@ -1705,6 +1751,7 @@ function DonationRequestSection({
           setRequestsError(
             error instanceof Error ? error.message : "Unable to load requests"
           );
+          setRequests([]);
         }
       } finally {
         if (!ignore) {
@@ -1717,7 +1764,7 @@ function DonationRequestSection({
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [currentUser?.userId, currentUser?.isAdmin, prioritizeRequests]);
 
   const resetForm = () => {
     setForm(createDonationRequestForm());
@@ -1755,6 +1802,11 @@ function DonationRequestSection({
       return;
     }
 
+    if (!currentUser) {
+      setNotification({ error: "Login required to submit requests." });
+      return;
+    }
+
     setIsSubmitting(true);
 
     const payload = {
@@ -1768,14 +1820,18 @@ function DonationRequestSection({
     };
 
     try {
+      const requestOptions = {
+        body: JSON.stringify(payload),
+        headers: buildAuthHeaders(currentUser),
+      };
       const result = editingId
         ? await apiFetch<DonationRequestApiRecord>(`/donation-requests/${editingId}/`, {
+            ...requestOptions,
             method: "PATCH",
-            body: JSON.stringify(payload),
           })
         : await apiFetch<DonationRequestApiRecord>("/donation-requests/", {
+            ...requestOptions,
             method: "POST",
-            body: JSON.stringify(payload),
           });
 
       const mapped: DonationRequestRecord = {
@@ -1788,12 +1844,15 @@ function DonationRequestSection({
         contactPhone: result.contact_phone ?? "",
         notes: result.notes ?? "",
         createdAt: result.created_at,
+        ownerUserId: result.created_by_user_id ?? currentUser.userId ?? null,
       };
 
       setRequests((prev) =>
-        editingId
-          ? prev.map((request) => (request.id === mapped.id ? mapped : request))
-          : [mapped, ...prev]
+        prioritizeRequests(
+          editingId
+            ? prev.map((request) => (request.id === mapped.id ? mapped : request))
+            : [mapped, ...prev]
+        )
       );
 
       setNotification({
@@ -1814,6 +1873,12 @@ function DonationRequestSection({
   };
 
   const handleEdit = (request: DonationRequestRecord) => {
+    if (!canManageRequest(request)) {
+      setNotification({
+        error: "You can only edit requests that you created.",
+      });
+      return;
+    }
     setForm({
       requestTitle: request.requestTitle,
       communityName: request.communityName,
@@ -1829,13 +1894,26 @@ function DonationRequestSection({
     });
   };
 
-  const handleDelete = async (requestId: string) => {
-    try {
-      await apiFetch(`/donation-requests/${requestId}/`, {
-        method: "DELETE",
+  const handleDelete = async (target: DonationRequestRecord) => {
+    if (!currentUser) {
+      setNotification({ error: "Login required to delete requests." });
+      return;
+    }
+    if (!canManageRequest(target)) {
+      setNotification({
+        error: "You can only delete requests that you created.",
       });
-      setRequests((prev) => prev.filter((request) => request.id !== requestId));
-      if (editingId === requestId) {
+      return;
+    }
+    try {
+      await apiFetch(`/donation-requests/${target.id}/`, {
+        method: "DELETE",
+        headers: buildAuthHeaders(currentUser),
+      });
+      setRequests((prev) =>
+        prioritizeRequests(prev.filter((request) => request.id !== target.id))
+      );
+      if (editingId === target.id) {
         resetForm();
       } else {
         setNotification({ message: "Request removed." });
@@ -2076,6 +2154,11 @@ function DonationRequestSection({
                     <p className="text-lg font-semibold text-gray-900">
                       {request.requestTitle}
                     </p>
+                    {currentUser?.userId && request.ownerUserId === currentUser.userId && (
+                      <span className="mt-1 inline-flex rounded-full bg-[#B86A49]/10 px-2 py-0.5 text-xs font-semibold text-[#8B4513]">
+                        Your request
+                      </span>
+                    )}
                     <p className="text-sm text-gray-600">
                       {request.numberOfPeople} people waiting for food
                     </p>
@@ -2114,22 +2197,24 @@ function DonationRequestSection({
                   <p className="mt-4 text-xs italic text-gray-500">{request.notes}</p>
                 )}
 
-                <div className="mt-5 flex gap-3 justify-end">
-                  <button
-                    type="button"
-                    className="rounded-full border-2 border-[#E6B9A2] bg-white px-5 py-2 text-sm font-semibold text-[#8B5B1F] shadow-sm transition-all duration-200 hover:border-[#B86A49] hover:bg-[#F8F3EE] hover:shadow-md active:scale-95"
-                    onClick={() => handleEdit(request)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-full border-2 border-[#F7B0A0] bg-white px-5 py-2 text-sm font-semibold text-[#B42318] shadow-sm transition-all duration-200 hover:border-[#E63946] hover:bg-[#FFF1F0] hover:shadow-md active:scale-95"
-                    onClick={() => handleDelete(request.id)}
-                  >
-                    Delete
-                  </button>
-                </div>
+                {canManageRequest(request) && (
+                  <div className="mt-5 flex gap-3 justify-end">
+                    <button
+                      type="button"
+                      className="rounded-full border-2 border-[#E6B9A2] bg-white px-5 py-2 text-sm font-semibold text-[#8B5B1F] shadow-sm transition-all duration-200 hover:border-[#B86A49] hover:bg-[#F8F3EE] hover:shadow-md active:scale-95"
+                      onClick={() => handleEdit(request)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      className="rounded-full border-2 border-[#F7B0A0] bg-white px-5 py-2 text-sm font-semibold text-[#B42318] shadow-sm transition-all duration-200 hover:border-[#E63946] hover:bg-[#FFF1F0] hover:shadow-md active:scale-95"
+                      onClick={() => handleDelete(request)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
               </article>
             ))}
           </div>

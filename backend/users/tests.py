@@ -1,6 +1,14 @@
+from datetime import date
+
 from django.test import TestCase
 from django.contrib.auth.hashers import make_password
-from users.models import User
+from django.db import IntegrityError
+from django.utils import timezone
+
+from users.models import User, Donor, Recipient
+from restaurants.models import Restaurant
+from community.models import Community
+from warehouse.models import Warehouse
 import json
 
 class AuthTests(TestCase):
@@ -201,6 +209,88 @@ class AuthTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 400)
+
+
+class RoleModelTests(TestCase):
+    def setUp(self):
+        self.donor_user = User.objects.create(
+            user_id="DON999001",
+            username="donor.single",
+            fname="Donor",
+            lname="One",
+            bod="1990-01-01",
+            phone="0800000001",
+            email="donor.one@example.com",
+            password=make_password("pass1234"),
+        )
+        self.recipient_user = User.objects.create(
+            user_id="REC999001",
+            username="recipient.single",
+            fname="Recipient",
+            lname="One",
+            bod="1991-02-02",
+            phone="0800000002",
+            email="recipient.one@example.com",
+            password=make_password("pass1234"),
+        )
+        self.recipient_user_two = User.objects.create(
+            user_id="REC999002",
+            username="recipient.two",
+            fname="Recipient",
+            lname="Two",
+            bod="1992-03-03",
+            phone="0800000003",
+            email="recipient.two@example.com",
+            password=make_password("pass1234"),
+        )
+        self.restaurant_one = Restaurant.objects.create(
+            address="99 Main St",
+            name="Test Kitchen",
+            branch_name="Central",
+            is_chain=False,
+        )
+        self.restaurant_two = Restaurant.objects.create(
+            address="101 Second St",
+            name="Test Kitchen",
+            branch_name="North",
+            is_chain=False,
+        )
+        self.warehouse = Warehouse.objects.create(
+            address="Warehouse Road",
+            capacity=1000,
+            stored_date=date(2025, 1, 1),
+            exp_date=date(2025, 12, 31),
+        )
+        self.community = Community.objects.create(
+            name="Community Alpha",
+            address="Community Lane",
+            received_time=timezone.now(),
+            population=500,
+            warehouse_id=self.warehouse,
+        )
+
+    def test_user_cannot_represent_multiple_restaurants(self):
+        Donor.objects.create(user=self.donor_user, restaurant_id=self.restaurant_one)
+        with self.assertRaises(IntegrityError):
+            Donor.objects.create(user=self.donor_user, restaurant_id=self.restaurant_two)
+
+    def test_user_cannot_register_twice_as_recipient(self):
+        Recipient.objects.create(
+            user=self.recipient_user,
+            address="123 Recipient Rd",
+            community_id=self.community,
+        )
+        Recipient.objects.create(
+            user=self.recipient_user_two,
+            address="456 Shared Rd",
+            community_id=self.community,
+        )
+        with self.assertRaises(IntegrityError):
+            Recipient.objects.create(
+                user=self.recipient_user,
+                address="789 Duplicate Rd",
+                community_id=self.community,
+            )
 
     # 10. Login requires identifier
     def test_login_missing_identifier(self):

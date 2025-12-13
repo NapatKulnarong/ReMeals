@@ -124,6 +124,26 @@ npm run dev
 docker-compose up -d
 ```
 
+#### Load the sample data with Docker
+
+Once the services are running, you can populate the database with all of the fixtures in one shot:
+
+```bash
+docker compose exec backend python manage.py loaddata \
+  fixtures/001_restaurant_chains.json \
+  fixtures/002_restaurants.json \
+  fixtures/003_warehouses.json \
+  fixtures/004_communities.json \
+  fixtures/005_users.json \
+  fixtures/006_user_roles.json \
+  fixtures/007_donations.json \
+  fixtures/008_food_items.json \
+  fixtures/010_deliveries.json \
+  fixtures/009_donation_requests.json
+```
+
+> Tip: run this command against a fresh database (or after `python manage.py flush`) to avoid duplicate-key errors while reloading fixtures.
+
 ## 📚 Documentation
 
 Comprehensive documentation is available in the `/docs` directory:
@@ -246,10 +266,10 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## 📧 Contact
 
-Karnpon Poochitkanon - karnpon14513@gmail.com
-Napat Kulnarong - kul.napat@hotmail.com
-Nisara Ploysuttipol - nisara.ploys@gmail.com
-Tanon Likhittaphong - 2005tanon@gmail.com
+- Karnpon Poochitkanon - karnpon14513@gmail.com
+- Napat Kulnarong - kul.napat@hotmail.com
+- Nisara Ploysuttipol - nisara.ploys@gmail.com
+- Tanon Likhittaphong - 2005tanon@gmail.com
 
 Project Link: [https://github.com/NapatKulnarong/Re-Meals](https://github.com/NapatKulnarong/Re-Meals)
 
