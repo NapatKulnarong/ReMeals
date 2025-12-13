@@ -42,5 +42,291 @@
       "is_chain": true,
       "chain": "CHA0000003"
     }
+  },
+    {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000005",
+    "fields": {
+      "name": "KFC",
+      "branch_name": "Future Park Rangsit",
+      "address": "94 Phahonyothin Rd, Prachathipat, Thanyaburi, Pathum Thani 12130",
+      "is_chain": true,
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000006",
+    "fields": {
+      "name": "KFC",
+      "branch_name": "Central Ladprao",
+      "address": "1693 Phahonyothin Rd, Chatuchak, Bangkok 10900",
+      "is_chain": true,
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000007",
+    "fields": {
+      "name": "The Pizza Company",
+      "branch_name": "Central Pinklao",
+      "address": "7/222 Borommaratchachonnani Rd, Arun Amarin, Bangkok 10700",
+      "is_chain": true,
+      "chain": "CHA0000002"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000008",
+    "fields": {
+      "name": "The Pizza Company",
+      "branch_name": "Terminal 21 Asok",
+      "address": "88 Sukhumvit Rd, Khlong Toei Nuea, Watthana, Bangkok 10110",
+      "is_chain": true,
+      "chain": "CHA0000002"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000009",
+    "fields": {
+      "name": "Sizzler",
+      "branch_name": "Central Rama 9",
+      "address": "9/9 Rama IX Rd, Huai Khwang, Bangkok 10310",
+      "is_chain": true,
+      "chain": "CHA0000003"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000010",
+    "fields": {
+      "name": "Sizzler",
+      "branch_name": "Central Festival Chiang Mai",
+      "address": "99, 99/1-2 Superhighway Chiang Mai-Lampang Rd, Chiang Mai 50000",
+      "is_chain": true,
+      "chain": "CHA0000003"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000011",
+    "fields": {
+      "name": "McDonald's",
+      "branch_name": "Siam Square One",
+      "address": "388 Rama I Rd, Pathum Wan, Bangkok 10330",
+      "is_chain": true,
+      "chain": "CHA0000004"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000012",
+    "fields": {
+      "name": "McDonald's",
+      "branch_name": "Don Mueang Airport",
+      "address": "222 Vibhavadi Rangsit Rd, Don Mueang, Bangkok 10210",
+      "is_chain": true,
+      "chain": "CHA0000004"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000013",
+    "fields": {
+      "name": "Burger King",
+      "branch_name": "MBK Center",
+      "address": "444 Phayathai Rd, Pathum Wan, Bangkok 10330",
+      "is_chain": true,
+      "chain": "CHA0000005"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000014",
+    "fields": {
+      "name": "Burger King",
+      "branch_name": "Central Bangna",
+      "address": "587 Bangna-Trad Rd, Bangna, Bangkok 10260",
+      "is_chain": true,
+      "chain": "CHA0000005"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000015",
+    "fields": {
+      "name": "Starbucks",
+      "branch_name": "Central World",
+      "address": "999/9 Rama I Rd, Pathum Wan, Bangkok 10330",
+      "is_chain": true,
+      "chain": "CHA0000006"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000016",
+    "fields": {
+      "name": "Starbucks",
+      "branch_name": "ICONSIAM",
+      "address": "299 Charoen Nakhon Rd, Khlong San, Bangkok 10600",
+      "is_chain": true,
+      "chain": "CHA0000006"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000017",
+    "fields": {
+      "name": "MK Restaurant",
+      "branch_name": "Central WestGate",
+      "address": "199/3 Moo 6, Sao Thong Hin, Bang Yai, Nonthaburi 11140",
+      "is_chain": true,
+      "chain": "CHA0000007"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000018",
+    "fields": {
+      "name": "Bar B Q Plaza",
+      "branch_name": "Seacon Square",
+      "address": "55 Srinakarin Rd, Nong Bon, Prawet, Bangkok 10250",
+      "is_chain": true,
+      "chain": "CHA0000008"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000019",
+    "fields": {
+      "name": "Bonchon",
+      "branch_name": "Central Rama 2",
+      "address": "160 Rama II Rd, Samae Dam, Bang Khun Thian, Bangkok 10150",
+      "is_chain": true,
+      "chain": "CHA0000010"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000020",
+    "fields": {
+      "name": "Subway",
+      "branch_name": "Asoke BTS",
+      "address": "Sukhumvit Rd, Khlong Toei Nuea, Watthana, Bangkok 10110",
+      "is_chain": true,
+      "chain": "CHA0000013"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000021",
+    "fields": {
+      "name": "KFC",
+      "branch_name": "Central Rama 2",
+      "address": "160 Rama II Rd, Samae Dam, Bang Khun Thian, Bangkok 10150",
+      "is_chain": true,
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000022",
+    "fields": {
+      "name": "The Pizza Company",
+      "branch_name": "Central Udon",
+      "address": "277/1-3 Prajak Sillapakhom Rd, Mak Khaeng, Udon Thani 41000",
+      "is_chain": true,
+      "chain": "CHA0000002"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000023",
+    "fields": {
+      "name": "Sizzler",
+      "branch_name": "Central Phuket",
+      "address": "199 Moo 5, Wichit, Mueang Phuket, Phuket 83000",
+      "is_chain": true,
+      "chain": "CHA0000003"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000024",
+    "fields": {
+      "name": "McDonald's",
+      "branch_name": "Central Chiang Mai Airport",
+      "address": "2 Mahidol Rd, Pa Daet, Mueang Chiang Mai, Chiang Mai 50100",
+      "is_chain": true,
+      "chain": "CHA0000004"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000025",
+    "fields": {
+      "name": "Burger King",
+      "branch_name": "Terminal 21 Pattaya",
+      "address": "456 Beach Rd, Na Kluea, Bang Lamung, Chon Buri 20150",
+      "is_chain": true,
+      "chain": "CHA0000005"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000026",
+    "fields": {
+      "name": "Starbucks",
+      "branch_name": "Central Khonkaen",
+      "address": "99 Srichan Rd, Nai Mueang, Mueang Khon Kaen, Khon Kaen 40000",
+      "is_chain": true,
+      "chain": "CHA0000006"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000027",
+    "fields": {
+      "name": "MK Restaurant",
+      "branch_name": "Central Hatyai",
+      "address": "1518 Kanjanavanich Rd, Hat Yai, Songkhla 90110",
+      "is_chain": true,
+      "chain": "CHA0000007"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000028",
+    "fields": {
+      "name": "Bar B Q Plaza",
+      "branch_name": "Central Korat",
+      "address": "990 Mittraphap Rd, Nai Mueang, Mueang Nakhon Ratchasima 30000",
+      "is_chain": true,
+      "chain": "CHA0000008"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000029",
+    "fields": {
+      "name": "Bonchon",
+      "branch_name": "Central Chiang Rai",
+      "address": "99/9 Phaholyothin Rd, Wiang, Mueang Chiang Rai, Chiang Rai 57000",
+      "is_chain": true,
+      "chain": "CHA0000010"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000030",
+    "fields": {
+      "name": "Subway",
+      "branch_name": "Central Salaya",
+      "address": "999 Phutthamonthon Sai 4 Rd, Salaya, Phutthamonthon, Nakhon Pathom 73170",
+      "is_chain": true,
+      "chain": "CHA0000013"
+    }
   }
 ]

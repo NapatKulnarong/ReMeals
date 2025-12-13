@@ -31,5 +31,302 @@
       "population": 750,
       "warehouse_id": "WAH0000003"
     }
+  },
+    {
+    "model": "community.community",
+    "pk": "COM0000004",
+    "fields": {
+      "name": "Lat Krabang Community Hub",
+      "address": "Lat Krabang, Bangkok 10520",
+      "received_time": "2025-01-16T09:30:00Z",
+      "population": 420,
+      "warehouse_id": "WAH0000001"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000005",
+    "fields": {
+      "name": "Bang Na Community Center",
+      "address": "Bang Na, Bangkok 10260",
+      "received_time": "2025-01-16T10:30:00Z",
+      "population": 380,
+      "warehouse_id": "WAH0000004"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000006",
+    "fields": {
+      "name": "Samut Prakan Welfare Community",
+      "address": "Bang Phli, Samut Prakan 10540",
+      "received_time": "2025-01-16T11:30:00Z",
+      "population": 610,
+      "warehouse_id": "WAH0000002"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000007",
+    "fields": {
+      "name": "Rangsit Community Support Center",
+      "address": "Rangsit, Pathum Thani 12110",
+      "received_time": "2025-01-17T09:00:00Z",
+      "population": 540,
+      "warehouse_id": "WAH0000005"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000008",
+    "fields": {
+      "name": "Ayutthaya Community Relief Point",
+      "address": "Bang Pa-In, Ayutthaya 13160",
+      "received_time": "2025-01-17T10:00:00Z",
+      "population": 680,
+      "warehouse_id": "WAH0000012"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000009",
+    "fields": {
+      "name": "Chonburi Industrial Area Community",
+      "address": "Si Racha, Chonburi 20110",
+      "received_time": "2025-01-17T11:00:00Z",
+      "population": 820,
+      "warehouse_id": "WAH0000006"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000010",
+    "fields": {
+      "name": "Chiang Mai Urban Community",
+      "address": "Saraphi, Chiang Mai 50140",
+      "received_time": "2025-01-18T09:30:00Z",
+      "population": 460,
+      "warehouse_id": "WAH0000014"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000011",
+    "fields": {
+      "name": "Khon Kaen Municipality Community",
+      "address": "Khon Kaen 40000",
+      "received_time": "2025-01-18T10:30:00Z",
+      "population": 720,
+      "warehouse_id": "WAH0000013"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000012",
+    "fields": {
+      "name": "Hat Yai Community Aid Center",
+      "address": "Hat Yai, Songkhla 90110",
+      "received_time": "2025-01-18T11:30:00Z",
+      "population": 900,
+      "warehouse_id": "WAH0000017"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000013",
+    "fields": {
+      "name": "Phuket Coastal Community",
+      "address": "Thalang, Phuket 83110",
+      "received_time": "2025-01-19T09:00:00Z",
+      "population": 350,
+      "warehouse_id": "WAH0000027"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000014",
+    "fields": {
+      "name": "Udon Thani Regional Community Center",
+      "address": "Udon Thani 41000",
+      "received_time": "2025-01-19T10:00:00Z",
+      "population": 640,
+      "warehouse_id": "WAH0000025"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000015",
+    "fields": {
+      "name": "Mae Sot Border Community",
+      "address": "Mae Sot, Tak 63110",
+      "received_time": "2025-01-19T11:00:00Z",
+      "population": 520,
+      "warehouse_id": "WAH0000018"
+    }
+  },
+    {
+    "model": "community.community",
+    "pk": "COM0000016",
+    "fields": {
+      "name": "Din Daeng Community Welfare Center",
+      "address": "Din Daeng, Bangkok 10400",
+      "received_time": "2025-01-20T09:00:00Z",
+      "population": 480,
+      "warehouse_id": "WAH0000020"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000017",
+    "fields": {
+      "name": "Rama 2 Riverside Community",
+      "address": "Bang Khun Thian, Bangkok 10150",
+      "received_time": "2025-01-20T10:00:00Z",
+      "population": 520,
+      "warehouse_id": "WAH0000020"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000018",
+    "fields": {
+      "name": "Nakhon Pathom Community Hub",
+      "address": "Mueang, Nakhon Pathom 73000",
+      "received_time": "2025-01-20T11:00:00Z",
+      "population": 610,
+      "warehouse_id": "WAH0000011"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000019",
+    "fields": {
+      "name": "Lopburi Provincial Community Center",
+      "address": "Mueang, Lopburi 15000",
+      "received_time": "2025-01-21T09:00:00Z",
+      "population": 450,
+      "warehouse_id": "WAH0000015"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000020",
+    "fields": {
+      "name": "Phitsanulok Central Community",
+      "address": "Mueang, Phitsanulok 65000",
+      "received_time": "2025-01-21T10:00:00Z",
+      "population": 700,
+      "warehouse_id": "WAH0000024"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000021",
+    "fields": {
+      "name": "Chiang Rai Urban Community",
+      "address": "Mueang, Chiang Rai 57000",
+      "received_time": "2025-01-21T11:00:00Z",
+      "population": 390,
+      "warehouse_id": "WAH0000026"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000022",
+    "fields": {
+      "name": "Rayong Industrial Worker Community",
+      "address": "Mueang, Rayong 21000",
+      "received_time": "2025-01-22T09:00:00Z",
+      "population": 820,
+      "warehouse_id": "WAH0000016"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000023",
+    "fields": {
+      "name": "Surat Thani City Community",
+      "address": "Mueang, Surat Thani 84000",
+      "received_time": "2025-01-22T10:00:00Z",
+      "population": 560,
+      "warehouse_id": "WAH0000017"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000024",
+    "fields": {
+      "name": "Trang Municipal Community",
+      "address": "Mueang, Trang 92000",
+      "received_time": "2025-01-22T11:00:00Z",
+      "population": 430,
+      "warehouse_id": "WAH0000028"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000025",
+    "fields": {
+      "name": "Prachuap Coastal Community",
+      "address": "Mueang, Prachuap Khiri Khan 77000",
+      "received_time": "2025-01-23T09:00:00Z",
+      "population": 370,
+      "warehouse_id": "WAH0000029"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000026",
+    "fields": {
+      "name": "Pak Chong Highland Community",
+      "address": "Pak Chong, Nakhon Ratchasima 30130",
+      "received_time": "2025-01-23T10:00:00Z",
+      "population": 640,
+      "warehouse_id": "WAH0000023"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000027",
+    "fields": {
+      "name": "Ubon Ratchathani Regional Community",
+      "address": "Mueang, Ubon Ratchathani 34000",
+      "received_time": "2025-01-23T11:00:00Z",
+      "population": 780,
+      "warehouse_id": "WAH0000025"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000028",
+    "fields": {
+      "name": "Nan Rural Support Community",
+      "address": "Mueang, Nan 55000",
+      "received_time": "2025-01-24T09:00:00Z",
+      "population": 320,
+      "warehouse_id": "WAH0000026"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000029",
+    "fields": {
+      "name": "Kalasin Community Aid Center",
+      "address": "Mueang, Kalasin 46000",
+      "received_time": "2025-01-24T10:00:00Z",
+      "population": 500,
+      "warehouse_id": "WAH0000025"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000030",
+    "fields": {
+      "name": "Yala Southern Border Community",
+      "address": "Mueang, Yala 95000",
+      "received_time": "2025-01-24T11:00:00Z",
+      "population": 460,
+      "warehouse_id": "WAH0000030"
+    }
   }
 ]
