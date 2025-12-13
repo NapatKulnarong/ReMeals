@@ -19,7 +19,7 @@
     "pk": 2,
     "fields": {
       "user": "DON0000002",
-      "restaurant_id": "RES0000003"
+      "restaurant_id": "RES0000002"
     }
   },
   {
@@ -27,7 +27,7 @@
     "pk": 3,
     "fields": {
       "user": "DON0000003",
-      "restaurant_id": "RES0000002"
+      "restaurant_id": "RES0000003"
     }
   },
   {
@@ -36,6 +36,70 @@
     "fields": {
       "user": "DON0000004",
       "restaurant_id": "RES0000004"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 5,
+    "fields": {
+      "user": "DON0000005",
+      "restaurant_id": "RES0000005"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 6,
+    "fields": {
+      "user": "DON0000006",
+      "restaurant_id": "RES0000006"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 7,
+    "fields": {
+      "user": "DON0000007",
+      "restaurant_id": "RES0000007"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 8,
+    "fields": {
+      "user": "DON0000008",
+      "restaurant_id": "RES0000008"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 9,
+    "fields": {
+      "user": "DON0000009",
+      "restaurant_id": "RES0000009"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 10,
+    "fields": {
+      "user": "DON0000010",
+      "restaurant_id": "RES0000010"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 11,
+    "fields": {
+      "user": "DON0000011",
+      "restaurant_id": "RES0000011"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 12,
+    "fields": {
+      "user": "DON0000012",
+      "restaurant_id": "RES0000012"
     }
   },
   {
@@ -53,6 +117,42 @@
     "fields": {
       "user": "DEL0000002",
       "assigned_area": "Samut Prakan",
+      "is_available": true
+    }
+  },
+  {
+    "model": "users.deliverystaff",
+    "pk": 3,
+    "fields": {
+      "user": "DEL0000003",
+      "assigned_area": "Nonthaburi",
+      "is_available": true
+    }
+  },
+  {
+    "model": "users.deliverystaff",
+    "pk": 4,
+    "fields": {
+      "user": "DEL0000004",
+      "assigned_area": "Pathum Thani",
+      "is_available": true
+    }
+  },
+  {
+    "model": "users.deliverystaff",
+    "pk": 5,
+    "fields": {
+      "user": "DEL0000005",
+      "assigned_area": "Chonburi",
+      "is_available": true
+    }
+  },
+  {
+    "model": "users.deliverystaff",
+    "pk": 6,
+    "fields": {
+      "user": "DEL0000006",
+      "assigned_area": "Chiang Mai",
       "is_available": true
     }
   },

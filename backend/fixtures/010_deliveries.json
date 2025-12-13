@@ -33,7 +33,7 @@
       "community_id": "COM0000002"
     }
   },
-    {
+  {
     "model": "delivery.delivery",
     "pk": "DLV0000003",
     "fields": {
@@ -44,7 +44,6 @@
       "dropoff_location_type": "warehouse",
       "status": "completed",
       "notes": "Surplus lunch meals collected",
-      "delivered_quantity": 95,
       "warehouse_id": "WAH0000001",
       "user_id": "DEL0000001",
       "donation_id": "DON0000003",
@@ -62,7 +61,6 @@
       "dropoff_location_type": "community",
       "status": "completed",
       "notes": "Evening distribution completed",
-      "delivered_quantity": 180,
       "warehouse_id": "WAH0000001",
       "user_id": "DEL0000002",
       "donation_id": "DON0000003",
@@ -80,7 +78,6 @@
       "dropoff_location_type": "warehouse",
       "status": "pending",
       "notes": "Breakfast surplus pickup",
-      "delivered_quantity": null,
       "warehouse_id": "WAH0000002",
       "user_id": "DEL0000003",
       "donation_id": "DON0000004",
@@ -98,7 +95,6 @@
       "dropoff_location_type": "community",
       "status": "in_transit",
       "notes": "Rural route, long distance",
-      "delivered_quantity": 220,
       "warehouse_id": "WAH0000003",
       "user_id": "DEL0000004",
       "donation_id": "DON0000005",
@@ -116,7 +112,6 @@
       "dropoff_location_type": "warehouse",
       "status": "completed",
       "notes": "Hotel buffet surplus",
-      "delivered_quantity": 160,
       "warehouse_id": "WAH0000004",
       "user_id": "DEL0000001",
       "donation_id": "DON0000006",
@@ -134,7 +129,6 @@
       "dropoff_location_type": "community",
       "status": "completed",
       "notes": "Night shelter distribution",
-      "delivered_quantity": 130,
       "warehouse_id": "WAH0000004",
       "user_id": "DEL0000005",
       "donation_id": "DON0000006",
@@ -152,7 +146,6 @@
       "dropoff_location_type": "warehouse",
       "status": "cancelled",
       "notes": "Restaurant closed unexpectedly",
-      "delivered_quantity": null,
       "warehouse_id": "WAH0000005",
       "user_id": "DEL0000003",
       "donation_id": "DON0000007",
@@ -170,7 +163,6 @@
       "dropoff_location_type": "community",
       "status": "in_transit",
       "notes": "Heavy traffic on highway",
-      "delivered_quantity": 260,
       "warehouse_id": "WAH0000006",
       "user_id": "DEL0000006",
       "donation_id": "DON0000008",
@@ -188,7 +180,6 @@
       "dropoff_location_type": "warehouse",
       "status": "completed",
       "notes": "Bakery unsold items",
-      "delivered_quantity": 75,
       "warehouse_id": "WAH0000012",
       "user_id": "DEL0000002",
       "donation_id": "DON0000009",
@@ -206,7 +197,6 @@
       "dropoff_location_type": "community",
       "status": "completed",
       "notes": "School meal distribution",
-      "delivered_quantity": 120,
       "warehouse_id": "WAH0000012",
       "user_id": "DEL0000004",
       "donation_id": "DON0000009",
@@ -224,7 +214,6 @@
       "dropoff_location_type": "warehouse",
       "status": "pending",
       "notes": "Scheduled weekend pickup",
-      "delivered_quantity": null,
       "warehouse_id": "WAH0000016",
       "user_id": "DEL0000005",
       "donation_id": "DON0000010",
@@ -242,14 +231,13 @@
       "dropoff_location_type": "community",
       "status": "in_transit",
       "notes": "Long-distance southern route",
-      "delivered_quantity": 310,
       "warehouse_id": "WAH0000030",
       "user_id": "DEL0000006",
       "donation_id": "DON0000011",
       "community_id": "COM0000030"
     }
   },
-    {
+  {
     "model": "delivery.delivery",
     "pk": "DLV0000015",
     "fields": {
@@ -260,7 +248,6 @@
       "dropoff_location_type": "community",
       "status": "completed",
       "notes": "Morning delivery for elderly community",
-      "delivered_quantity": 140,
       "warehouse_id": "WAH0000001",
       "user_id": "DEL0000002",
       "donation_id": "DON0000012",

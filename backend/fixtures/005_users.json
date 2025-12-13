@@ -66,6 +66,110 @@
   },
   {
     "model": "users.user",
+    "pk": "DON0000005",
+    "fields": {
+      "username": "donor5",
+      "fname": "Prasert",
+      "lname": "Kulchart",
+      "bod": "1987-04-18",
+      "phone": "0812345014",
+      "email": "donor5@example.com",
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "DON0000006",
+    "fields": {
+      "username": "donor6",
+      "fname": "Patchara",
+      "lname": "Nimman",
+      "bod": "1990-12-09",
+      "phone": "0812345015",
+      "email": "donor6@example.com",
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "DON0000007",
+    "fields": {
+      "username": "donor7",
+      "fname": "Siriporn",
+      "lname": "Chaidee",
+      "bod": "1992-01-12",
+      "phone": "0812345016",
+      "email": "donor7@example.com",
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "DON0000008",
+    "fields": {
+      "username": "donor8",
+      "fname": "Nalinee",
+      "lname": "Sukprasert",
+      "bod": "1995-02-21",
+      "phone": "0812345017",
+      "email": "donor8@example.com",
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "DON0000009",
+    "fields": {
+      "username": "donor9",
+      "fname": "Somchai",
+      "lname": "Boonsong",
+      "bod": "1989-08-14",
+      "phone": "0812345018",
+      "email": "donor9@example.com",
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "DON0000010",
+    "fields": {
+      "username": "donor10",
+      "fname": "Kannika",
+      "lname": "Pradchaphet",
+      "bod": "1994-05-05",
+      "phone": "0812345019",
+      "email": "donor10@example.com",
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "DON0000011",
+    "fields": {
+      "username": "donor11",
+      "fname": "Wanchai",
+      "lname": "Kongdech",
+      "bod": "1991-06-17",
+      "phone": "0812345020",
+      "email": "donor11@example.com",
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "DON0000012",
+    "fields": {
+      "username": "donor12",
+      "fname": "Panya",
+      "lname": "Srithep",
+      "bod": "1986-09-23",
+      "phone": "0812345021",
+      "email": "donor12@example.com",
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
+    }
+  },
+  {
+    "model": "users.user",
     "pk": "DEL0000001",
     "fields": {
       "username": "delivery1",
@@ -87,6 +191,58 @@
       "bod": "1995-07-25",
       "phone": "0812345005",
       "email": "gideon.cu@gmail.com",
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "DEL0000003",
+    "fields": {
+      "username": "delivery3",
+      "fname": "Siriporn",
+      "lname": "Chaidee",
+      "bod": "1990-05-02",
+      "phone": "0812345010",
+      "email": "siriporn.chaidee@example.com",
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "DEL0000004",
+    "fields": {
+      "username": "delivery4",
+      "fname": "Prasert",
+      "lname": "Kulchart",
+      "bod": "1987-11-18",
+      "phone": "0812345011",
+      "email": "prasert.kulchart@example.com",
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "DEL0000005",
+    "fields": {
+      "username": "delivery5",
+      "fname": "Patchara",
+      "lname": "Nimman",
+      "bod": "1994-09-07",
+      "phone": "0812345012",
+      "email": "patchara.nimman@example.com",
+      "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": "DEL0000006",
+    "fields": {
+      "username": "delivery6",
+      "fname": "Nalinee",
+      "lname": "Sukprasert",
+      "bod": "1996-01-29",
+      "phone": "0812345013",
+      "email": "nalinee.sukprasert@example.com",
       "password": "pbkdf2_sha256$1000000$Vz2xAbQuXxWgDnc7SJvMy0$nFAFBosDMKYWUbXi3guwJ78fOj4XygRoSfoR8bGoZ2k="
     }
   },
