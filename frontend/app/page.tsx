@@ -60,6 +60,7 @@ type DonationRecord = {
   id: string;
   restaurantId?: string;
   restaurantName: string;
+  restaurantAddress: string;
   branch?: string;
   note: string;
   items: FoodItemForm[];
@@ -69,6 +70,7 @@ type DonationRecord = {
 type DonationFormState = {
   restaurantId: string;
   restaurantName: string;
+  restaurantAddress: string;
   branch: string;
   note: string;
   items: FoodItemForm[];
@@ -244,6 +246,7 @@ const createEmptyFoodItem = (): FoodItemForm => ({
 const createDonationFormState = (): DonationFormState => ({
   restaurantId: "",
   restaurantName: "",
+  restaurantAddress: "",
   branch: "",
   note: "",
   items: [createEmptyFoodItem()],
@@ -653,10 +656,10 @@ function TabContent({
     return <HomePage setShowAuthModal={setShowAuthModal} setAuthMode={setAuthMode} />;
   }
   if (tab === 1) {
-    return <DonationSection />;
+    return <DonationSection currentUser={currentUser} setShowAuthModal={setShowAuthModal} setAuthMode={setAuthMode} />;
   }
   if (tab === 2) {
-    return <DonationRequestSection />;
+    return <DonationRequestSection currentUser={currentUser} setShowAuthModal={setShowAuthModal} setAuthMode={setAuthMode} />;
   }
   if (tab === 3) {
     if (currentUser?.isAdmin) {
@@ -677,7 +680,15 @@ function TabContent({
   );
 }
 
-function DonationSection() {
+function DonationSection({
+  currentUser,
+  setShowAuthModal,
+  setAuthMode
+}: {
+  currentUser: LoggedUser | null;
+  setShowAuthModal: (show: boolean) => void;
+  setAuthMode: (mode: AuthMode) => void;
+}) {
   const [form, setForm] = useState<DonationFormState>(createDonationFormState());
   const [donations, setDonations] = useState<DonationRecord[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -741,6 +752,7 @@ function DonationSection() {
               id: donation.donation_id,
               restaurantId: donation.restaurant,
               restaurantName: donation.restaurant_name ?? "",
+              restaurantAddress: donation.restaurant_address ?? "",
               branch: donation.restaurant_branch ?? "",
               note: "",
               items: items.map((item) => ({
@@ -910,6 +922,7 @@ function DonationSection() {
         ...prev,
         restaurantName: suggestion.label,
         restaurantId: suggestion.restaurant.restaurant_id,
+        restaurantAddress: suggestion.restaurant.address,
         branch: suggestion.restaurant.branch_name,
       }));
     } else {
@@ -917,6 +930,7 @@ function DonationSection() {
         ...prev,
         restaurantName: suggestion.label,
         restaurantId: "",
+        restaurantAddress: "",
         branch: "",
       }));
     }
@@ -1012,7 +1026,7 @@ function DonationSection() {
       } else {
         donationPayload.manual_restaurant_name = trimmedRestaurantName;
         donationPayload.manual_branch_name = branchValue;
-        donationPayload.manual_restaurant_address = branchValue || trimmedRestaurantName;
+        donationPayload.manual_restaurant_address = form.restaurantAddress.trim();
       }
       const createdDonation = await apiFetch<DonationApiRecord>("/donations/", {
         method: "POST",
@@ -1046,7 +1060,7 @@ function DonationSection() {
         createdDonation.restaurant_name ?? trimmedRestaurantName;
       const resolvedBranch = createdDonation.restaurant_branch ?? branchValue;
       const resolvedAddress =
-        createdDonation.restaurant_address ?? (branchValue || trimmedRestaurantName);
+        createdDonation.restaurant_address ?? form.restaurantAddress.trim();
       const existingRecord = previousId
         ? donations.find((donation) => donation.id === previousId)
         : null;
@@ -1055,6 +1069,7 @@ function DonationSection() {
         id: donationId,
         restaurantId: resolvedRestaurantId,
         restaurantName: resolvedRestaurantName,
+        restaurantAddress: resolvedAddress,
         branch: resolvedBranch,
         note: form.note.trim(),
         items: normalizedItems,
@@ -1115,6 +1130,7 @@ function DonationSection() {
     setForm({
       restaurantId: donation.restaurantId ?? "",
       restaurantName: donation.restaurantName,
+      restaurantAddress: donation.restaurantAddress,
       branch: donation.branch ?? "",
       note: donation.note,
       items: donation.items.map((item) => ({
@@ -1226,11 +1242,6 @@ function DonationSection() {
                 {restaurantLoadError && (
                   <p className="mt-1 text-xs text-red-500">{restaurantLoadError}</p>
                 )}
-                {selectedRestaurant && (
-                  <p className="mt-2 text-xs text-gray-500">
-                    {selectedRestaurant.address}
-                  </p>
-                )}
               </div>
 
               <div>
@@ -1255,6 +1266,26 @@ function DonationSection() {
                   you can type a custom branch/location.
                 </p>
               </div>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-gray-700">
+                Restaurant address
+              </label>
+              <input
+                type="text"
+                className={INPUT_STYLES}
+                placeholder="Enter restaurant address"
+                value={form.restaurantAddress}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, restaurantAddress: event.target.value }))
+                }
+                required
+              />
+              <p className="mt-2 text-xs text-gray-500">
+                Address is filled automatically when a restaurant is selected, or you can type a
+                custom address.
+              </p>
             </div>
 
             <div className="space-y-4 rounded-2xl border border-[#D7DCC7] bg-white p-4">
@@ -1378,11 +1409,11 @@ function DonationSection() {
               </p>
             )}
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center justify-end gap-3">
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="rounded-2xl bg-[#5E7A4A] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#4E653D] disabled:opacity-60"
+              disabled={isSubmitting || !currentUser}
+              className="rounded-2xl bg-[#5E7A4A] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#4E653D] disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {isSubmitting
                 ? "Saving..."
@@ -1400,6 +1431,49 @@ function DonationSection() {
                 </button>
               )}
             </div>
+
+            {!currentUser && (
+              <div className="mt-4 rounded-2xl border-2 border-dashed border-[#d48a68] bg-white p-6">
+                <div className="flex items-center justify-between gap-6">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900 mb-2">
+                      🔒 Please sign up or log in to save donations
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      You need an account to create and manage food donations.
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-3 items-end flex-shrink-0">
+                    <button
+                      onClick={() => {
+                        setAuthMode("signup");
+                        setShowAuthModal(true);
+                      }}
+                      className="group inline-flex items-center gap-4 rounded-2xl border border-[#E6B9A2] bg-white px-6 py-4 text-left text-base font-semibold text-[#70402B] shadow-sm transition-all duration-200 hover:border-[#B86A49] hover:bg-[#F1CBB5] hover:text-[#4B2415] hover:shadow-md active:border-[#B86A49] active:bg-[#F1CBB5] active:text-[#4B2415] active:shadow-md"
+                    >
+                      <span>Sign up</span>
+                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F3D6C3] text-[#9A5335] transition-all group-hover:bg-white group-hover:text-[#B86A49] group-active:bg-white group-active:text-[#B86A49]">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
+                        </svg>
+                      </span>
+                    </button>
+                    <p className="text-sm text-[#5a4f45]">
+                      Already have an account?{" "}
+                      <button
+                        onClick={() => {
+                          setAuthMode("login");
+                          setShowAuthModal(true);
+                        }}
+                        className="font-semibold text-[#d48a68] hover:underline"
+                      >
+                        Login
+                      </button>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </form>
         </div>
       </div>
@@ -1510,7 +1584,15 @@ function DonationSection() {
   );
 }
 
-function DonationRequestSection() {
+function DonationRequestSection({
+  currentUser,
+  setShowAuthModal,
+  setAuthMode
+}: {
+  currentUser: LoggedUser | null;
+  setShowAuthModal: (show: boolean) => void;
+  setAuthMode: (mode: AuthMode) => void;
+}) {
   const [form, setForm] = useState<DonationRequestForm>(createDonationRequestForm());
   const [requests, setRequests] = useState<DonationRequestRecord[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -1692,8 +1774,8 @@ function DonationRequestSection() {
   };
 
   return (
-    <div className="space-y-10">
-      <div className="rounded-[32px] border border-[#E6B9A2] bg-[#F6F2EC] p-8 shadow-2xl shadow-[#E6B9A2]/35">
+    <div className="grid grid-cols-5 gap-6 h-full">
+      <div className="col-span-3 flex flex-col rounded-[32px] border border-[#E6B9A2] bg-[#F6F2EC] p-8 shadow-2xl shadow-[#E6B9A2]/35">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-[#B86A49]">
@@ -1834,11 +1916,11 @@ function DonationRequestSection() {
             </p>
           )}
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center justify-end gap-3">
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="rounded-2xl bg-[#B86A49] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#9F583C] disabled:opacity-60 transition"
+              disabled={isSubmitting || !currentUser}
+              className="rounded-2xl bg-[#B86A49] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#9F583C] disabled:opacity-60 disabled:cursor-not-allowed transition"
             >
               {isSubmitting
                 ? "Saving..."
@@ -1856,10 +1938,53 @@ function DonationRequestSection() {
               </button>
             )}
           </div>
+
+          {!currentUser && (
+            <div className="mt-4 rounded-2xl border-2 border-dashed border-[#d48a68] bg-white p-6">
+              <div className="flex items-center justify-between gap-6">
+                <div>
+                  <p className="text-sm font-semibold text-gray-900 mb-2">
+                    🔒 Please sign up or log in to request meals
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    You need an account to create and manage meal requests for your community.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-3 items-end flex-shrink-0">
+                  <button
+                    onClick={() => {
+                      setAuthMode("signup");
+                      setShowAuthModal(true);
+                    }}
+                    className="group inline-flex items-center gap-4 rounded-2xl border border-[#E6B9A2] bg-white px-6 py-4 text-left text-base font-semibold text-[#70402B] shadow-sm transition-all duration-200 hover:border-[#B86A49] hover:bg-[#F1CBB5] hover:text-[#4B2415] hover:shadow-md active:border-[#B86A49] active:bg-[#F1CBB5] active:text-[#4B2415] active:shadow-md"
+                  >
+                    <span>Sign up</span>
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F3D6C3] text-[#9A5335] transition-all group-hover:bg-white group-hover:text-[#B86A49] group-active:bg-white group-active:text-[#B86A49]">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
+                      </svg>
+                    </span>
+                  </button>
+                  <p className="text-sm text-[#5a4f45]">
+                    Already have an account?{" "}
+                    <button
+                      onClick={() => {
+                        setAuthMode("login");
+                        setShowAuthModal(true);
+                      }}
+                      className="font-semibold text-[#d48a68] hover:underline"
+                    >
+                      Login
+                    </button>
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </form>
       </div>
 
-      <div className="space-y-5 rounded-[32px] border border-[#E6B9A2] bg-[#F6F2EC] p-8">
+      <div className="col-span-2 flex flex-col space-y-5 rounded-[32px] border border-[#E6B9A2] bg-[#F6F2EC] p-8">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-[#B86A49]">
@@ -1875,19 +2000,20 @@ function DonationRequestSection() {
         </div>
 
         {requestsError && (
-          <p className="text-sm font-semibold text-red-500">{requestsError}</p>
+          <p className="text-sm font-semibold text-red-500 mb-4">{requestsError}</p>
         )}
 
-        {loadingRequests ? (
-          <p className="rounded-2xl border border-dashed border-gray-300 bg-white/80 p-6 text-sm text-gray-500">
-            Loading requests...
-          </p>
-        ) : requests.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-gray-300 bg-white/80 p-6 text-sm text-gray-500">
-            Captured requests will appear here for dispatch review.
-          </p>
-        ) : (
-          <div className="space-y-4">
+        <div className="overflow-y-auto flex-1 pr-2">
+          {loadingRequests ? (
+            <p className="rounded-2xl border border-dashed border-gray-300 bg-white/80 p-6 text-sm text-gray-500">
+              Loading requests...
+            </p>
+          ) : requests.length === 0 ? (
+            <p className="rounded-2xl border border-dashed border-gray-300 bg-white/80 p-6 text-sm text-gray-500">
+              Captured requests will appear here for dispatch review.
+            </p>
+          ) : (
+            <div className="space-y-4">
             {requests.map((request) => (
               <article
                 key={request.id}
@@ -1960,6 +2086,7 @@ function DonationRequestSection() {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 }
