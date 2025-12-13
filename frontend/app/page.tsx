@@ -3283,6 +3283,8 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
     loadData();
   }, [loadData]);
 
+  const todayString = useMemo(() => new Date().toISOString().split("T")[0], []);
+
   const getWarehouseItems = (warehouseId: string) => {
     // Get deliveries to this warehouse
     const warehouseDeliveries = deliveries.filter(
@@ -3293,12 +3295,35 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
     return foodItems.filter((item) => donationIds.includes(item.donation || ""));
   };
 
+  const isItemExpired = useCallback(
+    (item: FoodItemApiRecord) => {
+      if (item.is_expired) return true;
+      if (!item.expire_date) return false;
+      const normalizedDate = item.expire_date.split("T")[0];
+      if (!normalizedDate) return false;
+      return normalizedDate < todayString;
+    },
+    [todayString]
+  );
+
   const filterItems = (items: FoodItemApiRecord[]) => {
-    if (filterStatus === "all") return items;
-    if (filterStatus === "available") return items.filter((item) => !item.is_claimed && !item.is_distributed);
-    if (filterStatus === "claimed") return items.filter((item) => item.is_claimed && !item.is_distributed);
-    if (filterStatus === "distributed") return items.filter((item) => item.is_distributed);
-    return items;
+    if (filterStatus === "distributed") {
+      return items.filter((item) => item.is_distributed);
+    }
+
+    const activeInventory = items.filter(
+      (item) => !isItemExpired(item) && !item.is_distributed
+    );
+
+    if (filterStatus === "available") {
+      return activeInventory.filter((item) => !item.is_claimed);
+    }
+
+    if (filterStatus === "claimed") {
+      return activeInventory.filter((item) => item.is_claimed);
+    }
+
+    return activeInventory;
   };
 
   const displayWarehouses = warehouses.map((warehouse) => {

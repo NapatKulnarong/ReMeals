@@ -234,47 +234,73 @@ POST /api/deliveries/
 
 #### List Warehouses
 ```http
-GET /api/warehouses/
+GET /api/warehouse/warehouses/
 ```
 
 **Response:**
 ```json
 [
   {
-    "id": "integer",
-    "name": "string",
+    "warehouse_id": "string",
     "address": "string",
-    "capacity": "integer",
-    "current_stock": "integer",
-    "manager": "integer",
-    "created_at": "datetime"
+    "capacity": "float",
+    "stored_date": "date",
+    "exp_date": "date"
   }
 ]
 ```
 
 #### Get Warehouse Details
 ```http
-GET /api/warehouses/{id}/
-```
-
-#### Get Warehouse Inventory
-```http
-GET /api/warehouses/{id}/inventory/
+GET /api/warehouse/warehouses/{warehouse_id}/
 ```
 
 **Response:**
 ```json
 {
-  "warehouse_id": "integer",
-  "total_items": "integer",
-  "items_by_status": {
-    "available": "integer",
-    "distributed": "integer",
-    "expired": "integer"
-  },
-  "items_expiring_soon": "integer",
-  "food_items": [...]
+  "warehouse_id": "string",
+  "address": "string",
+  "capacity": "float",
+  "stored_date": "date",
+  "exp_date": "date"
 }
+```
+
+#### Get Warehouse Inventory
+```http
+GET /api/warehouse/warehouses/{warehouse_id}/inventory/
+```
+
+Returns all food items currently stored in the warehouse that are:
+- Delivered to this warehouse (via completed deliveries)
+- Not expired (expire_date >= today)
+- Not distributed to community (is_distributed = false)
+
+**Response:**
+```json
+{
+  "warehouse_id": "string",
+  "warehouse_address": "string",
+  "total_items": "integer",
+  "inventory": [
+    {
+      "food_id": "string",
+      "name": "string",
+      "quantity": "integer",
+      "unit": "string",
+      "expire_date": "date",
+      "is_expired": "boolean",
+      "is_claimed": "boolean",
+      "is_distributed": "boolean",
+      "donation": "string"
+    }
+  ]
+}
+```
+
+**Example:**
+```bash
+curl http://localhost:8000/api/warehouse/warehouses/WAH0000001/inventory/
 ```
 
 ### Restaurants

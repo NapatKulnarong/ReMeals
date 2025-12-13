@@ -6,7 +6,7 @@
       "name": "Cooked Rice",
       "quantity": 25,
       "unit": "box",
-      "expire_date": "2025-02-01",
+      "expire_date": "2026-02-01",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
