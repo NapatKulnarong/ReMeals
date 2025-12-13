@@ -219,7 +219,6 @@
       "chain": "CHA0000013"
     }
   },
-  [
   {
     "model": "restaurants.restaurant",
     "pk": "RES0000021",
@@ -330,5 +329,4 @@
       "chain": "CHA0000013"
     }
   }
-]
 ]

@@ -28,5 +28,275 @@
       "stored_date": "2025-01-01",
       "exp_date": "2025-12-31"
     }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000004",
+    "fields": {
+      "address": "101 Logistics Park, Bang Na, Bangkok 10260",
+      "capacity": 6000.0,
+      "stored_date": "2025-02-01",
+      "exp_date": "2025-11-30"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000005",
+    "fields": {
+      "address": "22 Industrial Estate Road, Rangsit, Pathum Thani 12110",
+      "capacity": 4500.0,
+      "stored_date": "2025-01-15",
+      "exp_date": "2025-10-31"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000006",
+    "fields": {
+      "address": "88 Eastern Seaboard Warehouse, Si Racha, Chonburi 20110",
+      "capacity": 8000.0,
+      "stored_date": "2025-03-01",
+      "exp_date": "2026-02-28"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000007",
+    "fields": {
+      "address": "55 Northern Distribution Center, Lamphun Industrial Zone, Lamphun 51000",
+      "capacity": 3500.0,
+      "stored_date": "2025-01-10",
+      "exp_date": "2025-09-30"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000008",
+    "fields": {
+      "address": "999 Southern Cold Chain Hub, Hat Yai, Songkhla 90110",
+      "capacity": 7000.0,
+      "stored_date": "2025-02-20",
+      "exp_date": "2026-01-31"
+    }
+  },
+    {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000009",
+    "fields": {
+      "address": "12 Airport Logistics Hub, Lat Krabang, Bangkok 10520",
+      "capacity": 9000.0,
+      "stored_date": "2025-01-05",
+      "exp_date": "2026-01-05"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000010",
+    "fields": {
+      "address": "77 Mega Bangna Storage Center, Bang Phli, Samut Prakan 10540",
+      "capacity": 5200.0,
+      "stored_date": "2025-02-01",
+      "exp_date": "2025-12-01"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000011",
+    "fields": {
+      "address": "199 Western Distribution Hub, Nakhon Pathom 73000",
+      "capacity": 4800.0,
+      "stored_date": "2025-01-20",
+      "exp_date": "2025-10-20"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000012",
+    "fields": {
+      "address": "66 Ayutthaya Industrial Warehouse, Bang Pa-In, Ayutthaya 13160",
+      "capacity": 6500.0,
+      "stored_date": "2025-03-01",
+      "exp_date": "2026-02-28"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000013",
+    "fields": {
+      "address": "301 Northeast Logistic Park, Khon Kaen 40000",
+      "capacity": 4200.0,
+      "stored_date": "2025-01-12",
+      "exp_date": "2025-11-12"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000014",
+    "fields": {
+      "address": "18 Chiang Mai Cold Storage Center, Saraphi, Chiang Mai 50140",
+      "capacity": 3800.0,
+      "stored_date": "2025-02-10",
+      "exp_date": "2025-12-31"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000015",
+    "fields": {
+      "address": "555 Central Thailand Distribution Hub, Lopburi 15000",
+      "capacity": 4600.0,
+      "stored_date": "2025-01-18",
+      "exp_date": "2025-09-30"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000016",
+    "fields": {
+      "address": "888 Eastern Cold Chain Facility, Rayong 21130",
+      "capacity": 7500.0,
+      "stored_date": "2025-03-05",
+      "exp_date": "2026-03-04"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000017",
+    "fields": {
+      "address": "40 Southern Logistics Terminal, Surat Thani 84000",
+      "capacity": 5000.0,
+      "stored_date": "2025-02-15",
+      "exp_date": "2026-01-15"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000018",
+    "fields": {
+      "address": "9 Border Trade Warehouse, Mae Sot, Tak 63110",
+      "capacity": 3300.0,
+      "stored_date": "2025-01-08",
+      "exp_date": "2025-10-08"
+    }
+  },
+    {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000019",
+    "fields": {
+      "address": "250 Suvarnabhumi Freight Center, Lat Krabang, Bangkok 10520",
+      "capacity": 10000.0,
+      "stored_date": "2025-01-03",
+      "exp_date": "2026-01-03"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000020",
+    "fields": {
+      "address": "88 Rama 2 Logistics Hub, Bang Khun Thian, Bangkok 10150",
+      "capacity": 5400.0,
+      "stored_date": "2025-01-25",
+      "exp_date": "2025-11-25"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000021",
+    "fields": {
+      "address": "19 Samut Sakhon Cold Storage Park, Samut Sakhon 74000",
+      "capacity": 6200.0,
+      "stored_date": "2025-02-05",
+      "exp_date": "2026-02-04"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000022",
+    "fields": {
+      "address": "73 Bang Pa-In Logistics Estate, Ayutthaya 13160",
+      "capacity": 7100.0,
+      "stored_date": "2025-03-10",
+      "exp_date": "2026-03-09"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000023",
+    "fields": {
+      "address": "120 Pak Chong Distribution Center, Nakhon Ratchasima 30130",
+      "capacity": 4800.0,
+      "stored_date": "2025-01-14",
+      "exp_date": "2025-10-14"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000024",
+    "fields": {
+      "address": "58 Phitsanulok Regional Warehouse, Phitsanulok 65000",
+      "capacity": 4300.0,
+      "stored_date": "2025-01-22",
+      "exp_date": "2025-11-22"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000025",
+    "fields": {
+      "address": "401 Udon Thani Logistic Center, Udon Thani 41000",
+      "capacity": 5200.0,
+      "stored_date": "2025-02-12",
+      "exp_date": "2026-02-11"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000026",
+    "fields": {
+      "address": "77 Chiang Rai Border Trade Warehouse, Chiang Rai 57000",
+      "capacity": 3600.0,
+      "stored_date": "2025-01-18",
+      "exp_date": "2025-09-18"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000027",
+    "fields": {
+      "address": "88 Phuket Cold Storage Facility, Thalang, Phuket 83110",
+      "capacity": 5800.0,
+      "stored_date": "2025-02-20",
+      "exp_date": "2026-02-19"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000028",
+    "fields": {
+      "address": "15 Trang Regional Distribution Hub, Trang 92000",
+      "capacity": 3900.0,
+      "stored_date": "2025-01-09",
+      "exp_date": "2025-10-09"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000029",
+    "fields": {
+      "address": "260 Prachuap Portside Warehouse, Prachuap Khiri Khan 77000",
+      "capacity": 4500.0,
+      "stored_date": "2025-02-01",
+      "exp_date": "2025-12-01"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000030",
+    "fields": {
+      "address": "99 Hat Yai Logistics Super Hub, Hat Yai, Songkhla 90110",
+      "capacity": 8500.0,
+      "stored_date": "2025-03-01",
+      "exp_date": "2026-02-28"
+    }
   }
 ]
