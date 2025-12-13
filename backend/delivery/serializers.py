@@ -48,7 +48,6 @@ class DeliverySerializer(serializers.ModelSerializer):
             "community_id",
             "status",
             "notes",
-            "delivered_quantity",
         ]
         read_only_fields = ["delivery_id"]
 
@@ -60,15 +59,39 @@ class DeliverySerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         instance = getattr(self, "instance", None)
-        required_fk_fields = ["warehouse_id", "user_id", "donation_id", "community_id"]
+        delivery_type = attrs.get("delivery_type") or getattr(instance, "delivery_type", None)
+        warehouse = attrs.get("warehouse_id")
+        user = attrs.get("user_id")
+        donation = attrs.get("donation_id")
+        community = attrs.get("community_id")
+
+        if warehouse is None and instance is not None:
+            warehouse = instance.warehouse_id
+        if user is None and instance is not None:
+            user = instance.user_id
+        if donation is None and instance is not None:
+            donation = instance.donation_id
+        if community is None and instance is not None:
+            community = instance.community_id
+
         errors = {}
 
-        for field in required_fk_fields:
-            value = attrs.get(field)
-            if value is None and instance is not None:
-                value = getattr(instance, field, None)
-            if value is None:
-                errors[field] = "This field is required."
+        if delivery_type == "donation":
+            if not donation:
+                errors["donation_id"] = "Donation is required for pickup deliveries."
+            if not warehouse:
+                errors["warehouse_id"] = "Warehouse is required."
+            if not user:
+                errors["user_id"] = "Delivery staff is required."
+        elif delivery_type == "distribution":
+            if not community:
+                errors["community_id"] = "Community is required for distribution deliveries."
+            if not warehouse:
+                errors["warehouse_id"] = "Warehouse is required."
+            if not user:
+                errors["user_id"] = "Delivery staff is required."
+        else:
+            errors["delivery_type"] = "Unknown delivery type."
 
         if errors:
             raise serializers.ValidationError(errors)

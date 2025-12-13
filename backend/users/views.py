@@ -7,10 +7,17 @@ from rest_framework.response import Response
 
 from drf_yasg.utils import swagger_auto_schema
 
-from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.hashers import make_password, check_password, identify_hasher
 
 from .serializers import SignupSerializer, LoginSerializer
 from .models import User, Admin, DeliveryStaff
+
+def _is_hashed(value: str) -> bool:
+    try:
+        identify_hasher(value)
+        return True
+    except Exception:
+        return False
 
 
 def _admin_emails():
@@ -107,7 +114,14 @@ def login(request):
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=404)
 
-    if not check_password(password, user.password):
+    password_valid = check_password(password, user.password)
+    if not password_valid:
+        if not _is_hashed(user.password) and user.password == password:
+            user.password = make_password(password)
+            user.save(update_fields=["password"])
+            password_valid = True
+
+    if not password_valid:
         return Response({"error": "Invalid password"}, status=400)
 
     is_admin = Admin.objects.filter(user=user).exists()

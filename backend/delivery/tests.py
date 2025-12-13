@@ -340,7 +340,7 @@ class DeliveryAPITests(APITestCase):
         detail_url = reverse("delivery-detail", args=[self.existing_delivery.delivery_id])
         patch_payload = {
             "dropoff_time": "06:15:00",
-            "delivered_quantity": 12,
+            "notes": "Extended route",
         }
         patch_response = self.client.patch(
             detail_url, patch_payload, format="json", **self.admin_headers
@@ -349,7 +349,7 @@ class DeliveryAPITests(APITestCase):
         detail_response = self.client.get(detail_url, **self.admin_headers)
         self.assertEqual(detail_response.status_code, 200)
         self.assertEqual(detail_response.data["dropoff_time"], "06:15:00")
-        self.assertEqual(detail_response.data["delivered_quantity"], 12)
+        self.assertEqual(detail_response.data["notes"], "Extended route")
 
     # 21. Creating delivery with invalid pickup location type fails
     def test_create_delivery_invalid_pickup_location(self):

@@ -36,7 +36,6 @@ class Delivery(models.Model):
     ]
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     notes = models.TextField(blank=True, default="")
-    delivered_quantity = models.IntegerField(null=True, blank=True)
 
     warehouse_id = models.ForeignKey(
         Warehouse,

@@ -62,9 +62,9 @@ class DeliveryViewSet(viewsets.ModelViewSet):
         if not is_admin:
             if not (is_driver and user_id and instance.user_id and instance.user_id.user_id == user_id):
                 return Response({"detail": "Not permitted."}, status=403)
-            allowed_fields = {"status", "notes", "dropoff_time", "delivered_quantity"}
+            allowed_fields = {"status", "notes", "dropoff_time"}
         else:
-            allowed_fields = {"status", "notes", "dropoff_time", "delivered_quantity"}
+            allowed_fields = {"status", "notes", "dropoff_time"}
 
         data = {k: v for k, v in request.data.items() if k in allowed_fields}
         if not data:

@@ -60,6 +60,7 @@ type DonationRecord = {
   id: string;
   restaurantId?: string;
   restaurantName: string;
+  restaurantAddress: string;
   branch?: string;
   note: string;
   items: FoodItemForm[];
@@ -69,6 +70,7 @@ type DonationRecord = {
 type DonationFormState = {
   restaurantId: string;
   restaurantName: string;
+  restaurantAddress: string;
   branch: string;
   note: string;
   items: FoodItemForm[];
@@ -126,7 +128,7 @@ type DonationRequestRecord = DonationRequestForm & {
 type DonationApiRecord = {
   donation_id: string;
   donated_at: string;
-  status: boolean;
+  status: "pending" | "accepted" | "declined";
   restaurant: string;
   restaurant_name?: string;
   restaurant_branch?: string;
@@ -190,9 +192,8 @@ type DeliveryRecordApi = {
   user_id: string;
   donation_id: string;
   community_id: string;
-   status: "pending" | "in_transit" | "delivered" | "cancelled";
-   notes?: string;
-   delivered_quantity?: number;
+  status: "pending" | "in_transit" | "delivered" | "cancelled";
+  notes?: string;
 };
 
 const POPULAR_RESTAURANT_SUGGESTIONS: RestaurantSuggestion[] = [
@@ -244,15 +245,17 @@ const createEmptyFoodItem = (): FoodItemForm => ({
 const createDonationFormState = (): DonationFormState => ({
   restaurantId: "",
   restaurantName: "",
+  restaurantAddress: "",
   branch: "",
   note: "",
   items: [createEmptyFoodItem()],
 });
 
-const generateDonationId = () => {
-  const timestamp = Date.now();
-  const random = Math.floor(Math.random() * 1000);
-  return `DON${timestamp}${random}`;
+const generateDeliveryId = () => {
+  const suffix = Math.floor(Math.random() * 10_000_000)
+    .toString()
+    .padStart(7, "0");
+  return `DLV${suffix}`;
 };
 
 const createDonationRequestForm = (): DonationRequestForm => ({
@@ -323,12 +326,13 @@ const INPUT_STYLES = `
 `.replace(/\s+/g, " ");
 
 async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const mergedHeaders = {
+    "Content-Type": "application/json",
+    ...(options.headers ?? {}),
+  };
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers ?? {}),
-    },
     ...options,
+    headers: mergedHeaders,
   });
 
   if (!response.ok) {
@@ -355,7 +359,13 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
 }
 
 // Home Page Component
-function HomePage() {
+function HomePage({
+  setShowAuthModal,
+  setAuthMode
+}: {
+  setShowAuthModal: (show: boolean) => void;
+  setAuthMode: (mode: AuthMode) => void;
+}) {
   const stats = [
     { label: "Meals rescued", value: "2,340", helper: "+128 today" },
     { label: "Communities served", value: "48", helper: "active deliveries" },
@@ -387,84 +397,35 @@ function HomePage() {
     },
   ];
 
-  const promises = [
-    {
-      icon: "🧊",
-      title: "Food-safe handling",
-      copy: "Temperature-friendly guidance and quick routes keep every dish safe to serve.",
-    },
-    {
-      icon: "🛰️",
-      title: "Smart matching",
-      copy: "We prioritize the closest, best-fit requests to reduce travel and waste.",
-    },
-    {
-      icon: "🤝",
-      title: "Real partnership",
-      copy: "Restaurants, drivers, and community leads stay in the loop with clear updates.",
-    },
-  ];
-
   return (
-    <div className="mx-auto max-w-6xl space-y-12">
-      <div className="relative overflow-hidden rounded-[32px] border border-[#E4E0D7] bg-gradient-to-br from-[#F8F7F3] via-white to-[#EEF3EE] p-10 shadow-xl">
-        <div className="relative grid items-center gap-10 lg:grid-cols-[1.15fr,0.85fr]">
-          <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#1F4D36] shadow-sm">
-              <span aria-hidden className="text-lg">
-                ✦
-              </span>
-              <span>Rescue more. Waste less.</span>
+    <div className="mx-auto w-full max-w-8xl space-y-8">
+      <div className="relative overflow-hidden rounded-[40px] bg-[#e8ede3] p-8 shadow-[0_40px_120px_-45px rgba(59,31,16,0.6)] sm:p-10">
+        <div aria-hidden className="pointer-events-none absolute -right-8 top-6 hidden h-64 w-64 rounded-[40px] bg-[#DEF7EA]/60 blur-3xl lg:block" />
+        <div aria-hidden className="pointer-events-none absolute bottom-8 left-4 h-24 w-24 rounded-full bg-[#F1FBF5]/70 blur-2xl" />
+        <div className="relative grid items-start gap-10 lg:grid-cols-[1.15fr,0.85fr]">
+          <div className="space-y-6 text-[#2C1A10]">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#708A58] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-md">
+              <span aria-hidden className="text-lg">✦</span>
+              <span>Re-purpose every meal</span>
             </div>
-            <h1 className="text-4xl leading-tight text-gray-900 sm:text-5xl sm:leading-tight">
-              Rescue surplus meals.{" "}
-              <span className="text-[#1F4D36]">Fuel local relief.</span>
+            <h1 className="text-[2.65rem] leading-tight text-[#3a3a3a] sm:text-[3.25rem] sm:leading-[1.1]">
+              Redirect surplus meals. <span className="text-[#d48a68]">Rebuild communities.</span>
             </h1>
-            <p className="max-w-2xl text-lg text-gray-700">
+            <p className="max-w-2xl text-lg text-[#5a4f45]">
               Re-Meals links restaurants, drivers, and community leaders so good food never sits idle.
               Share donations, request support, and move meals where they are needed most.
             </p>
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2 rounded-full bg-[#1F4D36] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[#1F4D36]/20">
-                <span>Share a donation</span>
-                <span aria-hidden className="text-lg">
-                  →
-                </span>
-              </div>
-              <div className="flex items-center gap-2 rounded-full border border-[#F2C14E] bg-white px-5 py-3 text-sm font-semibold text-[#8B5B1F] shadow-sm">
-                <span>Request support</span>
-                <span aria-hidden className="text-lg">
-                  ❤
-                </span>
-              </div>
-              <span className="text-sm text-gray-600">
-                Use the sidebar to start — we guide both donors and recipients.
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-3 text-sm text-gray-700">
-              <div className="flex items-center gap-2 rounded-xl bg-white px-4 py-3 shadow-sm">
-                <span className="text-lg" aria-hidden>
-                  🚚
-                </span>
-                <span>Coordinated pickups & drop-offs</span>
-              </div>
-              <div className="flex items-center gap-2 rounded-xl bg-white px-4 py-3 shadow-sm">
-                <span className="text-lg" aria-hidden>
-                  🧊
-                </span>
-                <span>Freshness-first handling</span>
-              </div>
-            </div>
+            
           </div>
-          <div className="relative rounded-3xl border border-[#E4E0D7] bg-white p-6 shadow-lg">
-            <div className="mb-4 flex items-center justify-between">
+          <div className="relative rounded-[32px] border-2 border-dashed border-[#708958] bg-white p-6">
+            <div className="mb-4 flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#2F855A]">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#708A58]">
                   Impact snapshot
                 </p>
-                <h3 className="text-2xl font-bold text-gray-900">This week on Re-Meals</h3>
+                <h3 className="text-2xl font-bold text-[#3a3a3a]">This week on Re-Meals</h3>
               </div>
-              <div className="rounded-full bg-[#E9F7EF] px-3 py-1 text-xs font-semibold text-[#1F4D36]">
+              <div className="rounded-full bg-[#D25D5D] px-3 py-1 text-sm font-semibold text-white">
                 Live
               </div>
             </div>
@@ -472,139 +433,130 @@ function HomePage() {
               {stats.map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-2xl border border-[#E4E0D7] bg-white px-4 py-3 shadow-sm"
+                  className="rounded-2xl border-2 border-[#d48a68] bg-[#fdf8f4] px-4 py-3 shadow-sm hover:bg-[#d48a68] hover:text-white transition-all group"
                 >
-                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <p className="text-[0.55rem] font-semibold uppercase tracking-[0.15em] text-[#7E6A57] group-hover:text-white">
                     {item.label}
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">{item.value}</p>
-                  <p className="text-xs font-semibold text-[#1F4D36]">{item.helper}</p>
+                  <p className="text-2xl font-bold text-[#3a3a3a] group-hover:text-white">{item.value}</p>
+                  <p className="text-xs font-semibold text-[#708A58] group-hover:text-white">{item.helper}</p>
                 </div>
               ))}
             </div>
-            <div className="mt-4 rounded-2xl bg-[#1F4D36] px-4 py-3 text-sm text-white shadow-md">
-              <div className="flex items-center gap-2">
-              <span className="text-lg" aria-hidden>
-                ✨
-              </span>
-              <p className="leading-tight">
-                Tap "Donate" or "Get meals" from the sidebar to add your drop in minutes.
-              </p>
-            </div>
+            
           </div>
         </div>
       </div>
-      </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1.1fr,0.9fr]">
-        <div className="rounded-[28px] border border-[#E4E0D7] bg-[#F8F7F3] p-7 shadow-lg">
-          <div className="flex items-center justify-between gap-3">
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
+        <div className="rounded-[32px] bg-[#fde5d6] p-7 flex flex-col">
+          <div className="flex items-center justify-between gap-3 mb-3">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-[#2F855A]">
+              <p className="text-sm font-semibold uppercase tracking-wide text-[#d48a68]">
                 For restaurants
               </p>
-              <h2 className="text-3xl font-semibold text-gray-900">Donate surplus easily</h2>
+              <h2 className="text-3xl font-semibold text-black/70">Donate surplus easily</h2>
             </div>
-            <span className="rounded-full bg-white px-3 py-1 text-sm font-semibold text-[#2F855A] shadow-sm">
+            <span className="-mt-4 rounded-full border-2 border-dashed border-[#d48a68] bg-white px-3 py-2 text-sm font-semibold text-[#d48a68]">
               Reduce waste
             </span>
           </div>
-          <p className="mt-3 text-gray-700">
+          <p className="mt-3 text-black/70 mb-5">
             Log extra meals with quantities, expiry, and packaging notes so our delivery team can pick up while everything stays fresh.
           </p>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-[#E4E0D7] bg-white p-4 shadow-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-lg" aria-hidden>
-                  💚
-                </span>
-                <p className="text-sm font-semibold text-gray-900">Smart item logging</p>
+          <div className="grid grid-cols-2 gap-3 flex-1">
+            <div className="flex items-start gap-4 rounded-2xl border-2 border-dashed border-[#d48a68] bg-white p-4 cursor-pointer transition-all hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98] group">
+              <span className="text-3xl flex-shrink-0 transition-transform group-hover:scale-125 group-active:scale-110" aria-hidden>
+                💚
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-black/70">Smart item logging</p>
+                <p className="text-sm text-black/70">
+                  Capture portions, units, and expiry in seconds so we know what to rescue first.
+                </p>
               </div>
-              <p className="mt-1 text-sm text-gray-700">
-                Capture portions, units, and expiry in seconds so we know what to rescue first.
-              </p>
             </div>
-            <div className="rounded-2xl border border-[#E4E0D7] bg-white p-4 shadow-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-lg" aria-hidden>
-                  🧭
-                </span>
-                <p className="text-sm font-semibold text-gray-900">Route-friendly pickups</p>
+            <div className="flex items-start gap-4 rounded-2xl border-2 border-dashed border-[#d48a68] bg-white p-4 cursor-pointer transition-all hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98] group">
+              <span className="text-3xl flex-shrink-0 transition-transform group-hover:scale-125 group-active:scale-110" aria-hidden>
+                🧭
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-black/70">Route-friendly pickups</p>
+                <p className="text-sm text-black/70">
+                  Drivers see your window and plan efficient routes to minimize food time in transit.
+                </p>
               </div>
-              <p className="mt-1 text-sm text-gray-700">
-                Drivers see your window and plan efficient routes to minimize food time in transit.
-              </p>
             </div>
-            <div className="rounded-2xl border border-[#E4E0D7] bg-white p-4 shadow-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-lg" aria-hidden>
-                  📦
-                </span>
-                <p className="text-sm font-semibold text-gray-900">Packaging guidance</p>
+            <div className="flex items-start gap-4 rounded-2xl border-2 border-dashed border-[#d48a68] bg-white p-4 cursor-pointer transition-all hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98] group">
+              <span className="text-3xl flex-shrink-0 transition-transform group-hover:scale-125 group-active:scale-110" aria-hidden>
+                📦
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-black/70">Packaging guidance</p>
+                <p className="text-sm text-black/70">
+                  Tips for sealing, labeling, and keeping items cool before pickup arrives.
+                </p>
               </div>
-              <p className="mt-1 text-sm text-gray-700">
-                Tips for sealing, labeling, and keeping items cool before pickup arrives.
-              </p>
             </div>
-            <div className="rounded-2xl border border-[#E4E0D7] bg-white p-4 shadow-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-lg" aria-hidden>
-                  🎧
-                </span>
-                <p className="text-sm font-semibold text-gray-900">Concierge support</p>
+            <div className="flex items-start gap-4 rounded-2xl border-2 border-dashed border-[#d48a68] bg-white p-4 cursor-pointer transition-all hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98] group">
+              <span className="text-3xl flex-shrink-0 transition-transform group-hover:scale-125 group-active:scale-110" aria-hidden>
+                🎧
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-black/70">Concierge support</p>
+                <p className="text-sm text-black/70">
+                  Need help? Tag the admin team and we&apos;ll follow up before your shift ends.
+                </p>
               </div>
-              <p className="mt-1 text-sm text-gray-700">
-                Need help? Tag the admin team and we'll follow up before your shift ends.
-              </p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-[28px] border border-[#E4E0D7] bg-[#FFFAF1] p-7 shadow-lg">
-          <div className="flex items-center justify-between gap-3">
+        <div className="rounded-[32px] bg-[#fde5d6] p-7 flex flex-col">
+          <div className="flex items-center justify-between gap-3 mb-3">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-[#D77B28]">
+              <p className="text-sm font-semibold uppercase tracking-wide text-[#d48a68]">
                 For communities
               </p>
-              <h2 className="text-3xl font-semibold text-gray-900">Request food support</h2>
+              <h2 className="text-3xl font-semibold text-black/70">Request food support</h2>
             </div>
-            <span className="rounded-full bg-white px-3 py-1 text-sm font-semibold text-[#C46A24] shadow-sm">
+            <span className="-mt-4 rounded-full border-2 border-dashed border-[#d48a68] bg-white px-3 py-2 text-sm font-semibold text-[#d48a68]">
               Right-sized aid
             </span>
           </div>
-          <p className="mt-3 text-gray-700">
+          <p className="mt-3 text-black/70 mb-5">
             Share what your neighbors need, when, and where. We align donations to your delivery window and capacity.
           </p>
-          <div className="mt-5 space-y-3">
-            <div className="flex items-start gap-3 rounded-2xl border border-[#E4E0D7] bg-white p-4 shadow-sm">
-              <span className="text-lg" aria-hidden>
+          <div className="space-y-3 flex-1">
+            <div className="flex items-start gap-3 rounded-2xl border-2 border-dashed border-[#d48a68] bg-white p-4 cursor-pointer transition-all hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98] group">
+              <span className="text-3xl flex-shrink-0 transition-transform group-hover:scale-125 group-active:scale-110" aria-hidden>
                 🍽️
               </span>
               <div>
-                <p className="text-sm font-semibold text-gray-900">Structured needs list</p>
-                <p className="text-sm text-gray-700">
+                <p className="text-sm font-semibold text-black/70">Structured needs list</p>
+                <p className="text-sm text-black/70">
                   Outline items, quantities, and urgency so matching stays accurate.
                 </p>
               </div>
             </div>
-            <div className="flex items-start gap-3 rounded-2xl border border-[#E4E0D7] bg-white p-4 shadow-sm">
-              <span className="text-lg" aria-hidden>
+            <div className="flex items-start gap-3 rounded-2xl border-2 border-dashed border-[#d48a68] bg-white p-4 cursor-pointer transition-all hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98] group">
+              <span className="text-3xl flex-shrink-0 transition-transform group-hover:scale-125 group-active:scale-110" aria-hidden>
                 🏠
               </span>
               <div>
-                <p className="text-sm font-semibold text-gray-900">Clear drop-off details</p>
-                <p className="text-sm text-gray-700">
+                <p className="text-sm font-semibold text-black/70">Clear drop-off details</p>
+                <p className="text-sm text-black/70">
                   Provide addresses, access notes, and an ideal delivery time for smooth arrivals.
                 </p>
               </div>
             </div>
-            <div className="flex items-start gap-3 rounded-2xl border border-[#E4E0D7] bg-white p-4 shadow-sm">
-              <span className="text-lg" aria-hidden>
+            <div className="flex items-start gap-3 rounded-2xl border-2 border-dashed border-[#d48a68] bg-white p-4 cursor-pointer transition-all hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98] group">
+              <span className="text-3xl flex-shrink-0 transition-transform group-hover:scale-125 group-active:scale-110" aria-hidden>
                 📱
               </span>
               <div>
-                <p className="text-sm font-semibold text-gray-900">Stay updated</p>
-                <p className="text-sm text-gray-700">
+                <p className="text-sm font-semibold text-black/70">Stay updated</p>
+                <p className="text-sm text-black/70">
                   Track confirmations from our team and know when a delivery is on the way.
                 </p>
               </div>
@@ -613,15 +565,15 @@ function HomePage() {
         </div>
       </div>
 
-      <div className="rounded-[32px] border border-[#E4E0D7] bg-white p-8 shadow-lg">
+      <div className="rounded-[40px] bg-[#fde5d6] p-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-[#8B4C1F]">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#d48a68]">
               How Re-Meals works
             </p>
-            <h2 className="text-3xl font-semibold text-gray-900">Three guided steps</h2>
+            <h2 className="text-3xl font-semibold text-black/70">Three guided steps</h2>
           </div>
-          <div className="flex items-center gap-2 rounded-full bg-[#FFF9EC] px-4 py-2 text-xs font-semibold text-[#8B4C1F]">
+          <div className="flex items-center gap-2 rounded-full border-2 border-dashed border-[#d48a68] bg-white px-4 py-2 text-xs font-semibold text-black/70">
             <span className="text-lg" aria-hidden>
               🧭
             </span>
@@ -632,52 +584,56 @@ function HomePage() {
           {journey.map((item) => (
             <div
               key={item.step}
-              className="rounded-2xl border border-[#E4E0D7] bg-[#FFFBF3] p-5 shadow-sm"
+              className="rounded-2xl border-2 border-dashed border-[#d48a68] bg-white p-5 cursor-pointer transition-all hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98]"
             >
               <div className={`mb-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${item.accent}`}>
                 <span>Step {item.step}</span>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
-              <p className="mt-2 text-sm text-gray-700">{item.copy}</p>
+              <h3 className="text-lg font-semibold text-black/70">{item.title}</h3>
+              <p className="mt-2 text-sm text-black/70">{item.copy}</p>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {promises.map((item) => (
-          <div
-            key={item.title}
-            className="rounded-[24px] border border-[#E4E0D7] bg-gradient-to-br from-[#F7F4EE] via-white to-[#F0F2F0] p-6 shadow-md"
-          >
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm">
-              <span className="text-xl" aria-hidden>
-                {item.icon}
-              </span>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900">{item.title}</h3>
-            <p className="mt-2 text-sm text-gray-700">{item.copy}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="rounded-[32px] border border-[#E0E7DE] bg-gradient-to-br from-[#EEF3EE] via-white to-[#F8F7F3] p-10 shadow-xl">
-        <div className="flex flex-col items-start gap-5 text-left sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900">
-              Ready to keep good food moving?
+      <div className="rounded-[40px] bg-[#e8ede3] px-12 py-12">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-3">
+            <h2 className="text-3xl font-semibold text-[#3a3a3a]">
+              Ready to make a difference?
             </h2>
-            <p className="mt-2 text-lg text-gray-700">
-              Use the sidebar to log a donation, request food, or manage deliveries.
+            <p className="text-base text-[#5a4f45]">
+              Join our community and help redirect surplus meals to those who need them most.
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <div className="rounded-2xl border border-[#1F4D36] bg-[#1F4D36] px-6 py-3 text-sm font-semibold text-white shadow-sm">
-              Donate surplus meals
-            </div>
-            <div className="rounded-2xl border border-[#F2C14E] bg-white px-6 py-3 text-sm font-semibold text-[#8B5B1F] shadow-sm">
-              Request food support
-            </div>
+
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={() => {
+                setAuthMode("signup");
+                setShowAuthModal(true);
+              }}
+              className="group flex items-center justify-between rounded-2xl bg-white px-6 py-4 text-left text-base font-semibold text-[#70402B] shadow-sm transition-all duration-200 hover:border-[#B86A49] hover:bg-[#F1CBB5] hover:text-[#4B2415] hover:shadow-md active:border-[#B86A49] active:bg-[#F1CBB5] active:text-[#4B2415] active:shadow-md"
+            >
+              <span>Sign up</span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F3D6C3] text-[#9A5335] transition-all group-hover:bg-white group-hover:text-[#B86A49] group-active:bg-white group-active:text-[#B86A49]">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
+                </svg>
+              </span>
+            </button>
+            <p className="mt-1 text-sm text-[#5a4f45]">
+              Already have an account?{" "}
+              <button
+                onClick={() => {
+                  setAuthMode("login");
+                  setShowAuthModal(true);
+                }}
+                className="font-semibold text-[#d48a68] hover:underline"
+              >
+                Login
+              </button>
+            </p>
           </div>
         </div>
       </div>
@@ -686,15 +642,25 @@ function HomePage() {
 }
 
 // Content of each tab
-function TabContent({ tab, currentUser }: { tab: number; currentUser: LoggedUser | null }) {
+function TabContent({
+  tab,
+  currentUser,
+  setShowAuthModal,
+  setAuthMode
+}: {
+  tab: number;
+  currentUser: LoggedUser | null;
+  setShowAuthModal: (show: boolean) => void;
+  setAuthMode: (mode: AuthMode) => void;
+}) {
   if (tab === 0) {
-    return <HomePage />;
+    return <HomePage setShowAuthModal={setShowAuthModal} setAuthMode={setAuthMode} />;
   }
   if (tab === 1) {
-    return <DonationSection />;
+    return <DonationSection currentUser={currentUser} setShowAuthModal={setShowAuthModal} setAuthMode={setAuthMode} />;
   }
   if (tab === 2) {
-    return <DonationRequestSection />;
+    return <DonationRequestSection currentUser={currentUser} setShowAuthModal={setShowAuthModal} setAuthMode={setAuthMode} />;
   }
   if (tab === 3) {
     if (currentUser?.isAdmin) {
@@ -715,7 +681,15 @@ function TabContent({ tab, currentUser }: { tab: number; currentUser: LoggedUser
   );
 }
 
-function DonationSection() {
+function DonationSection({
+  currentUser,
+  setShowAuthModal,
+  setAuthMode
+}: {
+  currentUser: LoggedUser | null;
+  setShowAuthModal: (show: boolean) => void;
+  setAuthMode: (mode: AuthMode) => void;
+}) {
   const [form, setForm] = useState<DonationFormState>(createDonationFormState());
   const [donations, setDonations] = useState<DonationRecord[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -779,6 +753,7 @@ function DonationSection() {
               id: donation.donation_id,
               restaurantId: donation.restaurant,
               restaurantName: donation.restaurant_name ?? "",
+              restaurantAddress: donation.restaurant_address ?? "",
               branch: donation.restaurant_branch ?? "",
               note: "",
               items: items.map((item) => ({
@@ -948,6 +923,7 @@ function DonationSection() {
         ...prev,
         restaurantName: suggestion.label,
         restaurantId: suggestion.restaurant.restaurant_id,
+        restaurantAddress: suggestion.restaurant.address,
         branch: suggestion.restaurant.branch_name,
       }));
     } else {
@@ -955,6 +931,7 @@ function DonationSection() {
         ...prev,
         restaurantName: suggestion.label,
         restaurantId: "",
+        restaurantAddress: "",
         branch: "",
       }));
     }
@@ -1050,7 +1027,7 @@ function DonationSection() {
       } else {
         donationPayload.manual_restaurant_name = trimmedRestaurantName;
         donationPayload.manual_branch_name = branchValue;
-        donationPayload.manual_restaurant_address = branchValue || trimmedRestaurantName;
+        donationPayload.manual_restaurant_address = form.restaurantAddress.trim();
       }
       const createdDonation = await apiFetch<DonationApiRecord>("/donations/", {
         method: "POST",
@@ -1084,7 +1061,7 @@ function DonationSection() {
         createdDonation.restaurant_name ?? trimmedRestaurantName;
       const resolvedBranch = createdDonation.restaurant_branch ?? branchValue;
       const resolvedAddress =
-        createdDonation.restaurant_address ?? (branchValue || trimmedRestaurantName);
+        createdDonation.restaurant_address ?? form.restaurantAddress.trim();
       const existingRecord = previousId
         ? donations.find((donation) => donation.id === previousId)
         : null;
@@ -1093,6 +1070,7 @@ function DonationSection() {
         id: donationId,
         restaurantId: resolvedRestaurantId,
         restaurantName: resolvedRestaurantName,
+        restaurantAddress: resolvedAddress,
         branch: resolvedBranch,
         note: form.note.trim(),
         items: normalizedItems,
@@ -1153,6 +1131,7 @@ function DonationSection() {
     setForm({
       restaurantId: donation.restaurantId ?? "",
       restaurantName: donation.restaurantName,
+      restaurantAddress: donation.restaurantAddress,
       branch: donation.branch ?? "",
       note: donation.note,
       items: donation.items.map((item) => ({
@@ -1264,11 +1243,6 @@ function DonationSection() {
                 {restaurantLoadError && (
                   <p className="mt-1 text-xs text-red-500">{restaurantLoadError}</p>
                 )}
-                {selectedRestaurant && (
-                  <p className="mt-2 text-xs text-gray-500">
-                    {selectedRestaurant.address}
-                  </p>
-                )}
               </div>
 
               <div>
@@ -1293,6 +1267,26 @@ function DonationSection() {
                   you can type a custom branch/location.
                 </p>
               </div>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-gray-700">
+                Restaurant address
+              </label>
+              <input
+                type="text"
+                className={INPUT_STYLES}
+                placeholder="Enter restaurant address"
+                value={form.restaurantAddress}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, restaurantAddress: event.target.value }))
+                }
+                required
+              />
+              <p className="mt-2 text-xs text-gray-500">
+                Address is filled automatically when a restaurant is selected, or you can type a
+                custom address.
+              </p>
             </div>
 
             <div className="space-y-4 rounded-2xl border border-[#D7DCC7] bg-white p-4">
@@ -1416,11 +1410,11 @@ function DonationSection() {
               </p>
             )}
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center justify-end gap-3">
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="rounded-2xl bg-[#5E7A4A] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#4E653D] disabled:opacity-60"
+              disabled={isSubmitting || !currentUser}
+              className="rounded-2xl bg-[#5E7A4A] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#4E653D] disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {isSubmitting
                 ? "Saving..."
@@ -1438,6 +1432,49 @@ function DonationSection() {
                 </button>
               )}
             </div>
+
+            {!currentUser && (
+              <div className="mt-4 rounded-2xl border-2 border-dashed border-[#d48a68] bg-white p-6">
+                <div className="flex items-center justify-between gap-6">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900 mb-2">
+                      🔒 Please sign up or log in to save donations
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      You need an account to create and manage food donations.
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-3 items-end flex-shrink-0">
+                    <button
+                      onClick={() => {
+                        setAuthMode("signup");
+                        setShowAuthModal(true);
+                      }}
+                      className="group inline-flex items-center gap-4 rounded-2xl border border-[#E6B9A2] bg-white px-6 py-4 text-left text-base font-semibold text-[#70402B] shadow-sm transition-all duration-200 hover:border-[#B86A49] hover:bg-[#F1CBB5] hover:text-[#4B2415] hover:shadow-md active:border-[#B86A49] active:bg-[#F1CBB5] active:text-[#4B2415] active:shadow-md"
+                    >
+                      <span>Sign up</span>
+                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F3D6C3] text-[#9A5335] transition-all group-hover:bg-white group-hover:text-[#B86A49] group-active:bg-white group-active:text-[#B86A49]">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
+                        </svg>
+                      </span>
+                    </button>
+                    <p className="text-sm text-[#5a4f45]">
+                      Already have an account?{" "}
+                      <button
+                        onClick={() => {
+                          setAuthMode("login");
+                          setShowAuthModal(true);
+                        }}
+                        className="font-semibold text-[#d48a68] hover:underline"
+                      >
+                        Login
+                      </button>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </form>
         </div>
       </div>
@@ -1548,7 +1585,15 @@ function DonationSection() {
   );
 }
 
-function DonationRequestSection() {
+function DonationRequestSection({
+  currentUser,
+  setShowAuthModal,
+  setAuthMode
+}: {
+  currentUser: LoggedUser | null;
+  setShowAuthModal: (show: boolean) => void;
+  setAuthMode: (mode: AuthMode) => void;
+}) {
   const [form, setForm] = useState<DonationRequestForm>(createDonationRequestForm());
   const [requests, setRequests] = useState<DonationRequestRecord[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -1730,8 +1775,8 @@ function DonationRequestSection() {
   };
 
   return (
-    <div className="space-y-10">
-      <div className="rounded-[32px] border border-[#E6B9A2] bg-[#F6F2EC] p-8 shadow-2xl shadow-[#E6B9A2]/35">
+    <div className="grid grid-cols-5 gap-6 h-full">
+      <div className="col-span-3 flex flex-col rounded-[32px] border border-[#E6B9A2] bg-[#F6F2EC] p-8 shadow-2xl shadow-[#E6B9A2]/35">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-[#B86A49]">
@@ -1872,11 +1917,11 @@ function DonationRequestSection() {
             </p>
           )}
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center justify-end gap-3">
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="rounded-2xl bg-[#B86A49] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#9F583C] disabled:opacity-60 transition"
+              disabled={isSubmitting || !currentUser}
+              className="rounded-2xl bg-[#B86A49] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#9F583C] disabled:opacity-60 disabled:cursor-not-allowed transition"
             >
               {isSubmitting
                 ? "Saving..."
@@ -1894,10 +1939,53 @@ function DonationRequestSection() {
               </button>
             )}
           </div>
+
+          {!currentUser && (
+            <div className="mt-4 rounded-2xl border-2 border-dashed border-[#d48a68] bg-white p-6">
+              <div className="flex items-center justify-between gap-6">
+                <div>
+                  <p className="text-sm font-semibold text-gray-900 mb-2">
+                    🔒 Please sign up or log in to request meals
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    You need an account to create and manage meal requests for your community.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-3 items-end flex-shrink-0">
+                  <button
+                    onClick={() => {
+                      setAuthMode("signup");
+                      setShowAuthModal(true);
+                    }}
+                    className="group inline-flex items-center gap-4 rounded-2xl border border-[#E6B9A2] bg-white px-6 py-4 text-left text-base font-semibold text-[#70402B] shadow-sm transition-all duration-200 hover:border-[#B86A49] hover:bg-[#F1CBB5] hover:text-[#4B2415] hover:shadow-md active:border-[#B86A49] active:bg-[#F1CBB5] active:text-[#4B2415] active:shadow-md"
+                  >
+                    <span>Sign up</span>
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F3D6C3] text-[#9A5335] transition-all group-hover:bg-white group-hover:text-[#B86A49] group-active:bg-white group-active:text-[#B86A49]">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
+                      </svg>
+                    </span>
+                  </button>
+                  <p className="text-sm text-[#5a4f45]">
+                    Already have an account?{" "}
+                    <button
+                      onClick={() => {
+                        setAuthMode("login");
+                        setShowAuthModal(true);
+                      }}
+                      className="font-semibold text-[#d48a68] hover:underline"
+                    >
+                      Login
+                    </button>
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </form>
       </div>
 
-      <div className="space-y-5 rounded-[32px] border border-[#E6B9A2] bg-[#F6F2EC] p-8">
+      <div className="col-span-2 flex flex-col space-y-5 rounded-[32px] border border-[#E6B9A2] bg-[#F6F2EC] p-8">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-[#B86A49]">
@@ -1913,19 +2001,20 @@ function DonationRequestSection() {
         </div>
 
         {requestsError && (
-          <p className="text-sm font-semibold text-red-500">{requestsError}</p>
+          <p className="text-sm font-semibold text-red-500 mb-4">{requestsError}</p>
         )}
 
-        {loadingRequests ? (
-          <p className="rounded-2xl border border-dashed border-gray-300 bg-white/80 p-6 text-sm text-gray-500">
-            Loading requests...
-          </p>
-        ) : requests.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-gray-300 bg-white/80 p-6 text-sm text-gray-500">
-            Captured requests will appear here for dispatch review.
-          </p>
-        ) : (
-          <div className="space-y-4">
+        <div className="overflow-y-auto flex-1 pr-2">
+          {loadingRequests ? (
+            <p className="rounded-2xl border border-dashed border-gray-300 bg-white/80 p-6 text-sm text-gray-500">
+              Loading requests...
+            </p>
+          ) : requests.length === 0 ? (
+            <p className="rounded-2xl border border-dashed border-gray-300 bg-white/80 p-6 text-sm text-gray-500">
+              Captured requests will appear here for dispatch review.
+            </p>
+          ) : (
+            <div className="space-y-4">
             {requests.map((request) => (
               <article
                 key={request.id}
@@ -1998,6 +2087,7 @@ function DonationRequestSection() {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 }
@@ -2152,7 +2242,12 @@ function AdminDashboard() {
     return match ? `${match.name}${match.branch_name ? ` (${match.branch_name})` : ""}` : id;
   };
 
-  const toggleStatus = async (donationId: string, nextStatus: boolean) => {
+  const isCompleted = (status: DonationApiRecord["status"]) => status === "accepted";
+
+  const toggleStatus = async (
+    donationId: string,
+    nextStatus: DonationApiRecord["status"],
+  ) => {
     setUpdatingId(donationId);
     try {
       await apiFetch(`/donations/${donationId}/`, {
@@ -2161,14 +2256,24 @@ function AdminDashboard() {
       });
       setDonations((prev) =>
         prev.map((donation) =>
-          donation.donation_id === donationId ? { ...donation, status: nextStatus } : donation
-        )
+          donation.donation_id === donationId ? { ...donation, status: nextStatus } : donation,
+        ),
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to update donation status.");
     } finally {
       setUpdatingId(null);
     }
+  };
+
+  const donationStatusPill = (status: DonationApiRecord["status"]) => {
+    if (status === "accepted") {
+      return { text: "Completed", className: "bg-[#E6F7EE] text-[#1F4D36]" };
+    }
+    if (status === "declined") {
+      return { text: "Declined", className: "bg-[#FDECEA] text-[#B42318]" };
+    }
+    return { text: "Pending", className: "bg-[#FFF1E3] text-[#C46A24]" };
   };
 
   return (
@@ -2185,7 +2290,7 @@ function AdminDashboard() {
             </p>
           </div>
           <div className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow">
-            {donations.filter((d) => !d.status).length} pending / {donations.length} total
+            {donations.filter((d) => !isCompleted(d.status)).length} pending / {donations.length} total
           </div>
         </div>
 
@@ -2210,21 +2315,22 @@ function AdminDashboard() {
                 </div>
                 <div className="flex items-center gap-3">
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      donation.status
-                        ? "bg-[#E6F7EE] text-[#1F4D36]"
-                        : "bg-[#FFF1E3] text-[#C46A24]"
-                    }`}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${donationStatusPill(donation.status).className}`}
                   >
-                    {donation.status ? "Completed" : "Pending"}
+                    {donationStatusPill(donation.status).text}
                   </span>
                   <button
                     type="button"
-                    onClick={() => toggleStatus(donation.donation_id, !donation.status)}
+                    onClick={() =>
+                      toggleStatus(
+                        donation.donation_id,
+                        isCompleted(donation.status) ? "pending" : "accepted",
+                      )
+                    }
                     disabled={updatingId === donation.donation_id}
                     className="rounded-full border border-[#F3C7A0] px-4 py-2 text-xs font-semibold text-[#8B4C1F] transition hover:bg-[#FFF1E3] disabled:opacity-60"
                   >
-                    {donation.status ? "Mark pending" : "Mark completed"}
+                    {isCompleted(donation.status) ? "Mark pending" : "Mark completed"}
                   </button>
                 </div>
               </div>
@@ -2248,25 +2354,22 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
   const [notice, setNotice] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
-  const [staffInputs, setStaffInputs] = useState<Record<string, { deliveredQty: string; notes: string }>>({});
+  const [staffInputs, setStaffInputs] = useState<Record<string, { notes: string }>>({});
 
   const [pickupForm, setPickupForm] = useState({
     donationId: "",
     warehouseId: "",
-    communityId: "",
     userId: "",
     pickupTime: "",
     dropoffTime: "02:00:00",
   });
 
   const [distributionForm, setDistributionForm] = useState({
-    donationId: "",
     warehouseId: "",
     communityId: "",
     userId: "",
     pickupTime: "",
     dropoffTime: "03:00:00",
-    deliveredQty: "",
   });
 
   const canEdit = currentUser?.isAdmin ?? false;
@@ -2319,10 +2422,9 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
   }, [loadData]);
 
   useEffect(() => {
-    const next: Record<string, { deliveredQty: string; notes: string }> = {};
+    const next: Record<string, { notes: string }> = {};
     deliveries.forEach((d) => {
       next[d.delivery_id] = {
-        deliveredQty: d.delivered_quantity?.toString() ?? "",
         notes: d.notes ?? "",
       };
     });
@@ -2330,20 +2432,29 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
   }, [deliveries]);
 
   const handleSubmitDelivery = async (
-    form: typeof pickupForm,
+    form: typeof pickupForm | typeof distributionForm,
     mode: "pickup" | "distribution"
   ) => {
     setSubmitting(true);
     setNotice(null);
     setError(null);
     try {
-      if (!form.donationId || !form.warehouseId || !form.communityId || !form.userId) {
-        throw new Error("Fill in donation, warehouse, community, and delivery staff.");
+      if (mode === "pickup") {
+        const pickup = form as typeof pickupForm;
+        if (!pickup.donationId || !pickup.warehouseId || !pickup.userId) {
+          throw new Error("Select donation, warehouse, and delivery staff first.");
+        }
+      } else {
+        const distribution = form as typeof distributionForm;
+        if (!distribution.warehouseId || !distribution.communityId || !distribution.userId) {
+          throw new Error("Select warehouse, community, and delivery staff first.");
+        }
       }
       if (!form.pickupTime) {
         throw new Error("Pickup time is required.");
       }
       const payload: Record<string, unknown> = {
+        delivery_id: generateDeliveryId(),
         delivery_type: mode === "pickup" ? "donation" : "distribution",
         pickup_time: new Date(form.pickupTime).toISOString(),
         dropoff_time: normalizeDuration(form.dropoffTime),
@@ -2351,14 +2462,11 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
         dropoff_location_type: mode === "pickup" ? "warehouse" : "community",
         warehouse_id: form.warehouseId,
         user_id: form.userId,
-        donation_id: form.donationId,
-        community_id: form.communityId,
       };
-      if (mode === "distribution") {
-        const distForm = form as typeof distributionForm;
-        if (distForm.deliveredQty) {
-          payload.delivered_quantity = Number(distForm.deliveredQty);
-        }
+      if (mode === "pickup") {
+        payload.donation_id = (form as typeof pickupForm).donationId;
+      } else {
+        payload.community_id = (form as typeof distributionForm).communityId;
       }
 
       await apiFetch(API_PATHS.deliveries, {
@@ -2373,20 +2481,17 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
         setPickupForm({
           donationId: "",
           warehouseId: "",
-          communityId: "",
           userId: "",
           pickupTime: "",
           dropoffTime: "02:00:00",
         });
       } else {
         setDistributionForm({
-          donationId: "",
           warehouseId: "",
           communityId: "",
           userId: "",
           pickupTime: "",
           dropoffTime: "03:00:00",
-          deliveredQty: "",
         });
       }
     } catch (err) {
@@ -2426,11 +2531,8 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
     setError(null);
     setNotice(null);
     try {
-      const staffInput = staffInputs[deliveryId] ?? { deliveredQty: "", notes: "" };
+      const staffInput = staffInputs[deliveryId] ?? { notes: "" };
       const payload: Record<string, unknown> = { status: nextStatus };
-      if (staffInput.deliveredQty) {
-        payload.delivered_quantity = Number(staffInput.deliveredQty);
-      }
       if (staffInput.notes) {
         payload.notes = staffInput.notes;
       }
@@ -2512,18 +2614,6 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
                 </select>
                 <select
                   className={INPUT_STYLES}
-                  value={pickupForm.communityId}
-                  onChange={(e) => setPickupForm((prev) => ({ ...prev, communityId: e.target.value }))}
-                >
-                  <option value="">Select community</option>
-                  {communities.map((community) => (
-                    <option key={community.community_id} value={community.community_id}>
-                      {community.name} ({community.community_id})
-                    </option>
-                  ))}
-                </select>
-                <select
-                  className={INPUT_STYLES}
                   value={pickupForm.userId}
                   onChange={(e) => setPickupForm((prev) => ({ ...prev, userId: e.target.value }))}
                 >
@@ -2580,20 +2670,6 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
                 <span className="text-xs text-gray-500">From warehouse</span>
               </div>
               <div className="grid gap-3">
-                <select
-                  className={INPUT_STYLES}
-                  value={distributionForm.donationId}
-                  onChange={(e) =>
-                    setDistributionForm((prev) => ({ ...prev, donationId: e.target.value }))
-                  }
-                >
-                  <option value="">Select donation</option>
-                  {donations.map((donation) => (
-                    <option key={donation.donation_id} value={donation.donation_id}>
-                      {donation.donation_id} • {lookupRestaurantName(donation.donation_id)}
-                    </option>
-                  ))}
-                </select>
                 <select
                   className={INPUT_STYLES}
                   value={distributionForm.warehouseId}
@@ -2661,20 +2737,6 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
                       value={distributionForm.dropoffTime}
                       onChange={(e) =>
                         setDistributionForm((prev) => ({ ...prev, dropoffTime: e.target.value }))
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-semibold text-gray-700">
-                      Delivered quantity
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      className={INPUT_STYLES}
-                      value={distributionForm.deliveredQty}
-                      onChange={(e) =>
-                        setDistributionForm((prev) => ({ ...prev, deliveredQty: e.target.value }))
                       }
                     />
                   </div>
@@ -2756,46 +2818,23 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
                 </p>
                 {!canEdit && (
                   <div className="space-y-3">
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      <div>
-                        <label className="mb-1 block text-[11px] font-semibold text-gray-700">
-                          Delivered quantity
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          className={INPUT_STYLES}
-                          value={staffInputs[delivery.delivery_id]?.deliveredQty ?? ""}
-                          onChange={(e) =>
-                            setStaffInputs((prev) => ({
-                              ...prev,
-                              [delivery.delivery_id]: {
-                                deliveredQty: e.target.value,
-                                notes: prev[delivery.delivery_id]?.notes ?? "",
-                              },
-                            }))
-                          }
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-[11px] font-semibold text-gray-700">
-                          Notes
-                        </label>
-                        <input
-                          type="text"
-                          className={INPUT_STYLES}
-                          value={staffInputs[delivery.delivery_id]?.notes ?? ""}
-                          onChange={(e) =>
-                            setStaffInputs((prev) => ({
-                              ...prev,
-                              [delivery.delivery_id]: {
-                                deliveredQty: prev[delivery.delivery_id]?.deliveredQty ?? "",
-                                notes: e.target.value,
-                              },
-                            }))
-                          }
-                        />
-                      </div>
+                    <div>
+                      <label className="mb-1 block text-[11px] font-semibold text-gray-700">
+                        Notes
+                      </label>
+                      <input
+                        type="text"
+                        className={INPUT_STYLES}
+                        value={staffInputs[delivery.delivery_id]?.notes ?? ""}
+                        onChange={(e) =>
+                          setStaffInputs((prev) => ({
+                            ...prev,
+                            [delivery.delivery_id]: {
+                              notes: e.target.value,
+                            },
+                          }))
+                        }
+                      />
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {delivery.status === "pending" && (
@@ -3025,12 +3064,15 @@ function AuthModal({
   };
 
   return (
-    // overlay only over the content area (section is relative)
-    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-      <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-lg">
+    // overlay over the entire viewport
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-lg border-4 border-[#d48a68]/20">
         {/* Header row: title + close button */}
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">
+          <h2 className={[
+            "text-xl font-bold",
+            isSignup ? "text-[#d48a68]" : "text-[#708A58]"
+          ].join(" ")}>
             {isSignup ? "Create your account" : "Welcome back"}
           </h2>
           <button
@@ -3049,8 +3091,8 @@ function AuthModal({
             className={[
               "flex-1 rounded-full py-2 transition-colors",
               isSignup
-                ? "bg-[#FFE17E] text-gray-900"
-                : "text-gray-600 hover:bg-[#FFE17E]/50 hover:text-gray-900",
+                ? "bg-[#d48a68] text-white"
+                : "text-gray-600 hover:bg-[#d48a68]/30 hover:text-gray-900",
             ].join(" ")}
           >
             Sign up
@@ -3060,8 +3102,8 @@ function AuthModal({
             className={[
               "flex-1 rounded-full py-2 transition-colors",
               !isSignup
-                ? "bg-[#FFE17E] text-gray-900"
-                : "text-gray-600 hover:[#FFE17E]/50 hover:text-gray-900",
+                ? "bg-[#708A58] text-white"
+                : "text-gray-600 hover:bg-[#708A58]/30 hover:text-gray-900",
             ].join(" ")}
           >
             Login
@@ -3072,7 +3114,7 @@ function AuthModal({
         {isSignup ? (
           // SIGN UP FORM
           <form className="space-y-4" onSubmit={handleSignupSubmit}>
-            <div className="space-y-3 rounded-2xl border border-[#FFE17E]/60 bg-[#FFF9EC] p-4 text-gray-700">
+            <div className="space-y-3 rounded-2xl border-2 border-[#d48a68] bg-[#fdf8f4] p-4 text-gray-700">
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-semibold text-gray-900">Username settings</p>
                 <span className="text-xs text-gray-500">
@@ -3090,7 +3132,7 @@ function AuthModal({
                     setSignupData((prev) => ({ ...prev, username: e.target.value }))
                   }
                   required
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#FFE17E] focus:ring-1 focus:ring-[#FFE17E] focus:bg-[#FFE17E]/30"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#d48a68] focus:ring-1 focus:ring-[#d48a68] focus:bg-[#fef5f1]"
                 />
               </div>
               <p className="text-xs text-gray-500">
@@ -3109,7 +3151,7 @@ function AuthModal({
                     setSignupData((prev) => ({ ...prev, fname: e.target.value }))
                   }
                   required
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#FFE17E] focus:ring-1 focus:ring-[#FFE17E] focus:bg-[#FFE17E]/30"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#708A58] focus:ring-1 focus:ring-[#708A58] focus:bg-[#e8ede3]"
                 />
               </div>
 
@@ -3124,7 +3166,7 @@ function AuthModal({
                     setSignupData((prev) => ({ ...prev, lname: e.target.value }))
                   }
                   required
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#FFE17E] focus:ring-1 focus:ring-[#FFE17E] focus:bg-[#FFE17E]/30"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#708A58] focus:ring-1 focus:ring-[#708A58] focus:bg-[#e8ede3]"
                 />
               </div>
             </div>
@@ -3156,7 +3198,7 @@ function AuthModal({
                     setSignupData((prev) => ({ ...prev, phone: e.target.value }))
                   }
                   required
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#FFE17E] focus:ring-1 focus:ring-[#FFE17E] focus:bg-[#FFE17E]/30"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#708A58] focus:ring-1 focus:ring-[#708A58] focus:bg-[#e8ede3]"
                 />
               </div>
 
@@ -3171,7 +3213,7 @@ function AuthModal({
                     setSignupData((prev) => ({ ...prev, email: e.target.value }))
                   }
                   required
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#FFE17E] focus:ring-1 focus:ring-[#FFE17E] focus:bg-[#FFE17E]/30"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#708A58] focus:ring-1 focus:ring-[#708A58] focus:bg-[#e8ede3]"
                 />
               </div>
             </div>
@@ -3201,7 +3243,7 @@ function AuthModal({
             <button
               type="submit"
               disabled={signupStatus.loading}
-              className="mt-2 w-full rounded-lg bg-[#FFE17E] px-4 py-2 text-sm font-semibold text-gray-900 transition hover:bg-yellow-400 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-2 w-full rounded-lg bg-[#d48a68] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#c47958] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {signupStatus.loading ? "Creating account..." : "Create account"}
             </button>
@@ -3249,7 +3291,7 @@ function AuthModal({
             <button
               type="submit"
               disabled={loginStatus.loading}
-              className="mt-2 w-full rounded-lg bg-[#FFE17E] px-4 py-2 text-sm font-semibold text-black transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-2 w-full rounded-lg bg-[#708A58] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#5a6e47] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loginStatus.loading ? "Logging in..." : "Login"}
             </button>
@@ -3302,7 +3344,7 @@ export default function Home() {
   }, [activeTab, currentUser]);
 
   return (
-    <main className="relative flex min-h-screen items-start bg-white">
+    <main className="relative flex min-h-screen items-start bg-[#f5f1ed]">
       {/* Sidebar on the left */}
       <Sidebar
         activeTab={normalizedActiveTab}
@@ -3324,7 +3366,7 @@ export default function Home() {
       {/* Right side: content area */}
       {/* relative is IMPORTANT so the modal overlay stays inside this area only */}
       <section className="relative flex-1 h-screen overflow-y-auto p-8">
-        <TabContent tab={normalizedActiveTab} currentUser={currentUser} />
+        <TabContent tab={normalizedActiveTab} currentUser={currentUser} setShowAuthModal={setShowAuthModal} setAuthMode={setAuthMode} />
 
         {currentUser && (
           <div className="mt-6 rounded-2xl border border-gray-200 bg-white/80 px-4 py-3 text-sm text-gray-700 shadow-sm">
