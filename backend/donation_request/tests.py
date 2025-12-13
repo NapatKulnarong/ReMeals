@@ -122,4 +122,4 @@ class DonationRequestAPITests(APITestCase):
             format="json",
             **self._headers(self.recipient_one),
         )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
