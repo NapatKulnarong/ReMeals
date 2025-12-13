@@ -349,7 +349,7 @@ const toDateTimeLocalValue = (value: string) => {
 };
 
 const INPUT_STYLES = `
-  w-full rounded-2xl border border-[#E4DCCD] bg-white px-3 py-2 text-sm
+  w-full rounded-lg border border-[#E4DCCD] bg-white px-3 py-2 text-sm
   text-gray-800 outline-none transition focus:border-[#E3B261] focus:ring-2
   focus:ring-[#E3B261]/40
 `.replace(/\s+/g, " ");
@@ -1465,47 +1465,6 @@ function DonationSection({
                 </button>
               )}
             </div>
-
-            {!currentUser && (
-              <div className="mt-4 rounded-2xl border-2 border-dashed border-[#d48a68] bg-[#f1cbb5]/80 p-6">
-                <div className="flex items-center justify-between gap-6">
-                  <div>
-                    <p className="text-[16px] font-semibold text-gray-900 mb-2">
-                      Please sign up or log in to save donations
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      You need an account to create and manage food donations.
-                    </p>
-                  </div>
-                  <div className="flex flex-col gap-3 items-end flex-shrink-0">
-                    <button
-                      onClick={() => {
-                        setAuthMode("signup");
-                        setShowAuthModal(true);
-                      }}
-                      className="group inline-flex items-center gap-4 rounded-xl border border -[#E6B9A2] bg-white px-5 py-3 text-left text-sm font-semibold text-[#70402B] shadow-sm transition-all duration-200 active:border-[#B86A49] active:bg-[#F1CBB5] active:text-[#4B2415] active:shadow-md"
-                    >
-                      <span>Sign up</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
-                        </svg>
-                    </button>
-                    <p className="text-sm text-[#5a4f45]">
-                      Already have an account?{" "}
-                      <button
-                        onClick={() => {
-                          setAuthMode("login");
-                          setShowAuthModal(true);
-                        }}
-                        className="font-semibold text-[#d48a68] hover:underline"
-                      >
-                        Login
-                      </button>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
           </form>
         </div>
       </div>
@@ -1806,15 +1765,19 @@ function DonationRequestSection({
   };
 
   return (
-    <div className="grid grid-cols-5 gap-6 h-full">
-      <div className="col-span-3 flex flex-col rounded-[32px] border border-[#E6B9A2] bg-[#F6F2EC] p-8 shadow-2xl shadow-[#E6B9A2]/35">
-        <div className="mb-6 flex items-center justify-between">
+    <div className="grid h-[calc(100vh-4rem)] min-h-0 grid-cols-5 gap-6">
+      <div className="col-span-3 flex h-full min-h-0 flex-col overflow-hidden rounded-[32px] border border-[#E6B9A2] bg-[#F6F2EC] p-8 shadow-2xl shadow-[#E6B9A2]/30">
+        <div className="mb-6 flex flex-shrink-0 items-start justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-[#B86A49]">
-              Get meals
+              Meal requests
             </p>
             <h2 className="text-3xl font-semibold text-gray-900">
-              {editingId ? "Update meal request" : "Request meals for your community"}
+              {editingId ? "Update meal request" : (
+                <>
+                  Request meals<br />for your community
+                </>
+              )}
             </h2>
           </div>
           <span className="text-xs text-gray-500">
@@ -1822,7 +1785,11 @@ function DonationRequestSection({
           </span>
         </div>
 
-        <form className="space-y-8" onSubmit={handleSubmit}>
+        <div className="flex-1 overflow-hidden">
+          <form
+            className="space-y-6 h-full overflow-y-auto pr-1 pb-4 sm:pr-3"
+            onSubmit={handleSubmit}
+          >
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-semibold text-gray-700">
@@ -1855,70 +1822,76 @@ function DonationRequestSection({
             </div>
           </div>
 
-          <div className="space-y-4 rounded-2xl border border-[#E6B9A2] bg-white p-4">
-            <p className="text-sm font-semibold text-gray-700">Community details</p>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-sm font-semibold text-gray-700">
-                  Community name
-                </label>
-                <input
-                  type="text"
-                  className={INPUT_STYLES}
-                  value={form.communityName}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, communityName: event.target.value }))
-                  }
-                  required
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-semibold text-gray-700">
-                  Number of people wanting food
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  className={INPUT_STYLES}
-                  value={form.numberOfPeople}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, numberOfPeople: event.target.value }))
-                  }
-                  required
-                />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <p className="mb-4 text-sm font-semibold text-gray-700">Community details</p>
+              <div className="rounded-2xl border border-[#E6B9A2] bg-[#f2d6c3] p-4">
+                <div className="space-y-4">
+                  <div>
+                    <label className="mb-1 block text-sm font-semibold text-gray-700">
+                      Community name
+                    </label>
+                    <input
+                      type="text"
+                      className={INPUT_STYLES}
+                      value={form.communityName}
+                      onChange={(event) =>
+                        setForm((prev) => ({ ...prev, communityName: event.target.value }))
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-semibold text-gray-700">
+                      Number of people to serve
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      className={INPUT_STYLES}
+                      value={form.numberOfPeople}
+                      onChange={(event) =>
+                        setForm((prev) => ({ ...prev, numberOfPeople: event.target.value }))
+                      }
+                      required
+                    />
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="space-y-4 rounded-2xl border border-[#E6B9A2] bg-white p-4">
-            <p className="text-sm font-semibold text-gray-700">Recipient details</p>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="md:col-span-2">
-                <label className="mb-1 block text-sm font-semibold text-gray-700">
-                  Recipient address
-                </label>
-                <input
-                  type="text"
-                  className={INPUT_STYLES}
-                  value={form.recipientAddress}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, recipientAddress: event.target.value }))
-                  }
-                  required
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-semibold text-gray-700">
-                  Contact phone (optional)
-                </label>
-                <input
-                  type="tel"
-                  className={INPUT_STYLES}
-                  value={form.contactPhone}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, contactPhone: event.target.value }))
-                  }
-                />
+            <div>
+              <p className="mb-4 text-sm font-semibold text-gray-700">Recipient details</p>
+              <div className="rounded-2xl border border-[#E6B9A2] bg-[#f2d6c3] p-4">
+                <div className="space-y-4">
+                  <div>
+                    <label className="mb-1 block text-sm font-semibold text-gray-700">
+                      Recipient address
+                    </label>
+                    <input
+                      type="text"
+                      className={INPUT_STYLES}
+                      value={form.recipientAddress}
+                      onChange={(event) =>
+                        setForm((prev) => ({ ...prev, recipientAddress: event.target.value }))
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-semibold text-gray-700">
+                      Contact phone (optional)
+                    </label>
+                    <input
+                      type="tel"
+                      className={INPUT_STYLES}
+                      value={form.contactPhone}
+                      onChange={(event) =>
+                        setForm((prev) => ({ ...prev, contactPhone: event.target.value }))
+                      }
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1970,56 +1943,14 @@ function DonationRequestSection({
               </button>
             )}
           </div>
-
-          {!currentUser && (
-            <div className="mt-4 rounded-2xl border-2 border-dashed border-[#d48a68] bg-white p-6">
-              <div className="flex items-center justify-between gap-6">
-                <div>
-                  <p className="text-sm font-semibold text-gray-900 mb-2">
-                    🔒 Please sign up or log in to request meals
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    You need an account to create and manage meal requests for your community.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-3 items-end flex-shrink-0">
-                  <button
-                    onClick={() => {
-                      setAuthMode("signup");
-                      setShowAuthModal(true);
-                    }}
-                    className="group inline-flex items-center gap-4 rounded-2xl border border-[#E6B9A2] bg-white px-6 py-4 text-left text-base font-semibold text-[#70402B] shadow-sm transition-all duration-200 hover:border-[#B86A49] hover:bg-[#F1CBB5] hover:text-[#4B2415] hover:shadow-md active:border-[#B86A49] active:bg-[#F1CBB5] active:text-[#4B2415] active:shadow-md"
-                  >
-                    <span>Sign up</span>
-                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F3D6C3] text-[#9A5335] transition-all group-hover:bg-white group-hover:text-[#B86A49] group-active:bg-white group-active:text-[#B86A49]">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
-                      </svg>
-                    </span>
-                  </button>
-                  <p className="text-sm text-[#5a4f45]">
-                    Already have an account?{" "}
-                    <button
-                      onClick={() => {
-                        setAuthMode("login");
-                        setShowAuthModal(true);
-                      }}
-                      className="font-semibold text-[#d48a68] hover:underline"
-                    >
-                      Login
-                    </button>
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-        </form>
+          </form>
+        </div>
       </div>
 
-      <div className="col-span-2 flex flex-col h-full rounded-[32px] border border-[#E6B9A2] bg-[#F6F2EC] p-8">
+      <div className="col-span-2 flex h-full min-h-0 flex-col overflow-hidden rounded-[32px] border border-[#E6B9A2] bg-[#e2baab] p-8">
         <div className="flex items-center justify-between mb-5 flex-shrink-0">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-[#B86A49]">
+            <p className="text-sm font-semibold uppercase tracking-wide text-[#9f5b3f]">
               Get meals log
             </p>
             <h3 className="text-2xl font-semibold text-gray-900">
@@ -3182,7 +3113,7 @@ function AuthModal({
                     setSignupData((prev) => ({ ...prev, fname: e.target.value }))
                   }
                   required
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#708A58] focus:ring-1 focus:ring-[#708A58] focus:bg-[#e8ede3]"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#d48a68] focus:ring-1 focus:ring-[#d48a68] focus:bg-[#fef5f1]"
                 />
               </div>
 
@@ -3197,7 +3128,7 @@ function AuthModal({
                     setSignupData((prev) => ({ ...prev, lname: e.target.value }))
                   }
                   required
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#708A58] focus:ring-1 focus:ring-[#708A58] focus:bg-[#e8ede3]"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#d48a68] focus:ring-1 focus:ring-[#d48a68] focus:bg-[#fef5f1]"
                 />
               </div>
             </div>
@@ -3213,7 +3144,7 @@ function AuthModal({
                   setSignupData((prev) => ({ ...prev, bod: e.target.value }))
                 }
                 required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#FFE17E] focus:ring-1 focus:ring-[#FFE17E] focus:bg-[#FFE17E]/30"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#d48a68] focus:ring-1 focus:ring-[#d48a68] focus:bg-[#fef5f1]"
               />
             </div>
 
@@ -3229,7 +3160,7 @@ function AuthModal({
                     setSignupData((prev) => ({ ...prev, phone: e.target.value }))
                   }
                   required
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#708A58] focus:ring-1 focus:ring-[#708A58] focus:bg-[#e8ede3]"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#d48a68] focus:ring-1 focus:ring-[#d48a68] focus:bg-[#fef5f1]"
                 />
               </div>
 
@@ -3244,7 +3175,7 @@ function AuthModal({
                     setSignupData((prev) => ({ ...prev, email: e.target.value }))
                   }
                   required
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#708A58] focus:ring-1 focus:ring-[#708A58] focus:bg-[#e8ede3]"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#d48a68] focus:ring-1 focus:ring-[#d48a68] focus:bg-[#fef5f1]"
                 />
               </div>
             </div>
@@ -3260,7 +3191,7 @@ function AuthModal({
                   setSignupData((prev) => ({ ...prev, password: e.target.value }))
                 }
                 required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#FFE17E] focus:ring-1 focus:ring-[#FFE17E] focus:bg-[#FFE17E]/30"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#d48a68] focus:ring-1 focus:ring-[#d48a68] focus:bg-[#fef5f1]"
               />
             </div>
 
@@ -3293,7 +3224,7 @@ function AuthModal({
                   setLoginData((prev) => ({ ...prev, identifier: e.target.value }))
                 }
                 required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#FFE17E] focus:ring-1 focus:ring-[#FFE17E] focus:bg-[#FFE17E]/30"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#708A58] focus:ring-1 focus:ring-[#708A58] focus:bg-[#e8ede3]"
               />
             </div>
 
@@ -3308,7 +3239,7 @@ function AuthModal({
                   setLoginData((prev) => ({ ...prev, password: e.target.value }))
                 }
                 required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#FFE17E] focus:ring-1 focus:ring-[#FFE17E] focus:bg-[#FFE17E]/30"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#708A58] focus:ring-1 focus:ring-[#708A58] focus:bg-[#e8ede3]"
               />
             </div>
 
