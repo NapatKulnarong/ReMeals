@@ -128,7 +128,7 @@ type DonationRequestRecord = DonationRequestForm & {
 type DonationApiRecord = {
   donation_id: string;
   donated_at: string;
-  status: boolean;
+  status: "pending" | "accepted" | "declined";
   restaurant: string;
   restaurant_name?: string;
   restaurant_branch?: string;
@@ -192,9 +192,8 @@ type DeliveryRecordApi = {
   user_id: string;
   donation_id: string;
   community_id: string;
-   status: "pending" | "in_transit" | "delivered" | "cancelled";
-   notes?: string;
-   delivered_quantity?: number;
+  status: "pending" | "in_transit" | "delivered" | "cancelled";
+  notes?: string;
 };
 
 const POPULAR_RESTAURANT_SUGGESTIONS: RestaurantSuggestion[] = [
@@ -256,6 +255,13 @@ const generateDonationId = () => {
   const timestamp = Date.now();
   const random = Math.floor(Math.random() * 1000);
   return `DON${timestamp}${random}`;
+};
+
+const generateDeliveryId = () => {
+  const suffix = Math.floor(Math.random() * 10_000_000)
+    .toString()
+    .padStart(7, "0");
+  return `DLV${suffix}`;
 };
 
 const createDonationRequestForm = (): DonationRequestForm => ({
@@ -326,12 +332,13 @@ const INPUT_STYLES = `
 `.replace(/\s+/g, " ");
 
 async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const mergedHeaders = {
+    "Content-Type": "application/json",
+    ...(options.headers ?? {}),
+  };
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers ?? {}),
-    },
     ...options,
+    headers: mergedHeaders,
   });
 
   if (!response.ok) {
@@ -2241,7 +2248,12 @@ function AdminDashboard() {
     return match ? `${match.name}${match.branch_name ? ` (${match.branch_name})` : ""}` : id;
   };
 
-  const toggleStatus = async (donationId: string, nextStatus: boolean) => {
+  const isCompleted = (status: DonationApiRecord["status"]) => status === "accepted";
+
+  const toggleStatus = async (
+    donationId: string,
+    nextStatus: DonationApiRecord["status"],
+  ) => {
     setUpdatingId(donationId);
     try {
       await apiFetch(`/donations/${donationId}/`, {
@@ -2250,14 +2262,24 @@ function AdminDashboard() {
       });
       setDonations((prev) =>
         prev.map((donation) =>
-          donation.donation_id === donationId ? { ...donation, status: nextStatus } : donation
-        )
+          donation.donation_id === donationId ? { ...donation, status: nextStatus } : donation,
+        ),
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to update donation status.");
     } finally {
       setUpdatingId(null);
     }
+  };
+
+  const donationStatusPill = (status: DonationApiRecord["status"]) => {
+    if (status === "accepted") {
+      return { text: "Completed", className: "bg-[#E6F7EE] text-[#1F4D36]" };
+    }
+    if (status === "declined") {
+      return { text: "Declined", className: "bg-[#FDECEA] text-[#B42318]" };
+    }
+    return { text: "Pending", className: "bg-[#FFF1E3] text-[#C46A24]" };
   };
 
   return (
@@ -2274,7 +2296,7 @@ function AdminDashboard() {
             </p>
           </div>
           <div className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow">
-            {donations.filter((d) => !d.status).length} pending / {donations.length} total
+            {donations.filter((d) => !isCompleted(d.status)).length} pending / {donations.length} total
           </div>
         </div>
 
@@ -2299,21 +2321,22 @@ function AdminDashboard() {
                 </div>
                 <div className="flex items-center gap-3">
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      donation.status
-                        ? "bg-[#E6F7EE] text-[#1F4D36]"
-                        : "bg-[#FFF1E3] text-[#C46A24]"
-                    }`}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${donationStatusPill(donation.status).className}`}
                   >
-                    {donation.status ? "Completed" : "Pending"}
+                    {donationStatusPill(donation.status).text}
                   </span>
                   <button
                     type="button"
-                    onClick={() => toggleStatus(donation.donation_id, !donation.status)}
+                    onClick={() =>
+                      toggleStatus(
+                        donation.donation_id,
+                        isCompleted(donation.status) ? "pending" : "accepted",
+                      )
+                    }
                     disabled={updatingId === donation.donation_id}
                     className="rounded-full border border-[#F3C7A0] px-4 py-2 text-xs font-semibold text-[#8B4C1F] transition hover:bg-[#FFF1E3] disabled:opacity-60"
                   >
-                    {donation.status ? "Mark pending" : "Mark completed"}
+                    {isCompleted(donation.status) ? "Mark pending" : "Mark completed"}
                   </button>
                 </div>
               </div>
@@ -2337,25 +2360,22 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
   const [notice, setNotice] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
-  const [staffInputs, setStaffInputs] = useState<Record<string, { deliveredQty: string; notes: string }>>({});
+  const [staffInputs, setStaffInputs] = useState<Record<string, { notes: string }>>({});
 
   const [pickupForm, setPickupForm] = useState({
     donationId: "",
     warehouseId: "",
-    communityId: "",
     userId: "",
     pickupTime: "",
     dropoffTime: "02:00:00",
   });
 
   const [distributionForm, setDistributionForm] = useState({
-    donationId: "",
     warehouseId: "",
     communityId: "",
     userId: "",
     pickupTime: "",
     dropoffTime: "03:00:00",
-    deliveredQty: "",
   });
 
   const canEdit = currentUser?.isAdmin ?? false;
@@ -2408,10 +2428,9 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
   }, [loadData]);
 
   useEffect(() => {
-    const next: Record<string, { deliveredQty: string; notes: string }> = {};
+    const next: Record<string, { notes: string }> = {};
     deliveries.forEach((d) => {
       next[d.delivery_id] = {
-        deliveredQty: d.delivered_quantity?.toString() ?? "",
         notes: d.notes ?? "",
       };
     });
@@ -2426,13 +2445,18 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
     setNotice(null);
     setError(null);
     try {
-      if (!form.donationId || !form.warehouseId || !form.communityId || !form.userId) {
-        throw new Error("Fill in donation, warehouse, community, and delivery staff.");
+      if (mode === "pickup") {
+        if (!form.donationId || !form.warehouseId || !form.userId) {
+          throw new Error("Select donation, warehouse, and delivery staff first.");
+        }
+      } else if (!form.warehouseId || !form.communityId || !form.userId) {
+        throw new Error("Select warehouse, community, and delivery staff first.");
       }
       if (!form.pickupTime) {
         throw new Error("Pickup time is required.");
       }
       const payload: Record<string, unknown> = {
+        delivery_id: generateDeliveryId(),
         delivery_type: mode === "pickup" ? "donation" : "distribution",
         pickup_time: new Date(form.pickupTime).toISOString(),
         dropoff_time: normalizeDuration(form.dropoffTime),
@@ -2440,14 +2464,11 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
         dropoff_location_type: mode === "pickup" ? "warehouse" : "community",
         warehouse_id: form.warehouseId,
         user_id: form.userId,
-        donation_id: form.donationId,
-        community_id: form.communityId,
       };
-      if (mode === "distribution") {
-        const distForm = form as typeof distributionForm;
-        if (distForm.deliveredQty) {
-          payload.delivered_quantity = Number(distForm.deliveredQty);
-        }
+      if (mode === "pickup") {
+        payload.donation_id = form.donationId;
+      } else {
+        payload.community_id = form.communityId;
       }
 
       await apiFetch(API_PATHS.deliveries, {
@@ -2462,20 +2483,17 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
         setPickupForm({
           donationId: "",
           warehouseId: "",
-          communityId: "",
           userId: "",
           pickupTime: "",
           dropoffTime: "02:00:00",
         });
       } else {
         setDistributionForm({
-          donationId: "",
           warehouseId: "",
           communityId: "",
           userId: "",
           pickupTime: "",
           dropoffTime: "03:00:00",
-          deliveredQty: "",
         });
       }
     } catch (err) {
@@ -2515,11 +2533,8 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
     setError(null);
     setNotice(null);
     try {
-      const staffInput = staffInputs[deliveryId] ?? { deliveredQty: "", notes: "" };
+      const staffInput = staffInputs[deliveryId] ?? { notes: "" };
       const payload: Record<string, unknown> = { status: nextStatus };
-      if (staffInput.deliveredQty) {
-        payload.delivered_quantity = Number(staffInput.deliveredQty);
-      }
       if (staffInput.notes) {
         payload.notes = staffInput.notes;
       }
@@ -2601,18 +2616,6 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
                 </select>
                 <select
                   className={INPUT_STYLES}
-                  value={pickupForm.communityId}
-                  onChange={(e) => setPickupForm((prev) => ({ ...prev, communityId: e.target.value }))}
-                >
-                  <option value="">Select community</option>
-                  {communities.map((community) => (
-                    <option key={community.community_id} value={community.community_id}>
-                      {community.name} ({community.community_id})
-                    </option>
-                  ))}
-                </select>
-                <select
-                  className={INPUT_STYLES}
                   value={pickupForm.userId}
                   onChange={(e) => setPickupForm((prev) => ({ ...prev, userId: e.target.value }))}
                 >
@@ -2669,20 +2672,6 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
                 <span className="text-xs text-gray-500">From warehouse</span>
               </div>
               <div className="grid gap-3">
-                <select
-                  className={INPUT_STYLES}
-                  value={distributionForm.donationId}
-                  onChange={(e) =>
-                    setDistributionForm((prev) => ({ ...prev, donationId: e.target.value }))
-                  }
-                >
-                  <option value="">Select donation</option>
-                  {donations.map((donation) => (
-                    <option key={donation.donation_id} value={donation.donation_id}>
-                      {donation.donation_id} • {lookupRestaurantName(donation.donation_id)}
-                    </option>
-                  ))}
-                </select>
                 <select
                   className={INPUT_STYLES}
                   value={distributionForm.warehouseId}
@@ -2750,20 +2739,6 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
                       value={distributionForm.dropoffTime}
                       onChange={(e) =>
                         setDistributionForm((prev) => ({ ...prev, dropoffTime: e.target.value }))
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-semibold text-gray-700">
-                      Delivered quantity
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      className={INPUT_STYLES}
-                      value={distributionForm.deliveredQty}
-                      onChange={(e) =>
-                        setDistributionForm((prev) => ({ ...prev, deliveredQty: e.target.value }))
                       }
                     />
                   </div>
@@ -2845,46 +2820,23 @@ function DeliveryBoard({ currentUser }: { currentUser: LoggedUser | null }) {
                 </p>
                 {!canEdit && (
                   <div className="space-y-3">
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      <div>
-                        <label className="mb-1 block text-[11px] font-semibold text-gray-700">
-                          Delivered quantity
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          className={INPUT_STYLES}
-                          value={staffInputs[delivery.delivery_id]?.deliveredQty ?? ""}
-                          onChange={(e) =>
-                            setStaffInputs((prev) => ({
-                              ...prev,
-                              [delivery.delivery_id]: {
-                                deliveredQty: e.target.value,
-                                notes: prev[delivery.delivery_id]?.notes ?? "",
-                              },
-                            }))
-                          }
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-[11px] font-semibold text-gray-700">
-                          Notes
-                        </label>
-                        <input
-                          type="text"
-                          className={INPUT_STYLES}
-                          value={staffInputs[delivery.delivery_id]?.notes ?? ""}
-                          onChange={(e) =>
-                            setStaffInputs((prev) => ({
-                              ...prev,
-                              [delivery.delivery_id]: {
-                                deliveredQty: prev[delivery.delivery_id]?.deliveredQty ?? "",
-                                notes: e.target.value,
-                              },
-                            }))
-                          }
-                        />
-                      </div>
+                    <div>
+                      <label className="mb-1 block text-[11px] font-semibold text-gray-700">
+                        Notes
+                      </label>
+                      <input
+                        type="text"
+                        className={INPUT_STYLES}
+                        value={staffInputs[delivery.delivery_id]?.notes ?? ""}
+                        onChange={(e) =>
+                          setStaffInputs((prev) => ({
+                            ...prev,
+                            [delivery.delivery_id]: {
+                              notes: e.target.value,
+                            },
+                          }))
+                        }
+                      />
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {delivery.status === "pending" && (
