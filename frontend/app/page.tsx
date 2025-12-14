@@ -324,7 +324,7 @@ function WeeklyMealsChart({ data }: { data: Array<{ weekKey: string; meals: numb
                   y={y}
                   width={barWidth}
                   height={barHeight}
-                  fill={isHovered ? "#d48a68" : "#A8B99A"}
+                  fill={isHovered ? "#A8B99A" : "#d48a68"}
                   rx="4"
                   ry="4"
                   className="transition-all duration-200 cursor-pointer"
@@ -337,12 +337,12 @@ function WeeklyMealsChart({ data }: { data: Array<{ weekKey: string; meals: numb
                   onMouseLeave={handleBarLeave}
                 />
                 
-                {barHeight > 20 && (
+                {barHeight > 20 && !isHovered && (
                   <text
                     x={x + barWidth / 2}
                     y={y - 5}
                     fontSize="11"
-                    fill={isHovered ? "#d48a68" : "#365032"}
+                    fill="#d48a68"
                     textAnchor="middle"
                     fontWeight="600"
                     className="pointer-events-none"
@@ -1053,43 +1053,45 @@ function HomePage({
         <div aria-hidden className="pointer-events-none absolute -right-8 top-6 hidden h-64 w-64 rounded-[40px] bg-[#DEF7EA]/60 blur-3xl lg:block" />
         <div aria-hidden className="pointer-events-none absolute bottom-8 left-4 h-24 w-24 rounded-full bg-[#F1FBF5]/70 blur-2xl" />
         <div className="relative space-y-6 text-[#2C1A10]">
-          <div className="inline-flex items-center gap-2 rounded-full bg-[#708A58] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-md">
-            <span aria-hidden className="text-lg">✦</span>
-            <span>Re-purpose every meal</span>
-          </div>
           <h1 className="text-[2.65rem] leading-tight text-[#3a3a3a] sm:text-[3.25rem] sm:leading-[1.1]">
-            Redirect surplus meals. <span className="text-[#d48a68]">Rebuild communities.</span>
+            Redirect surplus meals.
+            <br />
+            <span className="text-[#d48a68]">Rebuild communities.</span>
           </h1>
           <p className="max-w-3xl text-lg text-[#5a4f45]">
-            Re-Meals links restaurants, drivers, and community leaders so good food never sits idle.
-            Share donations, request support, and move meals where they are needed most.
+          Re-Meals brings together restaurants, drivers, and community hearts to ensure no good meal goes to waste—and no neighbor goes without. Share what you have, ask for what you need, and help nourish the people around you."
           </p>
           <div className="flex flex-wrap gap-3">
             <button
-              className="rounded-full bg-[#708A58] px-5 py-3 text-sm font-semibold text-white shadow hover:bg-[#576c45] transition"
+              className="flex items-center gap-3 rounded-full bg-[#708A58] px-5 py-3 pr-3 text-sm font-semibold text-white shadow hover:bg-[#576c45] transition"
               onClick={() => {
                 setAuthMode("signup");
                 setShowAuthModal(true);
               }}
               type="button"
             >
-              Join the rescue
-            </button>
-            <button
-              className="rounded-full border border-[#d48a68] bg-white px-5 py-3 text-sm font-semibold text-[#d48a68] shadow-sm hover:bg-[#fde5d6] transition"
-              onClick={() => {
-                setAuthMode("login");
-                setShowAuthModal(true);
-              }}
-              type="button"
-            >
-              Login to donate / request
+              Login / Sign up to donate or request
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
+                <svg
+                  className="h-6 w-6 text-[#d48a68]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  />
+                </svg>
+              </span>
             </button>
           </div>
         </div>
       </div>
 
-      <section className="rounded-[32px] border border-[#C7D2C0] bg-[#F4F7EF] p-6 shadow-inner shadow-[#C7D2C0]/30">
+      <section className="rounded-[32px] bg-[#e8ede3] p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-[#4E673E]">
@@ -1136,8 +1138,11 @@ function HomePage({
           {/* Top Restaurants Leaderboard - First visualization */}
           <div className="rounded-2xl border border-[#F3C7A0] bg-[#FFF8F0] p-5 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Top Restaurants by Impact</h3>
-              <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[#B25C23] border border-[#F3C7A0]">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Impact Leaders</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Top performing restaurants</p>
+              </div>
+              <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[#d48a68] border border-[#F3C7A0]">
                 Top 5
               </span>
             </div>
@@ -1202,13 +1207,13 @@ function HomePage({
 
         {/* Weekly Meals Saved Chart - Full Width */}
         <div className="mt-6">
-          <div className="rounded-2xl border border-[#A8B99A] bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-[#F3C7A0] bg-white p-6 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Weekly Meals Saved</h3>
                 <p className="text-xs text-gray-500 mt-1">Hover over bars to see details</p>
               </div>
-              <span className="rounded-full bg-[#E9F1E3] px-3 py-1 text-[11px] font-semibold text-[#365032]">
+              <span className="rounded-full bg-[#FFF4E6] px-3 py-1 text-[11px] font-semibold text-[#D97706]">
                 Last {weeklyMealsData.length} weeks
               </span>
             </div>
@@ -1239,7 +1244,7 @@ function HomePage({
           <p className="mt-3 text-black/70 mb-5">
             Log extra meals with quantities, expiry, and packaging notes so our delivery team can pick up while everything stays fresh.
           </p>
-          <div className="grid grid-cols-2 gap-3 flex-1">
+          <div className="flex flex-col gap-3 flex-1">
             <div className="flex items-start gap-4 rounded-2xl border-2 border-dashed border-[#d48a68] bg-white p-4 cursor-pointer transition-all hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98] group">
               <span className="text-3xl flex-shrink-0 transition-transform group-hover:scale-125 group-active:scale-110" aria-hidden>
                 💚
@@ -1270,17 +1275,6 @@ function HomePage({
                 <p className="text-sm font-semibold text-black/70">Packaging guidance</p>
                 <p className="text-sm text-black/70">
                   Tips for sealing, labeling, and keeping items cool before pickup arrives.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4 rounded-2xl border-2 border-dashed border-[#d48a68] bg-white p-4 cursor-pointer transition-all hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98] group">
-              <span className="text-3xl flex-shrink-0 transition-transform group-hover:scale-125 group-active:scale-110" aria-hidden>
-                🎧
-              </span>
-              <div>
-                <p className="text-sm font-semibold text-black/70">Concierge support</p>
-                <p className="text-sm text-black/70">
-                  Need help? Tag the admin team and we&apos;ll follow up before your shift ends.
                 </p>
               </div>
             </div>
