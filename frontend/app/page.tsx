@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 
 const API_BASE_URL =
@@ -90,28 +90,7 @@ type Notification = {
   error?: string;
 };
 
-type RestaurantSuggestion = {
-  name: string;
-  description: string;
-  keywords: string[];
-};
-
-type RestaurantSearchOption = {
-  kind: "restaurant";
-  key: string;
-  label: string;
-  description?: string;
-  restaurant: Restaurant;
-};
-
-type PopularSearchOption = {
-  kind: "popular";
-  key: string;
-  label: string;
-  description?: string;
-};
-
-type SearchSuggestionOption = RestaurantSearchOption | PopularSearchOption;
+// Restaurant suggestion types removed — suggestion UI trimmed in this branch.
 
 type NavItem = {
   id: number;
@@ -655,36 +634,7 @@ const normalizeImpactData = (raw: unknown): ImpactRecord[] => {
   });
 };
 
-const POPULAR_RESTAURANT_SUGGESTIONS: RestaurantSuggestion[] = [
-  {
-    name: "KFC Thailand",
-    description: "Fried chicken & rice bowls · 400+ branches",
-    keywords: ["KFC franchise list", "KFC Thailand donation"],
-  },
-  {
-    name: "McDonald's Thailand",
-    description: "Drive-thru & delivery heavy locations",
-    keywords: ["McDonald's Thailand stores", "McThai branches"],
-  },
-  {
-    name: "MK Restaurants",
-    description: "Sukiyaki restaurants inside major malls",
-    keywords: ["MK Restaurants Thailand", "MK branch directory"],
-  },
-  {
-    name: "Chester's Grill",
-    description: "Thai fast-food brand in transit hubs",
-    keywords: ["Chester's Grill Thailand", "Chester's donation"],
-  },
-  {
-    name: "After You Dessert Café",
-    description: "Dessert cafe chain with limited storage window",
-    keywords: ["After You cafe list", "After You donation program"],
-  },
-];
-
-const formatRestaurantLabel = (restaurant: Restaurant) =>
-  `${restaurant.name}${restaurant.branch_name ? ` (${restaurant.branch_name})` : ""}`.trim();
+// Popular suggestions & label formatter removed since suggestion UI is not active here.
 
 const createFoodItemId = () => {
   const suffix = Math.floor(Math.random() * 10_000_000)
@@ -1093,7 +1043,7 @@ function HomePage({
             <span className="text-[#d48a68]">Rebuild communities.</span>
           </h1>
           <p className="max-w-3xl text-lg text-[#5a4f45]">
-          Re-Meals brings together restaurants, drivers, and community hearts to ensure no good meal goes to waste—and no neighbor goes without. Share what you have, ask for what you need, and help nourish the people around you."
+          Re-Meals brings together restaurants, drivers, and community hearts to ensure no good meal goes to waste—and no neighbor goes without. Share what you have, ask for what you need, and help nourish the people around you.
           </p>
           <div className="flex flex-wrap gap-3">
             <button
@@ -1523,13 +1473,12 @@ function DonationSection(props: {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [notification, setNotification] = useState<Notification>({});
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [restaurantsLoading, setRestaurantsLoading] = useState(false);
-  const [restaurantLoadError, setRestaurantLoadError] = useState<string | null>(null);
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [donationsLoading, setDonationsLoading] = useState(false);
   const [donationsError, setDonationsError] = useState<string | null>(null);
-  const [isSuggestionOpen, setIsSuggestionOpen] = useState(false);
-  const suggestionBoxRef = useRef<HTMLDivElement | null>(null);
+  
+  
   const [deliveries, setDeliveries] = useState<DeliveryRecordApi[]>([]);
   const [deletingDonationId, setDeletingDonationId] = useState<string | null>(null);
 
@@ -1661,9 +1610,7 @@ function DonationSection(props: {
     };
   }, [currentUser]);
 
-  const selectedRestaurant = restaurants.find(
-    (restaurant) => restaurant.restaurant_id === form.restaurantId
-  );
+  
 
   useEffect(() => {
     if (!restaurants.length || !donations.length) {
@@ -1703,115 +1650,12 @@ function DonationSection(props: {
     );
   }, [restaurants, donations, updateDonations]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (!suggestionBoxRef.current?.contains(event.target as Node)) {
-        setIsSuggestionOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const normalizedRestaurantName = form.restaurantName.trim().toLowerCase();
-
-  const visibleSuggestions = useMemo<SearchSuggestionOption[]>(() => {
-    if (!normalizedRestaurantName) {
-      return [];
-    }
-
-    const seen = new Set<string>();
-    const suggestions: SearchSuggestionOption[] = [];
-
-    restaurants.forEach((restaurant) => {
-      const label = formatRestaurantLabel(restaurant);
-      const descriptor = restaurant.address || restaurant.branch_name || "";
-      const searchable = `${label} ${descriptor}`.toLowerCase();
-      if (!searchable.includes(normalizedRestaurantName)) {
-        return;
-      }
-      const uniqueKey = label.toLowerCase();
-      if (seen.has(uniqueKey)) {
-        return;
-      }
-      seen.add(uniqueKey);
-      suggestions.push({
-        kind: "restaurant",
-        key: restaurant.restaurant_id,
-        label,
-        description: descriptor,
-        restaurant,
-      });
-    });
-
-    POPULAR_RESTAURANT_SUGGESTIONS.forEach((suggestion) => {
-      const searchable = `${suggestion.name} ${suggestion.description} ${suggestion.keywords.join(
-        " "
-      )}`.toLowerCase();
-      if (!searchable.includes(normalizedRestaurantName)) {
-        return;
-      }
-      const uniqueKey = suggestion.name.toLowerCase();
-      if (seen.has(uniqueKey)) {
-        return;
-      }
-      seen.add(uniqueKey);
-      suggestions.push({
-        kind: "popular",
-        key: `popular-${suggestion.name}`,
-        label: suggestion.name,
-        description: suggestion.description,
-      });
-    });
-
-    return suggestions;
-  }, [normalizedRestaurantName, restaurants]);
-
-  const shouldShowSuggestions = isSuggestionOpen && visibleSuggestions.length > 0;
-
   const resetForm = () => {
     setForm(createDonationFormState());
     setEditingId(null);
     setNotification({});
   };
-
-  const handleRestaurantNameChange = (name: string) => {
-    const normalized = name.trim().toLowerCase();
-    const matched = restaurants.find((restaurant) => {
-      const label = formatRestaurantLabel(restaurant).toLowerCase();
-      return label === normalized || restaurant.name.toLowerCase() === normalized;
-    });
-
-    setForm((prev) => ({
-      ...prev,
-      restaurantName: name,
-      restaurantId: matched?.restaurant_id ?? "",
-      branch: matched ? matched.branch_name ?? "" : prev.branch,
-    }));
-    setIsSuggestionOpen(name.trim().length > 0);
-  };
-
-  const handleSelectSuggestion = (suggestion: SearchSuggestionOption) => {
-    if (suggestion.kind === "restaurant") {
-      setForm((prev) => ({
-        ...prev,
-        restaurantName: suggestion.label,
-        restaurantId: suggestion.restaurant.restaurant_id,
-        restaurantAddress: suggestion.restaurant.address,
-        branch: suggestion.restaurant.branch_name,
-      }));
-    } else {
-      setForm((prev) => ({
-        ...prev,
-        restaurantName: suggestion.label,
-        restaurantId: "",
-        restaurantAddress: "",
-        branch: "",
-      }));
-    }
-    setIsSuggestionOpen(false);
-  };
+  
 
   const handleItemChange = (
     index: number,
@@ -3219,10 +3063,10 @@ function ProfileModal({
         fname: response.fname,
         lname: response.lname,
         phone: response.phone,
-        restaurantId: (response as any).restaurant_id ?? undefined,
-        restaurantName: (response as any).restaurant_name ?? undefined,
-        branch: (response as any).branch ?? undefined,
-        restaurantAddress: (response as any).restaurant_address ?? undefined,
+        restaurantId: response.restaurant_id ?? undefined,
+        restaurantName: response.restaurant_name ?? undefined,
+        branch: response.branch ?? undefined,
+        restaurantAddress: response.restaurant_address ?? undefined,
       });
 
       setSuccess(true);
@@ -6389,7 +6233,7 @@ function AuthModal({
   });
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [restaurantSelectionMode, setRestaurantSelectionMode] = useState<"existing" | "manual">("existing");
-  const [restaurantsLoading, setRestaurantsLoading] = useState(false);
+  const [, setRestaurantsLoading] = useState(false);
 
   // Load restaurants for dropdown
   useEffect(() => {
