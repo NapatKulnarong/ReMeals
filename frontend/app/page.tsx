@@ -4025,11 +4025,18 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
   const [foodItems, setFoodItems] = useState<Record<string, FoodItemApiRecord[]>>({});
   const [warehouses, setWarehouses] = useState<Record<string, Warehouse>>({});
   const [communities, setCommunities] = useState<Record<string, Community>>({});
+  const [staff, setStaff] = useState<DeliveryStaffInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
   const [staffInputs, setStaffInputs] = useState<Record<string, { notes: string }>>({});
+
+  // Filter states
+  const [statusFilter, setStatusFilter] = useState<DeliveryRecordApi["status"] | "all">("all");
+  const [staffFilter, setStaffFilter] = useState<string>("all"); // "all", "unassigned", or user_id
+  const [areaFilter, setAreaFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<"all" | "today" | "tomorrow" | "week">("all");
 
   const statusLabel = (status: DeliveryRecordApi["status"]) => {
     switch (status) {
@@ -4039,9 +4046,8 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
         return { text: "In transit", className: "bg-[#E6F4FF] text-[#1D4ED8]" };
       case "delivered":
         return { text: "Delivered", className: "bg-[#E6F7EE] text-[#1F4D36]" };
-      case "cancelled":
       default:
-        return { text: "Cancelled", className: "bg-[#FDECEA] text-[#B42318]" };
+        return { text: "Unknown", className: "bg-gray-100 text-gray-600" };
     }
   };
 
@@ -4056,6 +4062,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
       });
       const warehouseData = await apiFetch<Warehouse[]>(API_PATHS.warehouses);
       const communityData = await apiFetch<Community[]>(API_PATHS.communities);
+      const staffData = await apiFetch<DeliveryStaffInfo[]>(API_PATHS.deliveryStaff);
 
       const donationIds = Array.from(
         new Set(
@@ -4104,6 +4111,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
       setFoodItems(itemsByDonation);
       setWarehouses(warehouseMap);
       setCommunities(communityMap);
+      setStaff(staffData);
 
       const nextInputs: Record<string, { notes: string }> = {};
       deliveryData.forEach((d) => {
@@ -4123,19 +4131,90 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
     }
   }, [currentUser, loadData]);
 
+  // Helper function to extract area from address
+  const extractArea = (address: string): string => {
+    const lowerAddress = address.toLowerCase();
+    if (lowerAddress.includes("bangkok central") || lowerAddress.includes("central bangkok")) return "Bangkok Central";
+    if (lowerAddress.includes("samut prakan")) return "Samut Prakan";
+    if (lowerAddress.includes("pathum thani")) return "Pathum Thani";
+    if (lowerAddress.includes("nonthaburi")) return "Nonthaburi";
+    if (lowerAddress.includes("bangkok")) return "Bangkok";
+    return "Other";
+  };
+
+  // Get area for a delivery
+  const getDeliveryArea = (delivery: DeliveryRecordApi): string => {
+    if (delivery.community_id && communities[delivery.community_id]) {
+      return extractArea(communities[delivery.community_id].address);
+    }
+    if (delivery.warehouse_id && warehouses[delivery.warehouse_id]) {
+      return extractArea(warehouses[delivery.warehouse_id].address);
+    }
+    return "Other";
+  };
+
+  // Get unique areas from deliveries
+  const uniqueAreas = useMemo(() => {
+    const areas = new Set<string>();
+    deliveries.forEach(d => {
+      areas.add(getDeliveryArea(d));
+    });
+    return Array.from(areas).sort();
+  }, [deliveries, communities, warehouses]);
+
+  // Filter function
+  const applyFilters = (delivery: DeliveryRecordApi): boolean => {
+    // Status filter
+    if (statusFilter !== "all" && delivery.status !== statusFilter) return false;
+
+    // Staff filter
+    if (staffFilter === "unassigned" && delivery.user_id) return false;
+    if (staffFilter !== "all" && staffFilter !== "unassigned" && delivery.user_id !== staffFilter) return false;
+
+    // Area filter
+    if (areaFilter !== "all" && getDeliveryArea(delivery) !== areaFilter) return false;
+
+    // Date filter
+    if (dateFilter !== "all") {
+      const pickupDate = new Date(delivery.pickup_time);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const weekEnd = new Date(today);
+      weekEnd.setDate(weekEnd.getDate() + 7);
+
+      if (dateFilter === "today") {
+        const pickupDay = new Date(pickupDate);
+        pickupDay.setHours(0, 0, 0, 0);
+        if (pickupDay.getTime() !== today.getTime()) return false;
+      } else if (dateFilter === "tomorrow") {
+        const pickupDay = new Date(pickupDate);
+        pickupDay.setHours(0, 0, 0, 0);
+        if (pickupDay.getTime() !== tomorrow.getTime()) return false;
+      } else if (dateFilter === "week") {
+        if (pickupDate < today || pickupDate >= weekEnd) return false;
+      }
+    }
+
+    return true;
+  };
+
   const pickupTasks = useMemo(
     () =>
       deliveries
         .filter((d) => d.delivery_type === "donation")
+        .filter(applyFilters)
         .sort((a, b) => new Date(a.pickup_time).getTime() - new Date(b.pickup_time).getTime()),
-    [deliveries]
+    [deliveries, statusFilter, staffFilter, areaFilter, dateFilter, communities, warehouses]
   );
   const distributionTasks = useMemo(
     () =>
       deliveries
         .filter((d) => d.delivery_type === "distribution")
+        .filter(applyFilters)
         .sort((a, b) => new Date(a.pickup_time).getTime() - new Date(b.pickup_time).getTime()),
-    [deliveries]
+    [deliveries, statusFilter, staffFilter, areaFilter, dateFilter, communities, warehouses]
   );
 
   const formatFoodAmount = (donationId?: string | null) => {
@@ -4304,50 +4383,27 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
           </div>
           <div className="flex flex-wrap gap-2">
             {delivery.status === "pending" && (
-              <>
-                <button
-                  type="button"
-                  disabled={updatingStatusId === delivery.delivery_id}
-                  onClick={() => updateStatus(delivery.delivery_id, "in_transit")}
-                  className="rounded-lg bg-[#1D4ED8] px-3 py-2 text-xs font-semibold text-white hover:bg-[#153EAE] disabled:opacity-60"
-                >
-                  Start
-                </button>
-                <button
-                  type="button"
-                  disabled={updatingStatusId === delivery.delivery_id}
-                  onClick={() => updateStatus(delivery.delivery_id, "cancelled")}
-                  className="rounded-lg bg-[#FDECEA] px-3 py-2 text-xs font-semibold text-[#B42318] hover:bg-[#FCD7D2] disabled:opacity-60"
-                >
-                  Cancel
-                </button>
-              </>
+              <button
+                type="button"
+                disabled={updatingStatusId === delivery.delivery_id}
+                onClick={() => updateStatus(delivery.delivery_id, "in_transit")}
+                className="rounded-lg bg-[#1D4ED8] px-3 py-2 text-xs font-semibold text-white hover:bg-[#153EAE] disabled:opacity-60"
+              >
+                Start
+              </button>
             )}
             {delivery.status === "in_transit" && (
-              <>
-                <button
-                  type="button"
-                  disabled={updatingStatusId === delivery.delivery_id}
-                  onClick={() => updateStatus(delivery.delivery_id, "delivered")}
-                  className="rounded-lg bg-[#2F8A61] px-3 py-2 text-xs font-semibold text-white hover:bg-[#25724F] disabled:opacity-60"
-                >
-                  Delivered
-                </button>
-                <button
-                  type="button"
-                  disabled={updatingStatusId === delivery.delivery_id}
-                  onClick={() => updateStatus(delivery.delivery_id, "cancelled")}
-                  className="rounded-lg bg-[#FDECEA] px-3 py-2 text-xs font-semibold text-[#B42318] hover:bg-[#FCD7D2] disabled:opacity-60"
-                >
-                  Cancel
-                </button>
-              </>
+              <button
+                type="button"
+                disabled={updatingStatusId === delivery.delivery_id}
+                onClick={() => updateStatus(delivery.delivery_id, "delivered")}
+                className="rounded-lg bg-[#2F8A61] px-3 py-2 text-xs font-semibold text-white hover:bg-[#25724F] disabled:opacity-60"
+              >
+                Mark as Delivered
+              </button>
             )}
             {delivery.status === "delivered" && (
-              <span className="text-xs font-semibold text-[#2F8A61]">Completed</span>
-            )}
-            {delivery.status === "cancelled" && (
-              <span className="text-xs font-semibold text-[#B42318]">Cancelled</span>
+              <span className="text-xs font-semibold text-[#2F8A61]">✓ Completed</span>
             )}
           </div>
         </div>
@@ -4381,6 +4437,143 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
 
       {error && <p className="rounded-xl bg-[#FDECEA] px-4 py-3 text-sm font-semibold text-[#B42318]">{error}</p>}
       {notice && <p className="rounded-xl bg-[#E6F7EE] px-4 py-3 text-sm font-semibold text-[#1F4D36]">{notice}</p>}
+
+      {/* Filters Section */}
+      <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+        {/* Status Filter Badges */}
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-600">Filter by Status</p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setStatusFilter("all")}
+              className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
+                statusFilter === "all"
+                  ? "bg-gray-900 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              All
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter("pending")}
+              className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
+                statusFilter === "pending"
+                  ? "bg-[#FFF1E3] text-[#C46A24] ring-2 ring-[#C46A24]"
+                  : "bg-[#FFF1E3] text-[#C46A24] hover:ring-2 hover:ring-[#C46A24]"
+              }`}
+            >
+              Pending
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter("in_transit")}
+              className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
+                statusFilter === "in_transit"
+                  ? "bg-[#E6F4FF] text-[#1D4ED8] ring-2 ring-[#1D4ED8]"
+                  : "bg-[#E6F4FF] text-[#1D4ED8] hover:ring-2 hover:ring-[#1D4ED8]"
+              }`}
+            >
+              In Transit
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter("delivered")}
+              className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
+                statusFilter === "delivered"
+                  ? "bg-[#E6F7EE] text-[#1F4D36] ring-2 ring-[#1F4D36]"
+                  : "bg-[#E6F7EE] text-[#1F4D36] hover:ring-2 hover:ring-[#1F4D36]"
+              }`}
+            >
+              Delivered
+            </button>
+          </div>
+        </div>
+
+        {/* Date, Staff, and Area Filters */}
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+          {/* Date Filter */}
+          <div>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">
+              Date Range
+            </label>
+            <select
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value as typeof dateFilter)}
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-[#8B4C1F] focus:outline-none focus:ring-2 focus:ring-[#8B4C1F]/20"
+            >
+              <option value="all">All dates</option>
+              <option value="today">Today</option>
+              <option value="tomorrow">Tomorrow</option>
+              <option value="week">This week</option>
+            </select>
+          </div>
+
+          {/* Staff Filter */}
+          <div>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">
+              Staff Assignment
+            </label>
+            <select
+              value={staffFilter}
+              onChange={(e) => setStaffFilter(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-[#8B4C1F] focus:outline-none focus:ring-2 focus:ring-[#8B4C1F]/20"
+            >
+              <option value="all">All staff</option>
+              <option value="unassigned">Unassigned</option>
+              {staff.map((s) => (
+                <option key={s.user_id} value={s.user_id}>
+                  {s.name} ({s.assigned_area})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Area Filter */}
+          <div>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">
+              Delivery Area
+            </label>
+            <select
+              value={areaFilter}
+              onChange={(e) => setAreaFilter(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-[#8B4C1F] focus:outline-none focus:ring-2 focus:ring-[#8B4C1F]/20"
+            >
+              <option value="all">All areas</option>
+              {uniqueAreas.map((area) => (
+                <option key={area} value={area}>
+                  {area}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Active Filters Count */}
+        {(statusFilter !== "all" || staffFilter !== "all" || areaFilter !== "all" || dateFilter !== "all") && (
+          <div className="flex items-center justify-between border-t border-gray-200 pt-3">
+            <p className="text-xs text-gray-600">
+              <span className="font-semibold">
+                {pickupTasks.length + distributionTasks.length}
+              </span>{" "}
+              task(s) match your filters
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setStatusFilter("all");
+                setStaffFilter("all");
+                setAreaFilter("all");
+                setDateFilter("all");
+              }}
+              className="text-xs font-semibold text-[#8B4C1F] hover:underline"
+            >
+              Clear all filters
+            </button>
+          </div>
+        )}
+      </div>
 
       <div className="grid h-full min-h-0 grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="flex min-h-0 flex-col rounded-3xl border border-[#CFE6D8] bg-[#F6FBF7] p-6 shadow-inner">
