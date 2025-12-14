@@ -214,7 +214,7 @@
       "dropoff_location_type": "warehouse",
       "status": "delivered",
       "notes": "Scheduled weekend pickup",
-      "warehouse_id": "WAH0000016",
+      "warehouse_id": "WAH0000006",
       "user_id": "DEL0000005",
       "donation_id": "DON0000010",
       "community_id": "COM0000022"
@@ -231,7 +231,7 @@
       "dropoff_location_type": "community",
       "status": "in_transit",
       "notes": "Long-distance southern route",
-      "warehouse_id": "WAH0000030",
+      "warehouse_id": "WAH0000009",
       "user_id": "DEL0000006",
       "donation_id": "DON0000011",
       "community_id": "COM0000030"

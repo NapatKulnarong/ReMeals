@@ -143,7 +143,7 @@
     "pk": 5,
     "fields": {
       "user": "DEL0000005",
-      "assigned_area": "Chonburi",
+      "assigned_area": "Samut Sakhon",
       "is_available": true
     }
   },
@@ -152,7 +152,7 @@
     "pk": 6,
     "fields": {
       "user": "DEL0000006",
-      "assigned_area": "Chiang Mai",
+      "assigned_area": "Nakhon Pathom",
       "is_available": true
     }
   },

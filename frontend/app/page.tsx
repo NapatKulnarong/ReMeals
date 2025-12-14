@@ -171,6 +171,21 @@ type Warehouse = {
   exp_date: string;
 };
 
+const BANGKOK_METRO_LOCATIONS = [
+  "bangkok",
+  "pathum thani",
+  "nonthaburi",
+  "samut prakan",
+  "samut sakhon",
+  "nakhon pathom",
+  "ayutthaya",
+];
+
+const isBangkokMetroArea = (address: string) => {
+  const normalized = address.toLowerCase();
+  return BANGKOK_METRO_LOCATIONS.some((keyword) => normalized.includes(keyword));
+};
+
 type Community = {
   community_id: string;
   name: string;
@@ -4274,6 +4289,31 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
     loadData();
   }, [loadData]);
 
+  const pickupTodayString = useMemo(() => new Date().toISOString().split("T")[0], []);
+
+  const isPickupItemExpired = useCallback(
+    (item: FoodItemApiRecord) => {
+      if (item.is_expired) {
+        return true;
+      }
+      if (!item.expire_date) {
+        return false;
+      }
+      const normalized = item.expire_date.split("T")[0];
+      if (!normalized) {
+        return false;
+      }
+      return normalized < pickupTodayString;
+    },
+    [pickupTodayString]
+  );
+
+  const donationHasFreshFood = useCallback(
+    (donationId: string) =>
+      foodItems.some((item) => item.donation === donationId && !isPickupItemExpired(item)),
+    [foodItems, isPickupItemExpired]
+  );
+
   useEffect(() => {
     const next: Record<string, { notes: string }> = {};
     deliveries.forEach((d) => {
@@ -4406,15 +4446,18 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
 
   // Filter donations to exclude those already assigned, but include the one being edited
   const availableDonations = donations.filter((donation) => {
-    // If we're editing a delivery that uses this donation, include it
     if (editingDeliveryId) {
       const editingDelivery = deliveries.find((d) => d.delivery_id === editingDeliveryId);
       if (editingDelivery?.donation_id === donation.donation_id) {
         return true;
       }
     }
-    // Otherwise, exclude if it's already assigned
-    return !assignedDonationIds.has(donation.donation_id);
+
+    if (assignedDonationIds.has(donation.donation_id)) {
+      return false;
+    }
+
+    return donationHasFreshFood(donation.donation_id);
   });
 
   const lookupRestaurantName = (donationId: string) => {
@@ -4534,6 +4577,9 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
                     <label className="mb-1 block text-sm font-semibold text-gray-700">
                       Select donation
                     </label>
+                    <p className="text-xs text-gray-500 mb-1">
+                      Donations with only expired food are hidden from this list.
+                    </p>
                     <select
                       className={INPUT_STYLES}
                       value={pickupForm.donationId}
@@ -5392,7 +5438,8 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
   const [deliveries, setDeliveries] = useState<DeliveryRecordApi[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedWarehouse, setSelectedWarehouse] = useState<string>("");
+  const [selectedWarehouseId, setSelectedWarehouseId] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
 
   const loadData = useCallback(async () => {
@@ -5406,10 +5453,13 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
         }),
         apiFetch<DonationApiRecord[]>(API_PATHS.donations),
       ]);
-      setWarehouses(warehouseData);
+
+      const metroWarehouses = warehouseData.filter((warehouse) =>
+        isBangkokMetroArea(`${warehouse.address} ${warehouse.warehouse_id}`)
+      );
+      setWarehouses(metroWarehouses);
       setDeliveries(deliveryData);
 
-      // Load food items for all donations
       const allFoodItems: FoodItemApiRecord[] = [];
       for (const donation of donationData) {
         try {
@@ -5420,6 +5470,13 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
         }
       }
       setFoodItems(allFoodItems);
+
+      setSelectedWarehouseId((prev) => {
+        if (prev && metroWarehouses.some((w) => w.warehouse_id === prev)) {
+          return prev;
+        }
+        return metroWarehouses[0]?.warehouse_id ?? "";
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to load warehouse data.");
     } finally {
@@ -5434,11 +5491,9 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
   const todayString = useMemo(() => new Date().toISOString().split("T")[0], []);
 
   const getWarehouseItems = (warehouseId: string) => {
-    // Get deliveries to this warehouse
     const warehouseDeliveries = deliveries.filter(
       (d) => d.delivery_type === "donation" && d.warehouse_id === warehouseId && d.status === "delivered"
     );
-    // Get food items from those donations
     const donationIds = warehouseDeliveries.map((d) => d.donation_id);
     return foodItems.filter((item) => donationIds.includes(item.donation || ""));
   };
@@ -5455,136 +5510,240 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
   );
 
   const filterItems = (items: FoodItemApiRecord[]) => {
+    if (filterStatus === "available") {
+      return items.filter(
+        (item) => !item.is_claimed && !item.is_distributed && !isItemExpired(item)
+      );
+    }
+
+    if (filterStatus === "claimed") {
+      return items.filter(
+        (item) => item.is_claimed && !item.is_distributed && !isItemExpired(item)
+      );
+    }
+
     if (filterStatus === "distributed") {
       return items.filter((item) => item.is_distributed);
     }
 
-    const activeInventory = items.filter(
-      (item) => !isItemExpired(item) && !item.is_distributed
-    );
-
-    if (filterStatus === "available") {
-      return activeInventory.filter((item) => !item.is_claimed);
+    if (filterStatus === "expired") {
+      return items.filter((item) => isItemExpired(item));
     }
 
-    if (filterStatus === "claimed") {
-      return activeInventory.filter((item) => item.is_claimed);
-    }
-
-    return activeInventory;
+    return items;
   };
 
-  const displayWarehouses = warehouses.map((warehouse) => {
-    const items = getWarehouseItems(warehouse.warehouse_id);
-    return { warehouse, items: filterItems(items) };
-  });
+  const visibleWarehouses = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) {
+      return warehouses;
+    }
+    return warehouses.filter((warehouse) => {
+      const haystack = `${warehouse.warehouse_id} ${warehouse.address}`.toLowerCase();
+      return haystack.includes(term);
+    });
+  }, [warehouses, searchTerm]);
+
+  useEffect(() => {
+    if (!visibleWarehouses.length) {
+      setSelectedWarehouseId("");
+      return;
+    }
+    if (!selectedWarehouseId || !visibleWarehouses.some((w) => w.warehouse_id === selectedWarehouseId)) {
+      setSelectedWarehouseId(visibleWarehouses[0].warehouse_id);
+    }
+  }, [visibleWarehouses, selectedWarehouseId]);
+
+  const selectedWarehouse = warehouses.find((w) => w.warehouse_id === selectedWarehouseId) || null;
+  const warehouseItems = selectedWarehouseId ? getWarehouseItems(selectedWarehouseId) : [];
+  const filteredItems = filterItems(warehouseItems);
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-[28px] border border-[#CFE6D8] bg-[#F6FBF7] p-6 shadow-lg shadow-[#B6DEC8]/30">
-        <div className="flex items-center justify-between mb-6">
+    <div className="grid h-[calc(100vh-4rem)] min-h-0 gap-6 lg:grid-cols-2">
+      <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[28px] border border-[#CFE6D8] bg-white p-6 shadow-lg shadow-[#B6DEC8]/30">
+        <div className="mb-4 flex flex-shrink-0 items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#2F855A]">
+              Bangkok metropolitan warehouses
+            </p>
+            <h2 className="text-2xl font-semibold text-gray-900">Browse warehouses</h2>
+            <p className="text-sm text-gray-600">
+              Search by warehouse ID or address to focus on a specific facility.
+            </p>
+          </div>
+          <span className="text-xs text-gray-500">{visibleWarehouses.length} listed</span>
+        </div>
+        <div className="flex min-h-0 flex-1 flex-col space-y-3">
+          <input
+            className={INPUT_STYLES + " flex-shrink-0"}
+            placeholder="Search by ID or address..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
+            {loading ? (
+              <p className="text-sm text-gray-600">Loading warehouse data...</p>
+            ) : visibleWarehouses.length === 0 ? (
+              <p className="text-sm text-gray-500">
+                No warehouses found in the Bangkok metropolitan list.
+              </p>
+            ) : (
+              visibleWarehouses.map((warehouse) => {
+                const isSelected = warehouse.warehouse_id === selectedWarehouseId;
+                const itemCount = getWarehouseItems(warehouse.warehouse_id).length;
+                return (
+                  <button
+                    type="button"
+                    key={warehouse.warehouse_id}
+                    onClick={() => setSelectedWarehouseId(warehouse.warehouse_id)}
+                    className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
+                      isSelected
+                        ? "border-[#2F855A] bg-[#F6FBF7] shadow-md"
+                        : "border-[#D7E6DD] bg-white hover:border-[#2F855A]"
+                    }`}
+                  >
+                    <p className="text-sm font-semibold text-gray-900">{warehouse.warehouse_id}</p>
+                    <p className="text-xs text-gray-500">{warehouse.address}</p>
+                    <p className="text-xs text-gray-400 mt-1">{itemCount} lot(s) stored</p>
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[28px] border border-[#CFE6D8] bg-[#F6FBF7] p-6 shadow-lg shadow-[#B6DEC8]/30">
+        <div className="mb-4 flex flex-shrink-0 flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-[#2F855A]">
               Warehouse management
             </p>
-            <h2 className="text-2xl font-semibold text-gray-900">Manage warehouse inventory</h2>
-            <p className="text-sm text-gray-600">
-              View and manage food items stored in warehouses.
-            </p>
+            <h2 className="text-2xl font-semibold text-gray-900">
+              {selectedWarehouse ? selectedWarehouse.warehouse_id : "Select a warehouse"}
+            </h2>
+            {selectedWarehouse && (
+              <p className="text-sm text-gray-600">{selectedWarehouse.address}</p>
+            )}
+          </div>
+          <div className="md:w-60">
+            <label className="mb-1 block text-xs font-semibold text-gray-600">
+              Filter by status
+            </label>
+            <select
+              className={INPUT_STYLES}
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="all">All items</option>
+              <option value="available">Available</option>
+              <option value="claimed">Claimed</option>
+              <option value="distributed">Distributed</option>
+              <option value="expired">Expired</option>
+            </select>
           </div>
         </div>
 
-        {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
+        {error && <p className="mb-4 flex-shrink-0 text-sm text-red-600">{error}</p>}
 
         {loading ? (
-          <p className="text-sm text-gray-600">Loading warehouse data...</p>
+          <p className="text-sm text-gray-600">Loading inventory...</p>
+        ) : !selectedWarehouse ? (
+          <p className="text-sm text-gray-500">
+            Use the search to choose a warehouse to inspect.
+          </p>
+        ) : filteredItems.length === 0 ? (
+          <p className="text-sm text-gray-500">
+            No food items match the selected status for this warehouse.
+          </p>
         ) : (
-          <div className="space-y-4">
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-gray-700">
-                Filter by warehouse
-              </label>
-              <select
-                className={INPUT_STYLES}
-                value={selectedWarehouse}
-                onChange={(e) => setSelectedWarehouse(e.target.value)}
-              >
-                <option value="">All warehouses</option>
-                {warehouses.map((warehouse) => (
-                  <option key={warehouse.warehouse_id} value={warehouse.warehouse_id}>
-                    {warehouse.warehouse_id} — {warehouse.address}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-gray-700">
-                Filter by status
-              </label>
-              <select
-                className={INPUT_STYLES}
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-              >
-                <option value="all">All items</option>
-                <option value="available">Available</option>
-                <option value="claimed">Claimed</option>
-                <option value="distributed">Distributed</option>
-              </select>
-            </div>
-
-            <div className="space-y-4">
-              {displayWarehouses
-                .filter((w) => !selectedWarehouse || w.warehouse.warehouse_id === selectedWarehouse)
-                .map(({ warehouse, items }) => (
-                  <div
-                    key={warehouse.warehouse_id}
-                    className="rounded-2xl border border-[#CFE6D8] bg-white p-5 shadow-sm"
-                  >
-                    <div className="mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">{warehouse.warehouse_id}</h3>
-                      <p className="text-sm text-gray-600">{warehouse.address}</p>
-                      <p className="text-xs text-gray-500 mt-1">{items.length} item(s)</p>
+          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
+            {filteredItems.map((item) => {
+              const expired = isItemExpired(item);
+              return (
+                <div
+                  key={item.food_id}
+                  className="rounded-2xl border border-[#CFE6D8] bg-white p-4 shadow-sm transition hover:shadow-md"
+                >
+                  <div className="mb-3 flex items-start justify-between gap-2">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#E6F7EE]">
+                          <span className="text-base">🥘</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900 leading-tight">
+                            {item.name}
+                          </p>
+                          <span className="text-[11px] font-medium text-[#2F855A] leading-tight">
+                            {item.food_id}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    {items.length === 0 ? (
-                      <p className="text-sm text-gray-500">No items in this warehouse.</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {items.map((item) => (
-                          <div
-                            key={item.food_id}
-                            className="flex items-center justify-between rounded-lg border border-[#CFE6D8] bg-[#F6FBF7] p-3"
-                          >
-                            <div>
-                              <p className="text-sm font-semibold text-gray-900">{item.name}</p>
-                              <p className="text-xs text-gray-500">
-                                {item.quantity} {item.unit}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {item.is_distributed && (
-                                <span className="rounded-full bg-[#E6F7EE] px-2 py-1 text-xs font-semibold text-[#1F4D36]">
-                                  Distributed
-                                </span>
-                              )}
-                              {item.is_claimed && !item.is_distributed && (
-                                <span className="rounded-full bg-[#E6F4FF] px-2 py-1 text-xs font-semibold text-[#1D4ED8]">
-                                  Claimed
-                                </span>
-                              )}
-                              {!item.is_claimed && !item.is_distributed && (
-                                <span className="rounded-full bg-[#FFF1E3] px-2 py-1 text-xs font-semibold text-[#C46A24]">
-                                  Available
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        ))}
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                        expired
+                          ? "bg-[#FDECEA] text-[#B42318]"
+                          : item.is_distributed
+                          ? "bg-[#E6F7EE] text-[#1F4D36]"
+                          : item.is_claimed
+                          ? "bg-[#E6F4FF] text-[#1D4ED8]"
+                          : "bg-[#FFF1E3] text-[#C46A24]"
+                      }`}
+                    >
+                      {expired
+                        ? "Expired"
+                        : item.is_distributed
+                        ? "Distributed"
+                        : item.is_claimed
+                        ? "Claimed"
+                        : "Available"}
+                    </span>
+                  </div>
+
+                  <div className="space-y-3 border-t border-gray-100 pt-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0">
+                        <span className="text-gray-400">🍽️</span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs font-medium text-gray-500">Donation</p>
+                        <p className="text-sm font-semibold text-gray-900">
+                          {item.donation_id}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0">
+                        <span className="text-gray-400">📦</span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs font-medium text-gray-500">Quantity</p>
+                        <p className="text-sm font-semibold text-gray-900">
+                          {item.quantity} {item.unit}
+                        </p>
+                      </div>
+                    </div>
+
+                    {item.expire_date && (
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0">
+                          <span className="text-gray-400">📅</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs font-medium text-gray-500">Expires</p>
+                          <p className="text-sm font-semibold text-gray-900">
+                            {formatDisplayDate(item.expire_date)}
+                          </p>
+                        </div>
                       </div>
                     )}
                   </div>
-                ))}
-            </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

@@ -7,7 +7,7 @@
       "address": "Klong Toey, Bangkok 10110",
       "received_time": "2025-01-15T10:00:00Z",
       "population": 500,
-      "warehouse_id": "WAH0000001"
+      "warehouse_id": "WAH0000004"
     }
   },
   {
@@ -18,7 +18,7 @@
       "address": "Bang Khen, Bangkok 10220",
       "received_time": "2025-01-15T11:00:00Z",
       "population": 300,
-      "warehouse_id": "WAH0000002"
+      "warehouse_id": "WAH0000003"
     }
   },
   {
@@ -29,10 +29,10 @@
       "address": "Pathum Thani 12000",
       "received_time": "2025-01-15T12:00:00Z",
       "population": 750,
-      "warehouse_id": "WAH0000003"
+      "warehouse_id": "WAH0000005"
     }
   },
-    {
+  {
     "model": "community.community",
     "pk": "COM0000004",
     "fields": {
@@ -91,8 +91,8 @@
     "model": "community.community",
     "pk": "COM0000009",
     "fields": {
-      "name": "Chonburi Industrial Area Community",
-      "address": "Si Racha, Chonburi 20110",
+      "name": "Mahachai Port Community",
+      "address": "Mahachai, Mueang Samut Sakhon 74000",
       "received_time": "2025-01-17T11:00:00Z",
       "population": 820,
       "warehouse_id": "WAH0000006"
@@ -102,69 +102,69 @@
     "model": "community.community",
     "pk": "COM0000010",
     "fields": {
-      "name": "Chiang Mai Urban Community",
-      "address": "Saraphi, Chiang Mai 50140",
+      "name": "Lat Phrao Urban Community",
+      "address": "Lat Phrao, Bangkok 10230",
       "received_time": "2025-01-18T09:30:00Z",
       "population": 460,
-      "warehouse_id": "WAH0000014"
+      "warehouse_id": "WAH0000004"
     }
   },
   {
     "model": "community.community",
     "pk": "COM0000011",
     "fields": {
-      "name": "Khon Kaen Municipality Community",
-      "address": "Khon Kaen 40000",
+      "name": "Bang Yai Municipality Community",
+      "address": "Bang Yai, Nonthaburi 11140",
       "received_time": "2025-01-18T10:30:00Z",
       "population": 720,
-      "warehouse_id": "WAH0000013"
+      "warehouse_id": "WAH0000003"
     }
   },
   {
     "model": "community.community",
     "pk": "COM0000012",
     "fields": {
-      "name": "Hat Yai Community Aid Center",
-      "address": "Hat Yai, Songkhla 90110",
+      "name": "Salaya Community Aid Center",
+      "address": "Salaya, Phutthamonthon, Nakhon Pathom 73170",
       "received_time": "2025-01-18T11:30:00Z",
       "population": 900,
-      "warehouse_id": "WAH0000017"
+      "warehouse_id": "WAH0000007"
     }
   },
   {
     "model": "community.community",
     "pk": "COM0000013",
     "fields": {
-      "name": "Phuket Coastal Community",
-      "address": "Thalang, Phuket 83110",
+      "name": "Phra Pradaeng Riverside Community",
+      "address": "Phra Pradaeng, Samut Prakan 10130",
       "received_time": "2025-01-19T09:00:00Z",
       "population": 350,
-      "warehouse_id": "WAH0000027"
+      "warehouse_id": "WAH0000010"
     }
   },
   {
     "model": "community.community",
     "pk": "COM0000014",
     "fields": {
-      "name": "Udon Thani Regional Community Center",
-      "address": "Udon Thani 41000",
+      "name": "Bang Bo Worker Community",
+      "address": "Bang Bo, Samut Prakan 10560",
       "received_time": "2025-01-19T10:00:00Z",
       "population": 640,
-      "warehouse_id": "WAH0000025"
+      "warehouse_id": "WAH0000010"
     }
   },
   {
     "model": "community.community",
     "pk": "COM0000015",
     "fields": {
-      "name": "Mae Sot Border Community",
-      "address": "Mae Sot, Tak 63110",
+      "name": "Sai Mai Community Network",
+      "address": "Sai Mai, Bangkok 10220",
       "received_time": "2025-01-19T11:00:00Z",
       "population": 520,
-      "warehouse_id": "WAH0000018"
+      "warehouse_id": "WAH0000003"
     }
   },
-    {
+  {
     "model": "community.community",
     "pk": "COM0000016",
     "fields": {
@@ -172,7 +172,7 @@
       "address": "Din Daeng, Bangkok 10400",
       "received_time": "2025-01-20T09:00:00Z",
       "population": 480,
-      "warehouse_id": "WAH0000020"
+      "warehouse_id": "WAH0000004"
     }
   },
   {
@@ -183,7 +183,7 @@
       "address": "Bang Khun Thian, Bangkok 10150",
       "received_time": "2025-01-20T10:00:00Z",
       "population": 520,
-      "warehouse_id": "WAH0000020"
+      "warehouse_id": "WAH0000006"
     }
   },
   {
@@ -201,132 +201,132 @@
     "model": "community.community",
     "pk": "COM0000019",
     "fields": {
-      "name": "Lopburi Provincial Community Center",
-      "address": "Mueang, Lopburi 15000",
+      "name": "Lam Luk Ka Community Center",
+      "address": "Lam Luk Ka, Pathum Thani 12150",
       "received_time": "2025-01-21T09:00:00Z",
       "population": 450,
-      "warehouse_id": "WAH0000015"
+      "warehouse_id": "WAH0000005"
     }
   },
   {
     "model": "community.community",
     "pk": "COM0000020",
     "fields": {
-      "name": "Phitsanulok Central Community",
-      "address": "Mueang, Phitsanulok 65000",
+      "name": "Bang Kapi Community Alliance",
+      "address": "Bang Kapi, Bangkok 10240",
       "received_time": "2025-01-21T10:00:00Z",
       "population": 700,
-      "warehouse_id": "WAH0000024"
+      "warehouse_id": "WAH0000004"
     }
   },
   {
     "model": "community.community",
     "pk": "COM0000021",
     "fields": {
-      "name": "Chiang Rai Urban Community",
-      "address": "Mueang, Chiang Rai 57000",
+      "name": "Bang Bon Agricultural Cooperative",
+      "address": "Bang Bon, Bangkok 10150",
       "received_time": "2025-01-21T11:00:00Z",
       "population": 390,
-      "warehouse_id": "WAH0000026"
+      "warehouse_id": "WAH0000006"
     }
   },
   {
     "model": "community.community",
     "pk": "COM0000022",
     "fields": {
-      "name": "Rayong Industrial Worker Community",
-      "address": "Mueang, Rayong 21000",
+      "name": "Krathum Baen Industrial Village",
+      "address": "Krathum Baen, Samut Sakhon 74130",
       "received_time": "2025-01-22T09:00:00Z",
       "population": 820,
-      "warehouse_id": "WAH0000016"
+      "warehouse_id": "WAH0000006"
     }
   },
   {
     "model": "community.community",
     "pk": "COM0000023",
     "fields": {
-      "name": "Surat Thani City Community",
-      "address": "Mueang, Surat Thani 84000",
+      "name": "Thonburi Community Pantry",
+      "address": "Thon Buri, Bangkok 10600",
       "received_time": "2025-01-22T10:00:00Z",
       "population": 560,
-      "warehouse_id": "WAH0000017"
+      "warehouse_id": "WAH0000004"
     }
   },
   {
     "model": "community.community",
     "pk": "COM0000024",
     "fields": {
-      "name": "Trang Municipal Community",
-      "address": "Mueang, Trang 92000",
+      "name": "Khlong San Community Hub",
+      "address": "Khlong San, Bangkok 10600",
       "received_time": "2025-01-22T11:00:00Z",
       "population": 430,
-      "warehouse_id": "WAH0000028"
+      "warehouse_id": "WAH0000004"
     }
   },
   {
     "model": "community.community",
     "pk": "COM0000025",
     "fields": {
-      "name": "Prachuap Coastal Community",
-      "address": "Mueang, Prachuap Khiri Khan 77000",
+      "name": "Bang Sai Riverside Community",
+      "address": "Bang Sai, Ayutthaya 13190",
       "received_time": "2025-01-23T09:00:00Z",
       "population": 370,
-      "warehouse_id": "WAH0000029"
+      "warehouse_id": "WAH0000012"
     }
   },
   {
     "model": "community.community",
     "pk": "COM0000026",
     "fields": {
-      "name": "Pak Chong Highland Community",
-      "address": "Pak Chong, Nakhon Ratchasima 30130",
+      "name": "Khlong Luang Welfare Group",
+      "address": "Khlong Luang, Pathum Thani 12120",
       "received_time": "2025-01-23T10:00:00Z",
       "population": 640,
-      "warehouse_id": "WAH0000023"
+      "warehouse_id": "WAH0000005"
     }
   },
   {
     "model": "community.community",
     "pk": "COM0000027",
     "fields": {
-      "name": "Ubon Ratchathani Regional Community",
-      "address": "Mueang, Ubon Ratchathani 34000",
+      "name": "Bang Kruai Community Network",
+      "address": "Bang Kruai, Nonthaburi 11130",
       "received_time": "2025-01-23T11:00:00Z",
       "population": 780,
-      "warehouse_id": "WAH0000025"
+      "warehouse_id": "WAH0000003"
     }
   },
   {
     "model": "community.community",
     "pk": "COM0000028",
     "fields": {
-      "name": "Nan Rural Support Community",
-      "address": "Mueang, Nan 55000",
+      "name": "Bang Kho Laem Riverside Community",
+      "address": "Bang Kho Laem, Bangkok 10120",
       "received_time": "2025-01-24T09:00:00Z",
       "population": 320,
-      "warehouse_id": "WAH0000026"
+      "warehouse_id": "WAH0000004"
     }
   },
   {
     "model": "community.community",
     "pk": "COM0000029",
     "fields": {
-      "name": "Kalasin Community Aid Center",
-      "address": "Mueang, Kalasin 46000",
+      "name": "Bang Rak Noi Community",
+      "address": "Bang Rak Noi, Nonthaburi 11000",
       "received_time": "2025-01-24T10:00:00Z",
       "population": 500,
-      "warehouse_id": "WAH0000025"
+      "warehouse_id": "WAH0000003"
     }
   },
   {
     "model": "community.community",
     "pk": "COM0000030",
     "fields": {
-      "name": "Yala Southern Border Community",
-      "address": "Mueang, Yala 95000",
+      "name": "Lat Krabang Airport Community",
+      "address": "Lat Krabang, Bangkok 10520",
       "received_time": "2025-01-24T11:00:00Z",
       "population": 460,
-      "warehouse_id": "WAH0000030"
+      "warehouse_id": "WAH0000001"
     }
   }
 ]

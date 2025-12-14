@@ -43,7 +43,7 @@
       "chain": "CHA0000003"
     }
   },
-    {
+  {
     "model": "restaurants.restaurant",
     "pk": "RES0000005",
     "fields": {
@@ -103,8 +103,8 @@
     "pk": "RES0000010",
     "fields": {
       "name": "Sizzler",
-      "branch_name": "Central Festival Chiang Mai",
-      "address": "99, 99/1-2 Superhighway Chiang Mai-Lampang Rd, Chiang Mai 50000",
+      "branch_name": "Central Rama 2",
+      "address": "160 Rama II Rd, Bang Khun Thian, Bangkok 10150",
       "is_chain": true,
       "chain": "CHA0000003"
     }
@@ -235,8 +235,8 @@
     "pk": "RES0000022",
     "fields": {
       "name": "The Pizza Company",
-      "branch_name": "Central Udon",
-      "address": "277/1-3 Prajak Sillapakhom Rd, Mak Khaeng, Udon Thani 41000",
+      "branch_name": "Central WestGate",
+      "address": "199/1 Kanchanaphisek Rd, Sao Thong Hin, Bang Yai, Nonthaburi 11140",
       "is_chain": true,
       "chain": "CHA0000002"
     }
@@ -246,8 +246,8 @@
     "pk": "RES0000023",
     "fields": {
       "name": "Sizzler",
-      "branch_name": "Central Phuket",
-      "address": "199 Moo 5, Wichit, Mueang Phuket, Phuket 83000",
+      "branch_name": "Central Mahachai",
+      "address": "98 Rama II Frontage Rd, Mueang Samut Sakhon, Samut Sakhon 74000",
       "is_chain": true,
       "chain": "CHA0000003"
     }
@@ -257,8 +257,8 @@
     "pk": "RES0000024",
     "fields": {
       "name": "McDonald's",
-      "branch_name": "Central Chiang Mai Airport",
-      "address": "2 Mahidol Rd, Pa Daet, Mueang Chiang Mai, Chiang Mai 50100",
+      "branch_name": "Rattanathibet",
+      "address": "9 Rattanathibet Rd, Bang Kraso, Mueang Nonthaburi 11000",
       "is_chain": true,
       "chain": "CHA0000004"
     }
@@ -268,8 +268,8 @@
     "pk": "RES0000025",
     "fields": {
       "name": "Burger King",
-      "branch_name": "Terminal 21 Pattaya",
-      "address": "456 Beach Rd, Na Kluea, Bang Lamung, Chon Buri 20150",
+      "branch_name": "Seacon Square",
+      "address": "55 Srinagarindra Rd, Nong Bon, Prawet, Bangkok 10250",
       "is_chain": true,
       "chain": "CHA0000005"
     }
@@ -279,8 +279,8 @@
     "pk": "RES0000026",
     "fields": {
       "name": "Starbucks",
-      "branch_name": "Central Khonkaen",
-      "address": "99 Srichan Rd, Nai Mueang, Mueang Khon Kaen, Khon Kaen 40000",
+      "branch_name": "Future Park Rangsit",
+      "address": "94 Phahonyothin Rd, Thanyaburi, Pathum Thani 12130",
       "is_chain": true,
       "chain": "CHA0000006"
     }
@@ -290,8 +290,8 @@
     "pk": "RES0000027",
     "fields": {
       "name": "MK Restaurant",
-      "branch_name": "Central Hatyai",
-      "address": "1518 Kanjanavanich Rd, Hat Yai, Songkhla 90110",
+      "branch_name": "Central Salaya",
+      "address": "99/9 Borommaratchachonnani Rd, Salaya, Nakhon Pathom 73170",
       "is_chain": true,
       "chain": "CHA0000007"
     }
@@ -301,8 +301,8 @@
     "pk": "RES0000028",
     "fields": {
       "name": "Bar B Q Plaza",
-      "branch_name": "Central Korat",
-      "address": "990 Mittraphap Rd, Nai Mueang, Mueang Nakhon Ratchasima 30000",
+      "branch_name": "Fashion Island",
+      "address": "587 Ram Inthra Rd, Khan Na Yao, Bangkok 10230",
       "is_chain": true,
       "chain": "CHA0000008"
     }
@@ -312,8 +312,8 @@
     "pk": "RES0000029",
     "fields": {
       "name": "Bonchon",
-      "branch_name": "Central Chiang Rai",
-      "address": "99/9 Phaholyothin Rd, Wiang, Mueang Chiang Rai, Chiang Rai 57000",
+      "branch_name": "Central Pinklao",
+      "address": "7/222 Borommaratchachonnani Rd, Arun Amarin, Bangkok 10700",
       "is_chain": true,
       "chain": "CHA0000010"
     }
