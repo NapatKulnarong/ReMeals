@@ -5,6 +5,7 @@ from django.contrib.auth.hashers import make_password
 from django.db import IntegrityError
 from django.utils import timezone
 
+from donation_request.models import DonationRequest
 from users.models import User, Donor, Recipient
 from restaurants.models import Restaurant
 from community.models import Community
@@ -268,6 +269,26 @@ class RoleModelTests(TestCase):
             population=500,
             warehouse_id=self.warehouse,
         )
+        self.donation_request_one = DonationRequest.objects.create(
+            title="Recipient Request One",
+            community_name="Community Alpha",
+            recipient_address="123 Community Lane",
+            expected_delivery=timezone.now(),
+            people_count=100,
+            contact_phone="0800000001",
+            notes="Test request",
+            community=self.community,
+        )
+        self.donation_request_two = DonationRequest.objects.create(
+            title="Recipient Request Two",
+            community_name="Community Alpha",
+            recipient_address="456 Community Lane",
+            expected_delivery=timezone.now(),
+            people_count=200,
+            contact_phone="0800000002",
+            notes="Second request",
+            community=self.community,
+        )
 
     def test_user_cannot_represent_multiple_restaurants(self):
         Donor.objects.create(user=self.donor_user, restaurant_id=self.restaurant_one)
@@ -278,18 +299,18 @@ class RoleModelTests(TestCase):
         Recipient.objects.create(
             user=self.recipient_user,
             address="123 Recipient Rd",
-            community_id=self.community,
+            donation_request=self.donation_request_one,
         )
         Recipient.objects.create(
             user=self.recipient_user_two,
             address="456 Shared Rd",
-            community_id=self.community,
+            donation_request=self.donation_request_two,
         )
         with self.assertRaises(IntegrityError):
             Recipient.objects.create(
                 user=self.recipient_user,
                 address="789 Duplicate Rd",
-                community_id=self.community,
+                donation_request=self.donation_request_two,
             )
 
     # 10. Login requires identifier

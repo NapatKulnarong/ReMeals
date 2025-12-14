@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 
 const API_BASE_URL =
@@ -90,28 +90,7 @@ type Notification = {
   error?: string;
 };
 
-type RestaurantSuggestion = {
-  name: string;
-  description: string;
-  keywords: string[];
-};
-
-type RestaurantSearchOption = {
-  kind: "restaurant";
-  key: string;
-  label: string;
-  description?: string;
-  restaurant: Restaurant;
-};
-
-type PopularSearchOption = {
-  kind: "popular";
-  key: string;
-  label: string;
-  description?: string;
-};
-
-type SearchSuggestionOption = RestaurantSearchOption | PopularSearchOption;
+// Restaurant suggestion types removed — suggestion UI trimmed in this branch.
 
 type NavItem = {
   id: number;
@@ -156,6 +135,7 @@ type FoodItemApiRecord = {
   is_claimed?: boolean;
   is_distributed?: boolean;
   donation?: string;
+  category?: string | null;
 };
 
 type DonationRequestApiRecord = {
@@ -177,6 +157,21 @@ type Warehouse = {
   capacity: number;
   stored_date: string;
   exp_date: string;
+};
+
+const BANGKOK_METRO_LOCATIONS = [
+  "bangkok",
+  "pathum thani",
+  "nonthaburi",
+  "samut prakan",
+  "samut sakhon",
+  "nakhon pathom",
+  "ayutthaya",
+];
+
+const isBangkokMetroArea = (address: string) => {
+  const normalized = address.toLowerCase();
+  return BANGKOK_METRO_LOCATIONS.some((keyword) => normalized.includes(keyword));
 };
 
 type Community = {
@@ -221,6 +216,17 @@ type ImpactRecord = {
   food: string;
 };
 
+type LooseImpactRecord = {
+  impact_id?: string;
+  pk?: string;
+  id?: string;
+  meals_saved?: number | string;
+  weight_saved_kg?: number | string;
+  co2_reduced_kg?: number | string;
+  impact_date?: string;
+  food?: string;
+};
+
 // Interactive Weekly Meals Chart Component
 function WeeklyMealsChart({ data }: { data: Array<{ weekKey: string; meals: number; co2: number; startDate: Date; endDate: Date }> }) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -229,8 +235,8 @@ function WeeklyMealsChart({ data }: { data: Array<{ weekKey: string; meals: numb
   const maxMeals = Math.max(...data.map(d => d.meals), 1);
   const chartHeight = 280;
   const chartPadding = { top: 20, right: 20, bottom: 40, left: 50 };
-  const availableWidth = 800;
   const barSpacing = 8;
+  const availableWidth = 800;
   const barWidth = Math.max(32, Math.min(60, (availableWidth - chartPadding.left - chartPadding.right - (data.length - 1) * barSpacing) / data.length));
   const chartWidth = data.length * (barWidth + barSpacing) + chartPadding.left + chartPadding.right;
 
@@ -397,7 +403,6 @@ function CO2TrendChart({ data }: { data: Array<{ weekKey: string; co2: number; s
   const maxCO2 = Math.max(...data.map(d => d.co2), 1);
   const chartHeight = 280;
   const chartPadding = { top: 20, right: 20, bottom: 40, left: 50 };
-  const availableWidth = 800;
   const chartWidth = Math.max(600, data.length * 60 + chartPadding.left + chartPadding.right);
 
   const formatWeekLabel = (startDate: Date, endDate: Date) => {
@@ -614,51 +619,22 @@ const normalizeImpactData = (raw: unknown): ImpactRecord[] => {
     }
   }
   
-  return data.map((record: any) => {
+  return data.map((record: LooseImpactRecord) => {
     // Handle both 'impact_id' and 'pk' field names
-    const impactId = record.impact_id || record.pk || record.id || "";
+    const impactId = record.impact_id ?? record.pk ?? record.id ?? "";
     
     return {
-      impact_id: impactId,
-      meals_saved: Number(record.meals_saved) || 0,
-      weight_saved_kg: Number(record.weight_saved_kg) || 0,
-      co2_reduced_kg: Number(record.co2_reduced_kg) || 0,
-      impact_date: record.impact_date || "",
-      food: record.food || "",
+      impact_id: typeof impactId === "string" ? impactId : "",
+      meals_saved: Number(record.meals_saved ?? 0),
+      weight_saved_kg: Number(record.weight_saved_kg ?? 0),
+      co2_reduced_kg: Number(record.co2_reduced_kg ?? 0),
+      impact_date: record.impact_date ?? "",
+      food: typeof record.food === "string" ? record.food : "",
     };
   });
 };
 
-const POPULAR_RESTAURANT_SUGGESTIONS: RestaurantSuggestion[] = [
-  {
-    name: "KFC Thailand",
-    description: "Fried chicken & rice bowls · 400+ branches",
-    keywords: ["KFC franchise list", "KFC Thailand donation"],
-  },
-  {
-    name: "McDonald's Thailand",
-    description: "Drive-thru & delivery heavy locations",
-    keywords: ["McDonald's Thailand stores", "McThai branches"],
-  },
-  {
-    name: "MK Restaurants",
-    description: "Sukiyaki restaurants inside major malls",
-    keywords: ["MK Restaurants Thailand", "MK branch directory"],
-  },
-  {
-    name: "Chester's Grill",
-    description: "Thai fast-food brand in transit hubs",
-    keywords: ["Chester's Grill Thailand", "Chester's donation"],
-  },
-  {
-    name: "After You Dessert Café",
-    description: "Dessert cafe chain with limited storage window",
-    keywords: ["After You cafe list", "After You donation program"],
-  },
-];
-
-const formatRestaurantLabel = (restaurant: Restaurant) =>
-  `${restaurant.name}${restaurant.branch_name ? ` (${restaurant.branch_name})` : ""}`.trim();
+// Popular suggestions & label formatter removed since suggestion UI is not active here.
 
 const createFoodItemId = () => {
   const suffix = Math.floor(Math.random() * 10_000_000)
@@ -833,8 +809,8 @@ function HomePage({
   const [impactLoading, setImpactLoading] = useState(false);
   const [impactError, setImpactError] = useState<string | null>(null);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [donations, setDonations] = useState<any[]>([]);
-  const [foodItems, setFoodItems] = useState<any[]>([]);
+  const [donations, setDonations] = useState<DonationApiRecord[]>([]);
+  const [foodItems, setFoodItems] = useState<FoodItemApiRecord[]>([]);
 
   const journey = [
     {
@@ -915,8 +891,8 @@ function HomePage({
       try {
         const [restaurantsData, donationsData, foodItemsData] = await Promise.all([
           apiFetch<Restaurant[]>("/restaurants/").catch(() => []),
-          apiFetch<any[]>("/donations/").catch(() => []),
-          apiFetch<any[]>("/fooditems/").catch(() => []),
+          apiFetch<DonationApiRecord[]>("/donations/").catch(() => []),
+          apiFetch<FoodItemApiRecord[]>("/fooditems/").catch(() => []),
         ]);
         
         if (!ignore) {
@@ -924,7 +900,7 @@ function HomePage({
           setDonations(donationsData);
           setFoodItems(foodItemsData);
         }
-      } catch (err) {
+      } catch {
         // Silently fail - leaderboard is optional
       }
     }
@@ -999,11 +975,11 @@ function HomePage({
     }
 
     const restaurantMap = new Map(restaurants.map(r => [r.restaurant_id, r]));
-    const donationMap = new Map(donations.map(d => [d.donation_id || d.id, d]));
+    const donationMap = new Map(donations.map(d => [d.donation_id, d]));
     
-    const foodItemMap = new Map<string, any>();
+    const foodItemMap = new Map<string, FoodItemApiRecord>();
     foodItems.forEach(f => {
-      const foodId = f.food_id || f.id;
+      const foodId = f.food_id;
       if (foodId) {
         const normalized = normalizeFoodId(foodId);
         foodItemMap.set(normalized, f);
@@ -1019,13 +995,13 @@ function HomePage({
       
       if (!foodItem) return;
 
-      const donationId = foodItem.donation || foodItem.donation_id;
+      const donationId = foodItem.donation;
       if (!donationId) return;
       
       const donation = donationMap.get(donationId);
       if (!donation) return;
 
-      const restaurantId = donation.restaurant || donation.restaurant_id;
+      const restaurantId = donation.restaurant;
       if (!restaurantId) return;
       
       const restaurant = restaurantMap.get(restaurantId);
@@ -1085,7 +1061,7 @@ function HomePage({
             </h1>
           </div>
           <p className="max-w-3xl text-lg text-[#5a4f45]">
-          Re-Meals brings together restaurants, drivers, and community hearts to ensure no good meal goes to waste—and no neighbor goes without. Share what you have, ask for what you need, and help nourish the people around you."
+          Re-Meals brings together restaurants, drivers, and community hearts to ensure no good meal goes to waste—and no neighbor goes without. Share what you have, ask for what you need, and help nourish the people around you.
           </p>
           <div className="flex flex-wrap gap-3">
             <button
@@ -1226,7 +1202,14 @@ function HomePage({
             ) : weeklyMealsData.length === 0 ? (
               <p className="text-sm text-gray-600 py-8 text-center">No CO₂ data available yet.</p>
             ) : (
-              <CO2TrendChart data={weeklyMealsData.map(({ meals, ...rest }) => rest)} />
+              <CO2TrendChart
+                data={weeklyMealsData.map(({ weekKey, co2, startDate, endDate }) => ({
+                  weekKey,
+                  co2,
+                  startDate,
+                  endDate,
+                }))}
+              />
             )}
           </div>
         </div>
@@ -1497,27 +1480,23 @@ function TabContent({
   );
 }
 
-function DonationSection({
-  currentUser,
-  setShowAuthModal,
-  setAuthMode
-}: {
+function DonationSection(props: {
   currentUser: LoggedUser | null;
   setShowAuthModal: (show: boolean) => void;
   setAuthMode: (mode: AuthMode) => void;
 }) {
+  const { currentUser } = props;
   const [form, setForm] = useState<DonationFormState>(createDonationFormState());
   const [donations, setDonations] = useState<DonationRecord[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [notification, setNotification] = useState<Notification>({});
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [restaurantsLoading, setRestaurantsLoading] = useState(false);
-  const [restaurantLoadError, setRestaurantLoadError] = useState<string | null>(null);
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [donationsLoading, setDonationsLoading] = useState(false);
   const [donationsError, setDonationsError] = useState<string | null>(null);
-  const [isSuggestionOpen, setIsSuggestionOpen] = useState(false);
-  const suggestionBoxRef = useRef<HTMLDivElement | null>(null);
+  
+  
   const [deliveries, setDeliveries] = useState<DeliveryRecordApi[]>([]);
   const [deletingDonationId, setDeletingDonationId] = useState<string | null>(null);
 
@@ -1636,7 +1615,7 @@ function DonationSection({
         if (!ignore) {
           setDeliveries(deliveryData);
         }
-      } catch (error) {
+      } catch {
         // Silently fail - deliveries are optional for this check
       }
     }
@@ -1649,9 +1628,7 @@ function DonationSection({
     };
   }, [currentUser]);
 
-  const selectedRestaurant = restaurants.find(
-    (restaurant) => restaurant.restaurant_id === form.restaurantId
-  );
+  
 
   useEffect(() => {
     if (!restaurants.length || !donations.length) {
@@ -1691,115 +1668,12 @@ function DonationSection({
     );
   }, [restaurants, donations, updateDonations]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (!suggestionBoxRef.current?.contains(event.target as Node)) {
-        setIsSuggestionOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const normalizedRestaurantName = form.restaurantName.trim().toLowerCase();
-
-  const visibleSuggestions = useMemo<SearchSuggestionOption[]>(() => {
-    if (!normalizedRestaurantName) {
-      return [];
-    }
-
-    const seen = new Set<string>();
-    const suggestions: SearchSuggestionOption[] = [];
-
-    restaurants.forEach((restaurant) => {
-      const label = formatRestaurantLabel(restaurant);
-      const descriptor = restaurant.address || restaurant.branch_name || "";
-      const searchable = `${label} ${descriptor}`.toLowerCase();
-      if (!searchable.includes(normalizedRestaurantName)) {
-        return;
-      }
-      const uniqueKey = label.toLowerCase();
-      if (seen.has(uniqueKey)) {
-        return;
-      }
-      seen.add(uniqueKey);
-      suggestions.push({
-        kind: "restaurant",
-        key: restaurant.restaurant_id,
-        label,
-        description: descriptor,
-        restaurant,
-      });
-    });
-
-    POPULAR_RESTAURANT_SUGGESTIONS.forEach((suggestion) => {
-      const searchable = `${suggestion.name} ${suggestion.description} ${suggestion.keywords.join(
-        " "
-      )}`.toLowerCase();
-      if (!searchable.includes(normalizedRestaurantName)) {
-        return;
-      }
-      const uniqueKey = suggestion.name.toLowerCase();
-      if (seen.has(uniqueKey)) {
-        return;
-      }
-      seen.add(uniqueKey);
-      suggestions.push({
-        kind: "popular",
-        key: `popular-${suggestion.name}`,
-        label: suggestion.name,
-        description: suggestion.description,
-      });
-    });
-
-    return suggestions;
-  }, [normalizedRestaurantName, restaurants]);
-
-  const shouldShowSuggestions = isSuggestionOpen && visibleSuggestions.length > 0;
-
   const resetForm = () => {
     setForm(createDonationFormState());
     setEditingId(null);
     setNotification({});
   };
-
-  const handleRestaurantNameChange = (name: string) => {
-    const normalized = name.trim().toLowerCase();
-    const matched = restaurants.find((restaurant) => {
-      const label = formatRestaurantLabel(restaurant).toLowerCase();
-      return label === normalized || restaurant.name.toLowerCase() === normalized;
-    });
-
-    setForm((prev) => ({
-      ...prev,
-      restaurantName: name,
-      restaurantId: matched?.restaurant_id ?? "",
-      branch: matched ? matched.branch_name ?? "" : prev.branch,
-    }));
-    setIsSuggestionOpen(name.trim().length > 0);
-  };
-
-  const handleSelectSuggestion = (suggestion: SearchSuggestionOption) => {
-    if (suggestion.kind === "restaurant") {
-      setForm((prev) => ({
-        ...prev,
-        restaurantName: suggestion.label,
-        restaurantId: suggestion.restaurant.restaurant_id,
-        restaurantAddress: suggestion.restaurant.address,
-        branch: suggestion.restaurant.branch_name,
-      }));
-    } else {
-      setForm((prev) => ({
-        ...prev,
-        restaurantName: suggestion.label,
-        restaurantId: "",
-        restaurantAddress: "",
-        branch: "",
-      }));
-    }
-    setIsSuggestionOpen(false);
-  };
+  
 
   const handleItemChange = (
     index: number,
@@ -2048,7 +1922,7 @@ function DonationSection({
     return true;
   };
 
-  const canShowEditDeleteButtons = (donation: DonationRecord) => {
+  const canShowEditDeleteButtons = () => {
     // Show buttons if user is logged in
     // The buttons will be disabled if canManageDonation returns false
     return Boolean(currentUser);
@@ -2401,7 +2275,7 @@ function DonationSection({
         {currentUser && !currentUser.isAdmin && (
           <div className="mb-4 flex-shrink-0 rounded-xl border border-[#D7DCC7] bg-[#F4F7EF] p-3">
             <p className="text-xs text-gray-700 leading-relaxed">
-              <span className="font-semibold">Note:</span> You can edit or delete your donations only if they haven't been assigned to a pickup task yet. Once the admin assigns your donation to a delivery staff, it can no longer be modified.
+              <span className="font-semibold">Note:</span> You can edit or delete your donations only if they haven&apos;t been assigned to a pickup task yet. Once the admin assigns your donation to a delivery staff, it can no longer be modified.
             </p>
           </div>
         )}
@@ -2439,7 +2313,7 @@ function DonationSection({
                     )}
                   </div>
                   <div className="flex flex-col items-end gap-2">
-                    {canShowEditDeleteButtons(donation) && (
+                    {canShowEditDeleteButtons() && (
                       <div className="flex gap-2">
                         <button
                           type="button"
@@ -2551,15 +2425,12 @@ function DonationSection({
   );
 }
 
-function DonationRequestSection({
-  currentUser,
-  setShowAuthModal,
-  setAuthMode
-}: {
+function DonationRequestSection(props: {
   currentUser: LoggedUser | null;
   setShowAuthModal: (show: boolean) => void;
   setAuthMode: (mode: AuthMode) => void;
 }) {
+  const { currentUser } = props;
   const [form, setForm] = useState<DonationRequestForm>(createDonationRequestForm());
   const [requests, setRequests] = useState<DonationRequestRecord[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -2672,7 +2543,7 @@ function DonationRequestSection({
     return () => {
       ignore = true;
     };
-  }, [currentUser?.userId, currentUser?.isAdmin, prioritizeRequests]);
+  }, [currentUser, prioritizeRequests]);
 
   // Check if a request has been accepted (has a distribution delivery to its community)
   const isRequestAccepted = useCallback((request: DonationRequestRecord) => {
@@ -3210,10 +3081,10 @@ function ProfileModal({
         fname: response.fname,
         lname: response.lname,
         phone: response.phone,
-        restaurantId: (response as any).restaurant_id ?? undefined,
-        restaurantName: (response as any).restaurant_name ?? undefined,
-        branch: (response as any).branch ?? undefined,
-        restaurantAddress: (response as any).restaurant_address ?? undefined,
+        restaurantId: response.restaurant_id ?? undefined,
+        restaurantName: response.restaurant_name ?? undefined,
+        branch: response.branch ?? undefined,
+        restaurantAddress: response.restaurant_address ?? undefined,
       });
 
       setSuccess(true);
@@ -4644,7 +4515,7 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
         try {
           const items = await apiFetch<FoodItemApiRecord[]>(`/fooditems/?donation=${donation.donation_id}`);
           allFoodItems.push(...items);
-        } catch (err) {
+        } catch {
           // Ignore errors for individual donation food items
         }
       }
@@ -4659,6 +4530,31 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  const pickupTodayString = useMemo(() => new Date().toISOString().split("T")[0], []);
+
+  const isPickupItemExpired = useCallback(
+    (item: FoodItemApiRecord) => {
+      if (item.is_expired) {
+        return true;
+      }
+      if (!item.expire_date) {
+        return false;
+      }
+      const normalized = item.expire_date.split("T")[0];
+      if (!normalized) {
+        return false;
+      }
+      return normalized < pickupTodayString;
+    },
+    [pickupTodayString]
+  );
+
+  const donationHasFreshFood = useCallback(
+    (donationId: string) =>
+      foodItems.some((item) => item.donation === donationId && !isPickupItemExpired(item)),
+    [foodItems, isPickupItemExpired]
+  );
 
   useEffect(() => {
     const next: Record<string, { notes: string }> = {};
@@ -4792,15 +4688,18 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
 
   // Filter donations to exclude those already assigned, but include the one being edited
   const availableDonations = donations.filter((donation) => {
-    // If we're editing a delivery that uses this donation, include it
     if (editingDeliveryId) {
       const editingDelivery = deliveries.find((d) => d.delivery_id === editingDeliveryId);
       if (editingDelivery?.donation_id === donation.donation_id) {
         return true;
       }
     }
-    // Otherwise, exclude if it's already assigned
-    return !assignedDonationIds.has(donation.donation_id);
+
+    if (assignedDonationIds.has(donation.donation_id)) {
+      return false;
+    }
+
+    return donationHasFreshFood(donation.donation_id);
   });
 
   const lookupRestaurantName = (donationId: string) => {
@@ -4813,11 +4712,6 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
   const lookupStaffName = (userId: string) => {
     const member = staff.find((s) => s.user_id === userId);
     return member ? (member.name || member.username) : userId;
-  };
-
-  const lookupWarehouseAddress = (warehouseId: string) => {
-    const warehouse = warehouses.find((w) => w.warehouse_id === warehouseId);
-    return warehouse ? warehouse.address : warehouseId;
   };
 
   const getFoodItemsForDelivery = (donationId: string) => {
@@ -4925,6 +4819,9 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
                     <label className="mb-1 block text-sm font-semibold text-gray-700">
                       Select donation
                     </label>
+                    <p className="text-xs text-gray-500 mb-1">
+                      Donations with only expired food are hidden from this list.
+                    </p>
                     <select
                       className={INPUT_STYLES}
                       value={pickupForm.donationId}
@@ -5291,7 +5188,6 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
   const [communities, setCommunities] = useState<Community[]>([]);
   const [staff, setStaff] = useState<DeliveryStaffInfo[]>([]);
   const [deliveries, setDeliveries] = useState<DeliveryRecordApi[]>([]);
-  const [donationRequests, setDonationRequests] = useState<DonationRequestApiRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -5313,7 +5209,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
     setLoading(true);
     setError(null);
     try {
-      const [warehouseData, communityData, staffData, deliveryData, requestData] =
+      const [warehouseData, communityData, staffData, deliveryData] =
         await Promise.all([
           apiFetch<Warehouse[]>(API_PATHS.warehouses),
           apiFetch<Community[]>(API_PATHS.communities),
@@ -5321,13 +5217,11 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
           apiFetch<DeliveryRecordApi[]>(API_PATHS.deliveries, {
             headers: buildAuthHeaders(currentUser),
           }),
-          apiFetch<DonationRequestApiRecord[]>(API_PATHS.donationRequests),
         ]);
       setWarehouses(warehouseData);
       setCommunities(communityData);
       setStaff(staffData);
       setDeliveries(deliveryData);
-      setDonationRequests(requestData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to load delivery data.");
     } finally {
@@ -5785,37 +5679,55 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
   const [foodItems, setFoodItems] = useState<FoodItemApiRecord[]>([]);
   const [deliveries, setDeliveries] = useState<DeliveryRecordApi[]>([]);
   const [donations, setDonations] = useState<DonationApiRecord[]>([]);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedWarehouse, setSelectedWarehouse] = useState<string>("");
+  const [selectedWarehouseId, setSelectedWarehouseId] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [expiryFilter, setExpiryFilter] = useState<string>("all");
+  // Grouping is enabled by default; allow toggling to flat list
+  // grouping removed: show flat list filtered by category selection
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [warehouseData, deliveryData, donationData] = await Promise.all([
+      const [warehouseData, deliveryData, donationData, restaurantData] = await Promise.all([
         apiFetch<Warehouse[]>(API_PATHS.warehouses),
         apiFetch<DeliveryRecordApi[]>(API_PATHS.deliveries, {
           headers: buildAuthHeaders(currentUser),
         }),
         apiFetch<DonationApiRecord[]>(API_PATHS.donations),
+        apiFetch<Restaurant[]>(API_PATHS.restaurants),
       ]);
-      setWarehouses(warehouseData);
+
+      const metroWarehouses = warehouseData.filter((warehouse) =>
+        isBangkokMetroArea(`${warehouse.address} ${warehouse.warehouse_id}`)
+      );
+      setWarehouses(metroWarehouses);
       setDeliveries(deliveryData);
       setDonations(donationData);
+      setRestaurants(restaurantData);
 
-      // Load food items for all donations
       const allFoodItems: FoodItemApiRecord[] = [];
       for (const donation of donationData) {
         try {
           const items = await apiFetch<FoodItemApiRecord[]>(`/fooditems/?donation=${donation.donation_id}`);
           allFoodItems.push(...items);
-        } catch (err) {
+        } catch {
           // Ignore errors for individual donation food items
         }
       }
       setFoodItems(allFoodItems);
+
+      setSelectedWarehouseId((prev) => {
+        if (prev && metroWarehouses.some((w) => w.warehouse_id === prev)) {
+          return prev;
+        }
+        return metroWarehouses[0]?.warehouse_id ?? "";
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to load warehouse data.");
     } finally {
@@ -5830,11 +5742,9 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
   const todayString = useMemo(() => new Date().toISOString().split("T")[0], []);
 
   const getWarehouseItems = (warehouseId: string) => {
-    // Get deliveries to this warehouse
     const warehouseDeliveries = deliveries.filter(
       (d) => d.delivery_type === "donation" && d.warehouse_id === warehouseId && d.status === "delivered"
     );
-    // Get food items from those donations
     const donationIds = warehouseDeliveries.map((d) => d.donation_id);
     return foodItems.filter((item) => donationIds.includes(item.donation || ""));
   };
@@ -5851,70 +5761,227 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
   );
 
   const filterItems = (items: FoodItemApiRecord[]) => {
-    if (filterStatus === "distributed") {
-      return items.filter((item) => item.is_distributed);
-    }
+    let result = items.slice();
 
-    const activeInventory = items.filter(
-      (item) => !isItemExpired(item) && !item.is_distributed
-    );
-
+    // status filter
     if (filterStatus === "available") {
-      return activeInventory.filter((item) => !item.is_claimed);
+      result = result.filter((item) => !item.is_claimed && !item.is_distributed && !isItemExpired(item));
+    } else if (filterStatus === "claimed") {
+      result = result.filter((item) => item.is_claimed && !item.is_distributed && !isItemExpired(item));
+    } else if (filterStatus === "distributed") {
+      result = result.filter((item) => item.is_distributed);
+    } else if (filterStatus === "expired") {
+      result = result.filter((item) => isItemExpired(item));
     }
 
-    if (filterStatus === "claimed") {
-      return activeInventory.filter((item) => item.is_claimed);
+    // expiry filter
+    if (expiryFilter === "within_3_days") {
+      result = result.filter((item) => isExpiringWithinDays(item, 3));
+    } else if (expiryFilter === "this_week") {
+      result = result.filter((item) => isExpiringThisWeek(item));
+    } else if (expiryFilter === "this_month") {
+      result = result.filter((item) => isExpiringThisMonth(item));
     }
 
-    return activeInventory;
+    // Apply category filter (display labels used in the UI)
+    if (categoryFilter && categoryFilter !== "all") {
+      result = result.filter((item) => displayCategoryLabel(getCategory(item)) === categoryFilter);
+    }
+
+    return result;
   };
 
-  const displayWarehouses = warehouses.map((warehouse) => {
-    const items = getWarehouseItems(warehouse.warehouse_id);
-    return { warehouse, items: filterItems(items) };
-  });
+  const handleRemoveItem = async (foodId: string) => {
+    if (!foodId) return;
+    const ok = window.confirm("Remove this food item from the warehouse? This will delete the item.");
+    if (!ok) return;
+    try {
+      await apiFetch(`/fooditems/${foodId}/`, {
+        method: "DELETE",
+        headers: buildAuthHeaders(currentUser),
+      });
+      // Remove from local state so UI updates immediately
+      setFoodItems((prev) => prev.filter((f) => f.food_id !== foodId));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to remove item");
+    }
+  };
+
+  const isExpiringWithinDays = (item: FoodItemApiRecord, days: number) => {
+    if (!item.expire_date) return false;
+    const today = new Date();
+    const expire = new Date(item.expire_date.split("T")[0]);
+    const diffMs = expire.getTime() - today.setHours(0, 0, 0, 0);
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    return diffDays >= 0 && diffDays <= days;
+  };
+
+  const isExpiringThisWeek = (item: FoodItemApiRecord) => {
+    if (!item.expire_date) return false;
+    const today = new Date();
+    const day = today.getDay();
+    const daysUntilEndOfWeek = 6 - day; // treat week as Sun-Sat
+    return isExpiringWithinDays(item, daysUntilEndOfWeek);
+  };
+
+  const isExpiringThisMonth = (item: FoodItemApiRecord) => {
+    if (!item.expire_date) return false;
+    const today = new Date();
+    const expire = new Date(item.expire_date.split("T")[0]);
+    return today.getFullYear() === expire.getFullYear() && today.getMonth() === expire.getMonth();
+  };
+
+  const getCategory = (item: FoodItemApiRecord) => {
+    // Prefer explicit category from API if present
+    if (item.category) return item.category;
+
+    // Heuristic: infer from name when category is not provided
+    const name = (item.name || "").toLowerCase();
+    if (name.includes("vegan")) return "Vegan";
+  if (name.includes("vegetarian")) return "Vegan";
+    if (name.includes("halal") || name.includes("islamic") || name.includes("muslim")) return "Islamic";
+
+    // Default unspecified items to Islamic per user preference
+    return "Islamic";
+  };
+
+  const displayCategoryLabel = (cat: string) => {
+    if (!cat) return cat;
+    // Internally we use "Vegan"; display as "Vegetarian" per request
+    if (cat === "Vegan") return "Vegetarian";
+    // Normalize casing for display (e.g. "islamic" -> "Islamic")
+    return cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase();
+  };
+
+  // Format a donation id into a human-friendly label (restaurant name + branch)
+  const getDonationLabel = (donationId?: string | null) => {
+    if (!donationId) return "";
+    // Try to find the donation record from loaded donations
+    const donation = donations.find((d) => d.donation_id === donationId);
+    if (donation) {
+      // Prefer the donation-provided restaurant_name if available
+      const restaurantId = donation.restaurant;
+  const restaurant = restaurants.find((r: Restaurant) => r.restaurant_id === restaurantId);
+  const restaurantName = donation.restaurant_name || restaurant?.name || restaurant?.restaurant_id || "";
+  const branchName = donation.restaurant_branch || restaurant?.branch_name || "";
+      if (branchName) return `${restaurantName}${restaurantName ? " - " : ""}${branchName}`;
+      return restaurantName || donation.donation_id;
+    }
+
+    // Fallback: show the raw id
+    return donationId;
+  };
+
+  const groupItemsByCategory = (items: FoodItemApiRecord[]) => {
+    const groups: Record<string, FoodItemApiRecord[]> = {};
+    for (const it of items) {
+      const cat = getCategory(it);
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(it);
+    }
+    return groups;
+  };
+
+  const visibleWarehouses = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) {
+      return warehouses;
+    }
+    return warehouses.filter((warehouse) => {
+      const haystack = `${warehouse.warehouse_id} ${warehouse.address}`.toLowerCase();
+      return haystack.includes(term);
+    });
+  }, [warehouses, searchTerm]);
+
+  useEffect(() => {
+    if (!visibleWarehouses.length) {
+      setSelectedWarehouseId("");
+      return;
+    }
+    if (!selectedWarehouseId || !visibleWarehouses.some((w) => w.warehouse_id === selectedWarehouseId)) {
+      setSelectedWarehouseId(visibleWarehouses[0].warehouse_id);
+    }
+  }, [visibleWarehouses, selectedWarehouseId]);
+
+  const selectedWarehouse = warehouses.find((w) => w.warehouse_id === selectedWarehouseId) || null;
+  const warehouseItems = selectedWarehouseId ? getWarehouseItems(selectedWarehouseId) : [];
+  const filteredItems = filterItems(warehouseItems);
+  const expiredItems = filteredItems.filter(isItemExpired);
+  const visibleItems = filteredItems.filter((it) => !isItemExpired(it));
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-[28px] border border-[#CFE6D8] bg-[#F6FBF7] p-6 shadow-lg shadow-[#B6DEC8]/30">
-        <div className="flex items-center justify-between mb-6">
+    <div className="grid h-[calc(100vh-4rem)] min-h-0 gap-6 lg:[grid-template-columns:320px_1fr]">
+      <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[28px] border border-[#CFE6D8] bg-white p-6 shadow-lg shadow-[#B6DEC8]/30">
+        <div className="mb-4 flex flex-shrink-0 items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#2F855A]">
+              Bangkok metropolitan warehouses
+            </p>
+            <h2 className="text-2xl font-semibold text-gray-900">Browse warehouses</h2>
+            <p className="text-sm text-gray-600">
+              Search by warehouse ID or address to focus on a specific facility.
+            </p>
+          </div>
+          <span className="text-xs text-gray-500">{visibleWarehouses.length} listed</span>
+        </div>
+        <div className="flex min-h-0 flex-1 flex-col space-y-3">
+          <input
+            className={INPUT_STYLES + " flex-shrink-0"}
+            placeholder="Search by ID or address..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
+            {loading ? (
+              <p className="text-sm text-gray-600">Loading warehouse data...</p>
+            ) : visibleWarehouses.length === 0 ? (
+              <p className="text-sm text-gray-500">
+                No warehouses found in the Bangkok metropolitan list.
+              </p>
+            ) : (
+              visibleWarehouses.map((warehouse) => {
+                const isSelected = warehouse.warehouse_id === selectedWarehouseId;
+                const itemCount = getWarehouseItems(warehouse.warehouse_id).length;
+                return (
+                  <button
+                    type="button"
+                    key={warehouse.warehouse_id}
+                    onClick={() => setSelectedWarehouseId(warehouse.warehouse_id)}
+                    className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
+                      isSelected
+                        ? "border-[#2F855A] bg-[#F6FBF7] shadow-md"
+                        : "border-[#D7E6DD] bg-white hover:border-[#2F855A]"
+                    }`}
+                  >
+                    <p className="text-sm font-semibold text-gray-900">{warehouse.warehouse_id}</p>
+                    <p className="text-xs text-gray-500">{warehouse.address}</p>
+                    <p className="text-xs text-gray-400 mt-1">{itemCount} lot(s) stored</p>
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </div>
+      </div>
+
+  <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-[28px] border border-[#CFE6D8] bg-[#F6FBF7] p-6 shadow-lg shadow-[#B6DEC8]/30">
+        {/* header is sticky so controls don't shift when left column content changes */}
+        <div className="sticky top-6 z-20 mb-4 bg-[#F6FBF7] py-2">
+          <div className="flex flex-shrink-0 flex-col gap-4 md:flex-row md:items-start md:gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-[#2F855A]">
               Warehouse management
             </p>
-            <h2 className="text-2xl font-semibold text-gray-900">Manage warehouse inventory</h2>
-            <p className="text-sm text-gray-600">
-              View and manage food items stored in warehouses.
-            </p>
+            <h2 className="text-2xl font-semibold text-gray-900">
+              {selectedWarehouse ? selectedWarehouse.warehouse_id : "Select a warehouse"}
+            </h2>
+            {selectedWarehouse && (
+              <p className="text-sm text-gray-600">{selectedWarehouse.address}</p>
+            )}
           </div>
-        </div>
-
-        {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
-
-        {loading ? (
-          <p className="text-sm text-gray-600">Loading warehouse data...</p>
-        ) : (
-          <div className="space-y-4">
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-gray-700">
-                Filter by warehouse
-              </label>
-              <select
-                className={INPUT_STYLES}
-                value={selectedWarehouse}
-                onChange={(e) => setSelectedWarehouse(e.target.value)}
-              >
-                <option value="">All warehouses</option>
-                {warehouses.map((warehouse) => (
-                  <option key={warehouse.warehouse_id} value={warehouse.warehouse_id}>
-                    {warehouse.warehouse_id} — {warehouse.address}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-gray-700">
+          <div className="flex w-full md:w-auto md:ml-auto gap-4 flex-wrap">
+            <div className="w-full md:w-40">
+              <label className="mb-1 block text-xs font-semibold text-gray-600">
                 Filter by status
               </label>
               <select
@@ -5926,60 +5993,157 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
                 <option value="available">Available</option>
                 <option value="claimed">Claimed</option>
                 <option value="distributed">Distributed</option>
+                <option value="expired">Expired</option>
+              </select>
+            </div>
+            <div className="w-full md:w-40">
+              <label className="mb-1 block text-xs font-semibold text-gray-600">Expiry filter</label>
+              <select
+                className={INPUT_STYLES}
+                value={expiryFilter}
+                onChange={(e) => setExpiryFilter(e.target.value)}
+              >
+                <option value="all">All</option>
+                <option value="within_3_days">Expiring within 3 days</option>
+                <option value="this_week">Expiring this week</option>
+                <option value="this_month">Expiring this month</option>
               </select>
             </div>
 
-            <div className="space-y-4">
-              {displayWarehouses
-                .filter((w) => !selectedWarehouse || w.warehouse.warehouse_id === selectedWarehouse)
-                .map(({ warehouse, items }) => (
-                  <div
-                    key={warehouse.warehouse_id}
-                    className="rounded-2xl border border-[#CFE6D8] bg-white p-5 shadow-sm"
-                  >
-                    <div className="mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">{warehouse.warehouse_id}</h3>
-                      <p className="text-sm text-gray-600">{warehouse.address}</p>
-                      <p className="text-xs text-gray-500 mt-1">{items.length} item(s)</p>
-                    </div>
-                    {items.length === 0 ? (
-                      <p className="text-sm text-gray-500">No items in this warehouse.</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {items.map((item) => (
-                          <div
-                            key={item.food_id}
-                            className="flex items-center justify-between rounded-lg border border-[#CFE6D8] bg-[#F6FBF7] p-3"
-                          >
-                            <div>
-                              <p className="text-sm font-semibold text-gray-900">{item.name}</p>
-                              <p className="text-xs text-gray-500">
-                                {item.quantity} {item.unit}
-                              </p>
+            <div className="w-full md:w-40">
+              <label className="mb-1 block text-xs font-semibold text-gray-600">Category</label>
+              <select
+                className={INPUT_STYLES}
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+              >
+                <option value="all">All</option>
+                <option value="Vegetarian">Vegetarian</option>
+                <option value="Islamic">Islamic</option>
+              </select>
+            </div>
+          </div>
+
+          {/* grouping UI removed - category selection drives filtering */}
+  </div>
+  </div>
+
+  {error && <p className="mb-4 flex-shrink-0 text-sm text-red-600">{error}</p>}
+
+        {loading ? (
+          <p className="text-sm text-gray-600">Loading inventory...</p>
+        ) : !selectedWarehouse ? (
+          <p className="text-sm text-gray-500">
+            Use the search to choose a warehouse to inspect.
+          </p>
+        ) : filteredItems.length === 0 ? (
+          <p className="mt-1.5 text-sm text-gray-500">
+            No food items match the selected status for this warehouse.
+          </p>
+        ) : (
+          <div className="min-h-0 min-w-0 flex-1 flex pr-1">
+            <div className="flex gap-2 items-stretch w-full min-h-0">
+              <div className="md:w-[65%] mt-3 w-full flex-1 flex flex-col space-y-3 min-h-0 overflow-y-auto">
+                {visibleItems.map((item) => {
+                  const expired = isItemExpired(item);
+                  return (
+                    <div
+                      key={item.food_id}
+                      className={`rounded-2xl p-4 shadow-sm transition hover:shadow-md ${
+                        expired ? 'border-2 border-dashed border-[#F5C6C1] bg-[#FFF5F5]' : 'border border-[#CFE6D8] bg-white'
+                      }`}
+                    >
+                      <div className="mb-3 flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#E6F7EE]">
+                              <span className="text-base">🥘</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                              {item.is_distributed && (
-                                <span className="rounded-full bg-[#E6F7EE] px-2 py-1 text-xs font-semibold text-[#1F4D36]">
-                                  Distributed
-                                </span>
-                              )}
-                              {item.is_claimed && !item.is_distributed && (
-                                <span className="rounded-full bg-[#E6F4FF] px-2 py-1 text-xs font-semibold text-[#1D4ED8]">
-                                  Claimed
-                                </span>
-                              )}
-                              {!item.is_claimed && !item.is_distributed && (
-                                <span className="rounded-full bg-[#FFF1E3] px-2 py-1 text-xs font-semibold text-[#C46A24]">
-                                  Available
-                                </span>
-                              )}
+                            <div>
+                              <p className="text-sm font-semibold text-gray-900 leading-tight">{item.name}</p>
+                              <span className="text-[11px] font-medium text-[#2F855A] leading-tight">{item.food_id}</span>
                             </div>
                           </div>
-                        ))}
+                        </div>
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                            expired
+                              ? "bg-[#FDECEA] text-[#B42318]"
+                              : item.is_distributed
+                              ? "bg-[#E6F7EE] text-[#1F4D36]"
+                              : item.is_claimed
+                              ? "bg-[#E6F4FF] text-[#1D4ED8]"
+                              : "bg-[#FFF1E3] text-[#C46A24]"
+                          }`}
+                        >
+                          {expired
+                            ? "Expired"
+                            : item.is_distributed
+                            ? "Distributed"
+                            : item.is_claimed
+                            ? "Claimed"
+                            : "Available"}
+                        </span>
                       </div>
-                    )}
-                  </div>
-                ))}
+
+                      <div className="space-y-3 border-t border-gray-100 pt-4">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0">
+                            <span className="text-gray-400">🍽️</span>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs font-medium text-gray-500">Donation</p>
+                            <p className="text-sm font-semibold text-gray-900">{getDonationLabel(item.donation)}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0">
+                            <span className="text-gray-400">📦</span>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs font-medium text-gray-500">Quantity</p>
+                            <p className="text-sm font-semibold text-gray-900">{item.quantity} {item.unit}</p>
+                          </div>
+                        </div>
+
+                        {item.expire_date && (
+                          <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0">
+                              <span className="text-gray-400">📅</span>
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-xs font-medium text-gray-500">Expires</p>
+                              <p className="text-sm font-semibold text-gray-900">{formatDisplayDate(item.expire_date)}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <aside className="md:w-[32%] mt-3 w-56 shrink-0 md:ml-auto rounded-lg border-2 border-dashed border-[#F5C6C1] bg-[#FFF5F5] p-3 space-y-3 min-h-0 h-full overflow-y-auto self-stretch">
+                <h3 className="text-sm font-semibold text-[#B42318]">Expired food ({expiredItems.length})</h3>
+                {expiredItems.length === 0 ? (
+                  <p className="text-xs text-gray-500">No expired food</p>
+                ) : (
+                  expiredItems.map((ei) => (
+                    <div key={ei.food_id} className="text-sm">
+                      <p className="font-medium text-gray-900">{ei.name}</p>
+                      <p className="text-xs text-[#7A1F1F]">{ei.expire_date ? formatDisplayDate(ei.expire_date) : 'No date'}</p>
+                      <p className="text-xs text-gray-700">Qty: {ei.quantity} {ei.unit}</p>
+                      <button
+                        onClick={() => handleRemoveItem(ei.food_id)}
+                        className="mt-2 w-full rounded-md bg-[#B42318] px-2 py-1 text-xs font-semibold text-white hover:bg-[#991b1b]"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))
+                )}
+              </aside>
             </div>
           </div>
         )}
@@ -6051,7 +6215,7 @@ function AuthModal({
   });
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [restaurantSelectionMode, setRestaurantSelectionMode] = useState<"existing" | "manual">("existing");
-  const [restaurantsLoading, setRestaurantsLoading] = useState(false);
+  const [, setRestaurantsLoading] = useState(false);
 
   // Load restaurants for dropdown
   useEffect(() => {

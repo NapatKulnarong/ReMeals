@@ -3,15 +3,15 @@
     "model": "donation_request.donationrequest",
     "pk": "REQ0000001",
     "fields": {
-      "title": "Fresh meals for Ban Klang",
+      "title": "Meal support for Klong Toey Community",
       "community_name": "Klong Toey Community",
-      "recipient_address": "123 Klong Toey, Bangkok 10110",
+      "recipient_address": "Klong Toey, Bangkok 10110",
       "expected_delivery": "2025-01-20T09:00:00Z",
       "people_count": 150,
       "contact_phone": "0812345678",
       "notes": "Urgent need for households in Klong Toey.",
       "created_at": "2024-12-12T09:00:00Z",
-      "created_by": "REC0000001"
+      "community_id": "COM0000001"
     }
   },
   {
@@ -26,7 +26,7 @@
       "contact_phone": "0819876543",
       "notes": "Urgent need for households in Klong Toey.",
       "created_at": "2024-12-15T15:30:00Z",
-      "created_by": "REC0000002"
+      "community_id": "COM0000001"
     }
   },
   {
@@ -41,22 +41,22 @@
       "contact_phone": "0823456789",
       "notes": "Serving Bang Khen residents.",
       "created_at": "2024-12-18T08:45:00Z",
-      "created_by": "REC0000003"
+      "community_id": "COM0000002"
     }
   },
   {
     "model": "donation_request.donationrequest",
     "pk": "REQ0000004",
     "fields": {
-      "title": "Lunch support for construction workers",
-      "community_name": "Bang Khen Community Center",
-      "recipient_address": "456 Bang Khen, Bangkok 10220",
+      "title": "Meal support for Lat Krabang Community Hub",
+      "community_name": "Lat Krabang Community Hub",
+      "recipient_address": "Lat Krabang, Bangkok 10520",
       "expected_delivery": "2025-01-23T12:00:00Z",
       "people_count": 300,
       "contact_phone": "0891234567",
       "notes": "Serving Bang Khen residents.",
       "created_at": "2024-12-20T14:20:00Z",
-      "created_by": "REC0000004"
+      "community_id": "COM0000002"
     }
   },
   {
@@ -71,7 +71,7 @@
       "contact_phone": "0865554321",
       "notes": "Flood recovery support in Pathum Thani.",
       "created_at": "2024-12-22T10:00:00Z",
-      "created_by": "REC0000005"
+      "community_id": "COM0000003"
     }
   },
   {
@@ -86,7 +86,7 @@
       "contact_phone": "0812223344",
       "notes": "Lat Krabang worker housing support.",
       "created_at": "2024-12-23T09:15:00Z",
-      "created_by": "REC0000006"
+      "community_id": "COM0000004"
     }
   },
   {
@@ -101,7 +101,8 @@
       "contact_phone": "0834445566",
       "notes": "Bang Na families affected by layoffs.",
       "created_at": "2024-12-24T16:40:00Z",
-      "created_by": "REC0000007"
+      "community_id": "COM0000005"
+
     }
   },
   {
@@ -116,7 +117,7 @@
       "contact_phone": "0877778899",
       "notes": "Samut Prakan coastal community needs.",
       "created_at": "2024-12-26T11:30:00Z",
-      "created_by": "REC0000008"
+      "community_id": "COM0000006"
     }
   },
   {
@@ -131,7 +132,7 @@
       "contact_phone": "0849991111",
       "notes": "Urgent need for households in Klong Toey.",
       "created_at": "2024-12-27T17:10:00Z",
-      "created_by": "REC0000001"
+      "community_id": "COM0000001"
     }
   },
   {
@@ -146,7 +147,7 @@
       "contact_phone": "0853332211",
       "notes": "Urgent need for households in Klong Toey.",
       "created_at": "2024-12-28T13:00:00Z",
-      "created_by": "REC0000002"
+      "community_id": "COM0000001"
     }
   },
   {
@@ -161,7 +162,7 @@
       "contact_phone": "0816667788",
       "notes": "Serving Bang Khen residents.",
       "created_at": "2024-12-29T10:45:00Z",
-      "created_by": "REC0000003"
+      "community_id": "COM0000002"
     }
   },
   {
@@ -176,7 +177,7 @@
       "contact_phone": "0898887766",
       "notes": "Serving Bang Khen residents.",
       "created_at": "2024-12-30T14:30:00Z",
-      "created_by": "REC0000004"
+      "community_id": "COM0000002"
     }
   },
   {
@@ -191,7 +192,7 @@
       "contact_phone": "0811112233",
       "notes": "Flood recovery support in Pathum Thani.",
       "created_at": "2025-01-02T10:00:00Z",
-      "created_by": "REC0000005"
+      "community_id": "COM0000003"
     }
   },
   {
@@ -206,7 +207,7 @@
       "contact_phone": "0822223344",
       "notes": "Lat Krabang worker housing support.",
       "created_at": "2025-01-03T09:30:00Z",
-      "created_by": "REC0000006"
+      "community_id": "COM0000004"
     }
   },
   {
@@ -221,7 +222,7 @@
       "contact_phone": "0833334455",
       "notes": "Bang Na families affected by layoffs.",
       "created_at": "2025-01-04T16:20:00Z",
-      "created_by": "REC0000007"
+      "community_id": "COM0000005"
     }
   },
   {
@@ -236,7 +237,7 @@
       "contact_phone": "0844445566",
       "notes": "Samut Prakan coastal community needs.",
       "created_at": "2025-01-05T08:10:00Z",
-      "created_by": "REC0000008"
+      "community_id": "COM0000006"
     }
   },
   {
@@ -251,7 +252,7 @@
       "contact_phone": "0855556677",
       "notes": "Urgent need for households in Klong Toey.",
       "created_at": "2025-01-06T14:00:00Z",
-      "created_by": "REC0000001"
+      "community_id": "COM0000001"
     }
   },
   {
@@ -266,7 +267,7 @@
       "contact_phone": "0866667788",
       "notes": "Urgent need for households in Klong Toey.",
       "created_at": "2025-01-07T09:45:00Z",
-      "created_by": "REC0000002"
+      "community_id": "COM0000001"
     }
   },
   {
@@ -281,22 +282,22 @@
       "contact_phone": "0877778899",
       "notes": "Serving Bang Khen residents.",
       "created_at": "2025-01-08T11:20:00Z",
-      "created_by": "REC0000003"
+      "community_id": "COM0000002"
     }
   },
   {
     "model": "donation_request.donationrequest",
     "pk": "REQ0000020",
     "fields": {
-      "title": "Meal support for university students",
-      "community_name": "Bang Khen Community Center",
-      "recipient_address": "456 Bang Khen, Bangkok 10220",
-      "expected_delivery": "2025-02-03T12:00:00Z",
+      "title": "Meal support for Bang Kapi Community Alliance",
+      "community_name": "Bang Kapi Community Alliance",
+      "recipient_address": "Bang Kapi, Bangkok 10240",
+      "expected_delivery": "2025-01-29T10:00:00Z",
       "people_count": 180,
       "contact_phone": "0888889900",
       "notes": "Serving Bang Khen residents.",
       "created_at": "2025-01-09T15:30:00Z",
-      "created_by": "REC0000004"
+      "community_id": "COM0000002"
     }
   },
   {
@@ -311,7 +312,7 @@
       "contact_phone": "0819990001",
       "notes": "Flood recovery support in Pathum Thani.",
       "created_at": "2025-01-10T10:40:00Z",
-      "created_by": "REC0000005"
+      "community_id": "COM0000003"
     }
   },
   {
@@ -326,7 +327,7 @@
       "contact_phone": "0821230987",
       "notes": "Lat Krabang worker housing support.",
       "created_at": "2025-01-11T09:00:00Z",
-      "created_by": "REC0000006"
+      "community_id": "COM0000004"
     }
   },
   {
@@ -341,7 +342,7 @@
       "contact_phone": "0812341122",
       "notes": "Bang Na families affected by layoffs.",
       "created_at": "2025-01-12T10:30:00Z",
-      "created_by": "REC0000007"
+      "community_id": "COM0000005"
     }
   },
   {
@@ -356,7 +357,7 @@
       "contact_phone": "0823456677",
       "notes": "Samut Prakan coastal community needs.",
       "created_at": "2025-01-13T09:00:00Z",
-      "created_by": "REC0000008"
+      "community_id": "COM0000006"
     }
   },
   {
@@ -371,7 +372,7 @@
       "contact_phone": "0834567788",
       "notes": "Urgent need for households in Klong Toey.",
       "created_at": "2025-01-14T14:15:00Z",
-      "created_by": "REC0000001"
+      "community_id": "COM0000001"
     }
   },
   {
@@ -386,22 +387,22 @@
       "contact_phone": "0845678899",
       "notes": "Urgent need for households in Klong Toey.",
       "created_at": "2025-01-15T08:40:00Z",
-      "created_by": "REC0000002"
+      "community_id": "COM0000001"
     }
   },
   {
     "model": "donation_request.donationrequest",
     "pk": "REQ0000027",
     "fields": {
-      "title": "Food assistance for migrant families",
-      "community_name": "Bang Khen Community Center",
-      "recipient_address": "456 Bang Khen, Bangkok 10220",
-      "expected_delivery": "2025-02-07T09:30:00Z",
+      "title": "Meal support for Bang Kruai Community Network",
+      "community_name": "Bang Kruai Community Network",
+      "recipient_address": "Bang Kruai, Nonthaburi 11130",
+      "expected_delivery": "2025-01-26T11:00:00Z",
       "people_count": 240,
       "contact_phone": "0856789900",
       "notes": "Serving Bang Khen residents.",
       "created_at": "2025-01-16T11:10:00Z",
-      "created_by": "REC0000003"
+      "community_id": "COM0000002"
     }
   },
   {
@@ -416,7 +417,7 @@
       "contact_phone": "0867890011",
       "notes": "Serving Bang Khen residents.",
       "created_at": "2025-01-17T16:00:00Z",
-      "created_by": "REC0000004"
+      "community_id": "COM0000002"
     }
   },
   {
@@ -431,22 +432,22 @@
       "contact_phone": "0878901122",
       "notes": "Flood recovery support in Pathum Thani.",
       "created_at": "2025-01-18T17:45:00Z",
-      "created_by": "REC0000005"
+      "community_id": "COM0000003"
     }
   },
   {
     "model": "donation_request.donationrequest",
     "pk": "REQ0000030",
     "fields": {
-      "title": "Meal support for border trade workers",
-      "community_name": "Lat Krabang Community Hub",
+      "title": "Meal support for Lat Krabang Airport Community",
+      "community_name": "Lat Krabang Airport Community",
       "recipient_address": "Lat Krabang, Bangkok 10520",
       "expected_delivery": "2025-02-09T10:00:00Z",
       "people_count": 275,
       "contact_phone": "0819023344",
       "notes": "Lat Krabang worker housing support.",
       "created_at": "2025-01-19T13:30:00Z",
-      "created_by": "REC0000006"
+      "community_id": "COM0000004"
     }
   }
 ]

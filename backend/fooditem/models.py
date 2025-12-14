@@ -1,6 +1,7 @@
 from django.db import models
 
 from donation.models import Donation
+from restaurant_chain.models import RestaurantChain
 from re_meals_api.id_utils import generate_prefixed_id
 
 
@@ -12,6 +13,12 @@ class FoodItem(models.Model):
     quantity = models.IntegerField()
     unit = models.CharField(max_length=20)
     expire_date = models.DateField()
+    # optional category for grouping (e.g., Vegan, Islamic)
+    CATEGORY_CHOICES = [
+        ("Vegan", "Vegan"),
+        ("Islamic", "Islamic"),
+    ]
+    category = models.CharField(max_length=32, choices=CATEGORY_CHOICES, null=True, blank=True)
 
     is_expired = models.BooleanField(default=False)
     is_claimed = models.BooleanField(default=False)
@@ -24,11 +31,24 @@ class FoodItem(models.Model):
         db_column="donation_id"
     )
 
+    chain = models.ForeignKey(
+        RestaurantChain,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column="chain_id",
+        related_name="food_items",
+    )
+
     class Meta:
         db_table = "fooditem"
         ordering = ["food_id"]
 
     def save(self, *args, **kwargs):
+        if self.donation and not self.chain:
+            restaurant = getattr(self.donation, "restaurant", None)
+            if restaurant and restaurant.chain:
+                self.chain = restaurant.chain
         if not self.food_id:
             self.food_id = generate_prefixed_id(
                 self.__class__,
@@ -40,4 +60,3 @@ class FoodItem(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.quantity} {self.unit})"
-

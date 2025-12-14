@@ -20,8 +20,8 @@ class WarehouseViewSet(viewsets.ModelViewSet):
         Get all food items currently in this warehouse.
         Returns items that are:
         - Delivered to this warehouse (via completed deliveries)
-        - Not expired
-        - Not distributed to community
+        - Includes expired items (flagged via `is_expired`)
+        - Includes claimed/distributed items so that admins have full visibility
         """
         warehouse = self.get_object()
         today = timezone.now().date()
@@ -33,23 +33,18 @@ class WarehouseViewSet(viewsets.ModelViewSet):
             status='delivered'
         ).values_list('donation_id', flat=True)
 
-        # Get food items from those donations that are:
-        # - Not expired
-        # - Not distributed to community
-        food_items = FoodItem.objects.filter(
-            donation__donation_id__in=delivered_to_warehouse,
-            is_distributed=False,
-            expire_date__gte=today
-        ).select_related('donation', 'donation__restaurant')
-
-        # Also update expired items
+        # Mark expired items
         expired_items = FoodItem.objects.filter(
             donation__donation_id__in=delivered_to_warehouse,
-            is_distributed=False,
             expire_date__lt=today,
             is_expired=False
         )
         expired_items.update(is_expired=True)
+
+        # Get food items from those donations, regardless of expiry/claim status.
+        food_items = FoodItem.objects.filter(
+            donation__donation_id__in=delivered_to_warehouse
+        ).select_related('donation', 'donation__restaurant')
 
         serializer = FoodItemSerializer(food_items, many=True)
 

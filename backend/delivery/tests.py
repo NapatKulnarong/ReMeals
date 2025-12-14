@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 from rest_framework.test import APITestCase, APIClient
 
-from users.models import User as DomainUser
+from users.models import Donor, Recipient, User as DomainUser
 from warehouse.models import Warehouse
 from community.models import Community
 from restaurants.models import Restaurant
@@ -49,7 +49,6 @@ class DeliveryAPITests(APITestCase):
         self.donation = Donation.objects.create(
             donation_id="DON001",
             restaurant=self.restaurant,
-            created_by=None,
         )
         self.donor_user = DomainUser.objects.create(
             user_id="USR0100",
@@ -71,8 +70,7 @@ class DeliveryAPITests(APITestCase):
             email="other@example.com",
             password="pw12345",
         )
-        self.donation.created_by = self.donor_user
-        self.donation.save()
+        Donor.objects.create(user=self.donor_user, restaurant_id=self.restaurant)
         self.delivery_user = DomainUser.objects.create(
             user_id="USR0001",
             username="recipient01",
@@ -113,7 +111,12 @@ class DeliveryAPITests(APITestCase):
             people_count=100,
             contact_phone="0999999999",
             notes="",
-            created_by=self.donor_user,
+            community=self.community,
+        )
+        Recipient.objects.create(
+            user=self.donor_user,
+            address="789 Request St",
+            donation_request=self.donation_request,
         )
 
     # 1. List endpoint returns a delivery with related IDs resolved
@@ -541,10 +544,17 @@ class DeliveryAPITests(APITestCase):
 
     # 31. Regular user sees only deliveries tied to their donations
     def test_regular_user_sees_their_donation_deliveries(self):
+        other_restaurant = Restaurant.objects.create(
+            restaurant_id="RES999",
+            address="99 Other St",
+            name="Other Eats",
+            branch_name="Branch",
+            is_chain=False,
+            chain=self.chain,
+        )
         other_donation = Donation.objects.create(
             donation_id="DON9999",
-            restaurant=self.restaurant,
-            created_by=self.other_user,
+            restaurant=other_restaurant,
         )
         other_delivery = Delivery.objects.create(
             delivery_id="DLV0999",
@@ -565,12 +575,11 @@ class DeliveryAPITests(APITestCase):
         self.assertIn(self.existing_delivery.delivery_id, delivery_ids)
         self.assertNotIn(other_delivery.delivery_id, delivery_ids)
 
-    # 32. Legacy donations without owner still appear for logged-in donors
-    def test_user_sees_legacy_donation_deliveries(self):
+    # 32. Donor sees deliveries for their restaurant
+    def test_donor_sees_restaurant_deliveries(self):
         legacy_donation = Donation.objects.create(
             donation_id="DON0700",
             restaurant=self.restaurant,
-            created_by=None,
         )
         legacy_delivery = Delivery.objects.create(
             delivery_id="DLV0700",

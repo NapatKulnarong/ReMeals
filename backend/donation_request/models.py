@@ -1,7 +1,7 @@
 from django.db import models
 
 from re_meals_api.id_utils import generate_prefixed_id
-from users.models import User
+from community.models import Community
 
 
 class DonationRequest(models.Model):
@@ -16,12 +16,11 @@ class DonationRequest(models.Model):
     contact_phone = models.CharField(max_length=30, blank=True)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+    community = models.ForeignKey(
+        Community,
+        on_delete=models.CASCADE,
         related_name="donation_requests",
+        db_column="community_id",
     )
 
     class Meta:

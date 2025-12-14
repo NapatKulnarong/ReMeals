@@ -85,8 +85,6 @@ export default function Sidebar({
   activeTab,
   onTabChange,
   onAuthClick,
-  onLogout,
-  onProfileClick,
   onSettingsClick,
   currentUser,
   tabs,

@@ -67,6 +67,15 @@ class FoodItemSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Quantity must not be negative.")
         return value
 
+    def validate_category(self, value):
+        # allow null/empty, otherwise ensure it matches one of the choices
+        if value in (None, ""):
+            return value
+        allowed = {c[0] for c in getattr(self.Meta.model, 'CATEGORY_CHOICES', [])}
+        if value not in allowed:
+            raise serializers.ValidationError(f"Invalid category. Allowed: {', '.join(sorted(allowed))}")
+        return value
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         food_id = data.get("food_id")

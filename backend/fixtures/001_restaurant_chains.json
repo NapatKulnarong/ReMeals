@@ -3,7 +3,7 @@
     "model": "restaurant_chain.restaurantchain",
     "pk": "CHA0000001",
     "fields": {
-      "chain_name": "KFC Thailand"
+      "chain_name": "KFC"
     }
   },
   {
@@ -24,21 +24,21 @@
     "model": "restaurant_chain.restaurantchain",
     "pk": "CHA0000004",
     "fields": {
-      "chain_name": "McDonald's Thailand"
+      "chain_name": "McDonald's"
     }
   },
   {
     "model": "restaurant_chain.restaurantchain",
     "pk": "CHA0000005",
     "fields": {
-      "chain_name": "Burger King Thailand"
+      "chain_name": "Burger King"
     }
   },
   {
     "model": "restaurant_chain.restaurantchain",
     "pk": "CHA0000006",
     "fields": {
-      "chain_name": "Starbucks Thailand"
+      "chain_name": "Starbucks"
     }
   },
   {
@@ -57,275 +57,16 @@
   },
   {
     "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000009",
-    "fields": {
-      "chain_name": "Swensen's Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
     "pk": "CHA0000010",
     "fields": {
-      "chain_name": "Bonchon Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000011",
-    "fields": {
-      "chain_name": "Auntie Anne's Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000012",
-    "fields": {
-      "chain_name": "Chester's Grill"
+      "chain_name": "Bonchon"
     }
   },
   {
     "model": "restaurant_chain.restaurantchain",
     "pk": "CHA0000013",
     "fields": {
-      "chain_name": "Subway Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000014",
-    "fields": {
-      "chain_name": "Dairy Queen Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000015",
-    "fields": {
-      "chain_name": "Krispy Kreme Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000016",
-    "fields": {
-      "chain_name": "Mister Donut Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000017",
-    "fields": {
-      "chain_name": "Hachiban Ramen Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000018",
-    "fields": {
-      "chain_name": "Pepper Lunch Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000019",
-    "fields": {
-      "chain_name": "Shabushi by Oishi"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000020",
-    "fields": {
-      "chain_name": "Oishi Buffet"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000021",
-    "fields": {
-      "chain_name": "S&P Restaurant Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000022",
-    "fields": {
-      "chain_name": "Black Canyon Coffee"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000023",
-    "fields": {
-      "chain_name": "After You Dessert Cafe"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000024",
-    "fields": {
-      "chain_name": "Greyhound Cafe Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000025",
-    "fields": {
-      "chain_name": "The Coffee Club Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000026",
-    "fields": {
-      "chain_name": "The Alley Milk Tea Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000027",
-    "fields": {
-      "chain_name": "Texas Chicken Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000028",
-    "fields": {
-      "chain_name": "Yoshinoya Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000029",
-    "fields": {
-      "chain_name": "Katsuya Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000030",
-    "fields": {
-      "chain_name": "Sushi Express Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000031",
-    "fields": {
-      "chain_name": "Santa Fe Steak Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000032",
-    "fields": {
-      "chain_name": "Cafe Amazon"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000033",
-    "fields": {
-      "chain_name": "Tim Ho Wan Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000034",
-    "fields": {
-      "chain_name": "Carl's Jr. Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000035",
-    "fields": {
-      "chain_name": "Ootoya Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000036",
-    "fields": {
-      "chain_name": "Fuji Japanese Restaurant"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000037",
-    "fields": {
-      "chain_name": "Hot Pot Buffet"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000038",
-    "fields": {
-      "chain_name": "Seefah Restaurant"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000039",
-    "fields": {
-      "chain_name": "Somtam Nua"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000041",
-    "fields": {
-      "chain_name": "Haidilao Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000043",
-    "fields": {
-      "chain_name": "Pizza Hut Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000045",
-    "fields": {
-      "chain_name": "Nara Thai Cuisine"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000047",
-    "fields": {
-      "chain_name": "The Coffee Bean & Tea Leaf Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000049",
-    "fields": {
-      "chain_name": "Sushiro Thailand"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000053",
-    "fields": {
-      "chain_name": "Kyo Roll En"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000054",
-    "fields": {
-      "chain_name": "ChaTraMue Flagship Store"
-    }
-  },
-  {
-    "model": "restaurant_chain.restaurantchain",
-    "pk": "CHA0000055",
-    "fields": {
-      "chain_name": "RedSun Thailand"
+      "chain_name": "Subway"
     }
   }
 ]

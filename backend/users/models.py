@@ -12,6 +12,8 @@ class User(models.Model):
     phone = models.CharField(max_length=10)
     email = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=128)
+    is_donor = models.BooleanField(default=False)
+    is_recipient = models.BooleanField(default=False)
     restaurant = models.ForeignKey(
         Restaurant,
         on_delete=models.SET_NULL,
@@ -51,6 +53,15 @@ class Donor(models.Model):
     def __str__(self):
         return f"Donor {self.user.user_id}"
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        updated_fields = []
+        if not self.user.is_donor:
+            self.user.is_donor = True
+            updated_fields.append("is_donor")
+        if updated_fields:
+            self.user.save(update_fields=updated_fields)
+
 
 class DeliveryStaff(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='delivery_roles')
@@ -64,13 +75,13 @@ class DeliveryStaff(models.Model):
 class Recipient(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recipient_roles')
     address = models.CharField(max_length=300)
-    community_id = models.ForeignKey(
-        "community.Community",
-        on_delete=models.CASCADE,
-        related_name="recipients",
+    donation_request = models.ForeignKey(
+        "donation_request.DonationRequest",
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        db_column="community_id",
+        related_name="recipients",
+        db_column="request_id",
     )
 
     class Meta:
@@ -80,3 +91,12 @@ class Recipient(models.Model):
 
     def __str__(self):
         return f"Recipient {self.user.user_id}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        updated_fields = []
+        if not self.user.is_recipient:
+            self.user.is_recipient = True
+            updated_fields.append("is_recipient")
+        if updated_fields:
+            self.user.save(update_fields=updated_fields)

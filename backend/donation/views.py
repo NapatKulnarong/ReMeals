@@ -7,7 +7,6 @@ from rest_framework.response import Response
 
 from .models import Donation
 from .serializers import DonationSerializer
-from users.models import User
 
 
 def _parse_datetime_param(value):
@@ -35,26 +34,8 @@ class DonationViewSet(viewsets.ModelViewSet):
             return False
         return str(value).lower() in {"true", "1", "yes"}
 
-    def _get_request_user(self):
-        user_id = self.request.headers.get("X-USER-ID")
-        if not user_id:
-            return None
-        return User.objects.filter(user_id=user_id).first()
-
     def _is_admin(self):
         return self._str_to_bool(self.request.headers.get("X-USER-IS-ADMIN"))
-
-    def _can_manage(self, donation):
-        if self._is_admin():
-            return True
-        request_user = self._get_request_user()
-        if not request_user:
-            return False
-        # If created_by is not set (legacy donations), allow logged-in users to manage
-        if donation.created_by_id is None:
-            return True
-        # Otherwise, must be the owner
-        return donation.created_by_id == request_user.user_id
 
     def _ensure_manageable(self, donation):
         if donation.status != "pending":
@@ -62,7 +43,7 @@ class DonationViewSet(viewsets.ModelViewSet):
                 {"detail": "Only pending donations can be modified or deleted."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if not self._can_manage(donation):
+        if not self._is_admin():
             return Response(
                 {"detail": "You do not have permission to modify this donation."},
                 status=status.HTTP_403_FORBIDDEN,
@@ -100,9 +81,6 @@ class DonationViewSet(viewsets.ModelViewSet):
             qs = qs.filter(donated_at__lte=date_to)
 
         return qs
-
-    def perform_create(self, serializer):
-        serializer.save(created_by=self._get_request_user())
 
     def update(self, request, *args, **kwargs):
         donation = self.get_object()

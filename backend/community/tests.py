@@ -8,6 +8,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from donation_request.models import DonationRequest
 from users.models import Recipient, User
 from warehouse.models import Warehouse
 from .models import Community
@@ -41,40 +42,51 @@ class RecipientCommunityWarehouseTests(TestCase):
             population=500,
             warehouse_id=self.warehouse,
         )
+        self.donation_request = DonationRequest.objects.create(
+            title="Relief for Test Community",
+            community_name=self.community.name,
+            recipient_address="789 Donation Dr",
+            expected_delivery=timezone.now() + timedelta(days=1),
+            people_count=10,
+            contact_phone="0123456789",
+            notes="Test donation request",
+            community=self.community,
+        )
 
-    # 1. Recipient links to the community and its warehouse
+    # 1. Recipient links to the community and its warehouse through a donation request
     def test_recipient_links_to_community_and_warehouse(self):
         recipient = Recipient.objects.create(
             user=self.user,
             address="789 Recipient St",
-            community_id=self.community,
+            donation_request=self.donation_request,
         )
 
-        self.assertEqual(recipient.community_id, self.community)
-        self.assertEqual(recipient.community_id.warehouse_id, self.warehouse)
+        self.assertEqual(recipient.donation_request, self.donation_request)
+        self.assertEqual(recipient.donation_request.community, self.community)
+        self.assertEqual(
+            recipient.donation_request.community.warehouse_id, self.warehouse
+        )
 
     # 2. Warehouse with linked community cannot be deleted
     def test_cannot_delete_warehouse_with_linked_community(self):
-        Recipient.objects.create(
-            user=self.user,
-            address="789 Recipient St",
-            community_id=self.community,
-        )
-
         with self.assertRaises(ProtectedError):
             self.warehouse.delete()
 
-    # 3. Deleting a community removes its recipient
-    def test_deleting_community_removes_recipient(self):
+    # 3. Deleting a community clears related donation requests for recipients
+    def test_deleting_community_clears_recipient_donation_request(self):
         recipient = Recipient.objects.create(
             user=self.user,
             address="789 Recipient St",
-            community_id=self.community,
+            donation_request=self.donation_request,
         )
 
         self.community.delete()
 
-        self.assertFalse(Recipient.objects.filter(pk=recipient.pk).exists())
+        recipient.refresh_from_db()
+        self.assertIsNone(recipient.donation_request)
+        self.assertFalse(
+            DonationRequest.objects.filter(pk=self.donation_request.pk).exists()
+        )
 
     # 4. Serializer representation includes IDs and timestamps
     def test_community_serializer_representation(self):

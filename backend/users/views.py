@@ -99,8 +99,6 @@ def signup(request):
                 is_chain=bool(branch),
                 chain=chain,
             )
-    else:
-        return Response({"error": "Restaurant information is required"}, status=400)
 
     user = User.objects.create(
         user_id=random_id,
@@ -113,7 +111,7 @@ def signup(request):
         password=make_password(data.get("password")),
         restaurant=restaurant,
         branch=branch,
-        restaurant_address=restaurant_address or restaurant.address if restaurant else "",
+        restaurant_address=restaurant_address or (restaurant.address if restaurant else ""),
     )
 
     is_admin = False

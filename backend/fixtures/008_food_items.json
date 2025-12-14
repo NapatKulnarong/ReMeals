@@ -6,11 +6,13 @@
       "name": "Original Recipe Chicken Buckets",
       "quantity": 20,
       "unit": "bucket",
-      "expire_date": "2025-01-15",
+      "expire_date": "2026-01-15",
+  "category": "Islamic",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000001"
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
     }
   },
   {
@@ -20,11 +22,12 @@
       "name": "Shrimp Donuts",
       "quantity": 32,
       "unit": "box",
-      "expire_date": "2025-01-16",
+      "expire_date": "2026-01-16",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000001"
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
     }
   },
   {
@@ -34,11 +37,12 @@
       "name": "Spicy Zinger Burgers",
       "quantity": 18,
       "unit": "set",
-      "expire_date": "2025-01-17",
+      "expire_date": "2026-01-17",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000002"
+      "donation": "DON0000002",
+      "chain": "CHA0000001"
     }
   },
   {
@@ -48,11 +52,12 @@
       "name": "French Fries Family Packs",
       "quantity": 25,
       "unit": "bag",
-      "expire_date": "2025-01-18",
+      "expire_date": "2026-01-18",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": true,
-      "donation": "DON0000002"
+      "donation": "DON0000002",
+      "chain": "CHA0000001"
     }
   },
   {
@@ -62,11 +67,12 @@
       "name": "Deluxe Pizza Slices",
       "quantity": 60,
       "unit": "slice",
-      "expire_date": "2025-01-19",
+      "expire_date": "2026-01-19",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000003"
+      "donation": "DON0000003",
+      "chain": "CHA0000002"
     }
   },
   {
@@ -76,11 +82,13 @@
       "name": "Cheesy Garlic Bread Boxes",
       "quantity": 35,
       "unit": "box",
-      "expire_date": "2025-01-13",
+      "expire_date": "2025-12-05",
+  "category": "Vegan",
       "is_expired": true,
       "is_claimed": false,
       "is_distributed": true,
-      "donation": "DON0000003"
+      "donation": "DON0000003",
+      "chain": "CHA0000002"
     }
   },
   {
@@ -90,11 +98,12 @@
       "name": "Grilled Chicken Salads",
       "quantity": 28,
       "unit": "bowl",
-      "expire_date": "2025-01-20",
+      "expire_date": "2026-01-21",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000004"
+      "donation": "DON0000004",
+      "chain": "CHA0000003"
     }
   },
   {
@@ -104,11 +113,12 @@
       "name": "Baked Potato Boats",
       "quantity": 20,
       "unit": "tray",
-      "expire_date": "2025-01-21",
+      "expire_date": "2026-01-22",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": true,
-      "donation": "DON0000004"
+      "donation": "DON0000004",
+      "chain": "CHA0000003"
     }
   },
   {
@@ -118,11 +128,13 @@
       "name": "Hot Wings Party Pieces",
       "quantity": 50,
       "unit": "piece",
-      "expire_date": "2025-01-22",
+      "expire_date": "2026-01-23",
+  "category": "Islamic",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000005"
+      "donation": "DON0000005",
+      "chain": "CHA0000001"
     }
   },
   {
@@ -132,11 +144,12 @@
       "name": "Coleslaw Cups",
       "quantity": 45,
       "unit": "cup",
-      "expire_date": "2025-01-12",
-      "is_expired": true,
+      "expire_date": "2026-01-24",
+      "is_expired": false,
       "is_claimed": true,
       "is_distributed": true,
-      "donation": "DON0000005"
+      "donation": "DON0000005",
+      "chain": "CHA0000001"
     }
   },
   {
@@ -146,11 +159,12 @@
       "name": "Rice Bowl Sets",
       "quantity": 32,
       "unit": "set",
-      "expire_date": "2025-01-23",
+      "expire_date": "2026-01-25",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000006"
+      "donation": "DON0000006",
+      "chain": "CHA0000001"
     }
   },
   {
@@ -160,11 +174,13 @@
       "name": "Portuguese Egg Tarts",
       "quantity": 48,
       "unit": "piece",
-      "expire_date": "2025-01-24",
+      "expire_date": "2026-01-26",
+  "category": "Vegan",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000006"
+      "donation": "DON0000006",
+      "chain": "CHA0000001"
     }
   },
   {
@@ -174,11 +190,12 @@
       "name": "Pepperoni Pizza Boxes",
       "quantity": 18,
       "unit": "box",
-      "expire_date": "2025-01-25",
+      "expire_date": "2026-01-27",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": true,
-      "donation": "DON0000007"
+      "donation": "DON0000007",
+      "chain": "CHA0000002"
     }
   },
   {
@@ -188,11 +205,12 @@
       "name": "Creamy Pasta Trays",
       "quantity": 22,
       "unit": "tray",
-      "expire_date": "2025-01-26",
+      "expire_date": "2026-01-28",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000007"
+      "donation": "DON0000007",
+      "chain": "CHA0000002"
     }
   },
   {
@@ -202,11 +220,12 @@
       "name": "Seafood Extravaganza Pizzas",
       "quantity": 15,
       "unit": "box",
-      "expire_date": "2025-01-27",
+      "expire_date": "2026-01-29",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000008"
+      "donation": "DON0000008",
+      "chain": "CHA0000002"
     }
   },
   {
@@ -216,11 +235,12 @@
       "name": "Caesar Salad Kits",
       "quantity": 30,
       "unit": "kit",
-      "expire_date": "2025-01-28",
+      "expire_date": "2026-01-30",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000008"
+      "donation": "DON0000008",
+      "chain": "CHA0000002"
     }
   },
   {
@@ -230,11 +250,12 @@
       "name": "Salad Bar Bowls",
       "quantity": 40,
       "unit": "bowl",
-      "expire_date": "2025-01-29",
+      "expire_date": "2026-01-31",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": true,
-      "donation": "DON0000009"
+      "donation": "DON0000009",
+      "chain": "CHA0000003"
     }
   },
   {
@@ -244,11 +265,12 @@
       "name": "Minestrone Soup Pots",
       "quantity": 18,
       "unit": "pot",
-      "expire_date": "2025-01-13",
+      "expire_date": "2025-12-05",
       "is_expired": true,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000009"
+      "donation": "DON0000009",
+      "chain": "CHA0000003"
     }
   },
   {
@@ -258,11 +280,12 @@
       "name": "Grilled Salmon Portions",
       "quantity": 24,
       "unit": "portion",
-      "expire_date": "2025-01-30",
+      "expire_date": "2026-02-02",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": true,
-      "donation": "DON0000010"
+      "donation": "DON0000010",
+      "chain": "CHA0000003"
     }
   },
   {
@@ -272,11 +295,12 @@
       "name": "Garlic Butter Bread Loaves",
       "quantity": 36,
       "unit": "loaf",
-      "expire_date": "2025-02-01",
+      "expire_date": "2026-02-03",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000010"
+      "donation": "DON0000010",
+      "chain": "CHA0000003"
     }
   },
   {
@@ -286,11 +310,12 @@
       "name": "Chicken McNugget Boxes",
       "quantity": 50,
       "unit": "box",
-      "expire_date": "2025-01-31",
+      "expire_date": "2026-02-04",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000011"
+      "donation": "DON0000011",
+      "chain": "CHA0000004"
     }
   },
   {
@@ -300,11 +325,12 @@
       "name": "Apple Pie Desserts",
       "quantity": 40,
       "unit": "piece",
-      "expire_date": "2025-02-03",
+      "expire_date": "2026-02-05",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000011"
+      "donation": "DON0000011",
+      "chain": "CHA0000004"
     }
   },
   {
@@ -314,11 +340,12 @@
       "name": "Breakfast McMuffins",
       "quantity": 30,
       "unit": "set",
-      "expire_date": "2025-01-12",
-      "is_expired": true,
+      "expire_date": "2026-02-06",
+      "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000012"
+      "donation": "DON0000012",
+      "chain": "CHA0000004"
     }
   },
   {
@@ -328,11 +355,12 @@
       "name": "Orange Juice Bottles",
       "quantity": 35,
       "unit": "bottle",
-      "expire_date": "2025-02-05",
+      "expire_date": "2026-02-07",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000012"
+      "donation": "DON0000012",
+      "chain": "CHA0000004"
     }
   },
   {
@@ -342,11 +370,12 @@
       "name": "Whopper Combo Sets",
       "quantity": 26,
       "unit": "set",
-      "expire_date": "2025-02-06",
+      "expire_date": "2026-02-08",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000013"
+      "donation": "DON0000013",
+      "chain": "CHA0000005"
     }
   },
   {
@@ -356,11 +385,12 @@
       "name": "Chicken Fries Buckets",
       "quantity": 30,
       "unit": "bucket",
-      "expire_date": "2025-02-07",
+      "expire_date": "2026-02-09",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000013"
+      "donation": "DON0000013",
+      "chain": "CHA0000005"
     }
   },
   {
@@ -370,11 +400,12 @@
       "name": "Onion Rings Trays",
       "quantity": 18,
       "unit": "tray",
-      "expire_date": "2025-02-08",
+      "expire_date": "2026-02-10",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": true,
-      "donation": "DON0000013"
+      "donation": "DON0000013",
+      "chain": "CHA0000005"
     }
   },
   {
@@ -384,11 +415,12 @@
       "name": "Bacon King Burgers",
       "quantity": 20,
       "unit": "set",
-      "expire_date": "2025-02-09",
+      "expire_date": "2026-02-11",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000014"
+      "donation": "DON0000014",
+      "chain": "CHA0000005"
     }
   },
   {
@@ -398,11 +430,12 @@
       "name": "Crispy Chicken Sandwich Packs",
       "quantity": 24,
       "unit": "pack",
-      "expire_date": "2025-02-10",
+      "expire_date": "2026-02-12",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000014"
+      "donation": "DON0000014",
+      "chain": "CHA0000005"
     }
   },
   {
@@ -412,11 +445,12 @@
       "name": "Soft Serve Dessert Cups",
       "quantity": 40,
       "unit": "cup",
-      "expire_date": "2025-02-06",
+      "expire_date": "2025-12-05",
       "is_expired": true,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000014"
+      "donation": "DON0000014",
+      "chain": "CHA0000005"
     }
   },
   {
@@ -426,11 +460,12 @@
       "name": "Cold Brew Coffee Cambros",
       "quantity": 10,
       "unit": "cambro",
-      "expire_date": "2025-02-11",
+      "expire_date": "2026-02-14",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": true,
-      "donation": "DON0000015"
+      "donation": "DON0000015",
+      "chain": "CHA0000006"
     }
   },
   {
@@ -440,11 +475,12 @@
       "name": "Blueberry Muffin Trays",
       "quantity": 16,
       "unit": "tray",
-      "expire_date": "2025-02-12",
+      "expire_date": "2026-02-15",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000015"
+      "donation": "DON0000015",
+      "chain": "CHA0000006"
     }
   },
   {
@@ -454,11 +490,12 @@
       "name": "Matcha Latte Bottles",
       "quantity": 28,
       "unit": "bottle",
-      "expire_date": "2025-02-13",
+      "expire_date": "2026-02-16",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000016"
+      "donation": "DON0000016",
+      "chain": "CHA0000006"
     }
   },
   {
@@ -468,11 +505,12 @@
       "name": "Spinach Feta Wrap Boxes",
       "quantity": 22,
       "unit": "box",
-      "expire_date": "2025-02-14",
+      "expire_date": "2026-02-17",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": true,
-      "donation": "DON0000016"
+      "donation": "DON0000016",
+      "chain": "CHA0000006"
     }
   },
   {
@@ -482,11 +520,12 @@
       "name": "Hot Pot Broth Containers",
       "quantity": 15,
       "unit": "container",
-      "expire_date": "2025-02-15",
+      "expire_date": "2026-02-18",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000017"
+      "donation": "DON0000017",
+      "chain": "CHA0000007"
     }
   },
   {
@@ -496,11 +535,12 @@
       "name": "Fresh Vegetable Platters",
       "quantity": 25,
       "unit": "platter",
-      "expire_date": "2025-02-16",
+      "expire_date": "2026-02-19",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000017"
+      "donation": "DON0000017",
+      "chain": "CHA0000007"
     }
   },
   {
@@ -510,11 +550,12 @@
       "name": "Premium Meat Platters",
       "quantity": 18,
       "unit": "platter",
-      "expire_date": "2025-02-17",
+      "expire_date": "2026-02-20",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": true,
-      "donation": "DON0000017"
+      "donation": "DON0000017",
+      "chain": "CHA0000007"
     }
   },
   {
@@ -524,11 +565,12 @@
       "name": "Marinated Pork Grill Sets",
       "quantity": 27,
       "unit": "set",
-      "expire_date": "2025-02-18",
+      "expire_date": "2026-02-21",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000018"
+      "donation": "DON0000018",
+      "chain": "CHA0000008"
     }
   },
   {
@@ -538,11 +580,12 @@
       "name": "Seafood Combo Platters",
       "quantity": 20,
       "unit": "platter",
-      "expire_date": "2025-02-19",
+      "expire_date": "2026-02-22",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000018"
+      "donation": "DON0000018",
+      "chain": "CHA0000008"
     }
   },
   {
@@ -552,11 +595,12 @@
       "name": "Soy Garlic Wing Trays",
       "quantity": 32,
       "unit": "tray",
-      "expire_date": "2025-02-20",
+      "expire_date": "2026-02-23",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000019"
+      "donation": "DON0000019",
+      "chain": "CHA0000010"
     }
   },
   {
@@ -566,11 +610,12 @@
       "name": "Hot Spicy Wing Trays",
       "quantity": 28,
       "unit": "tray",
-      "expire_date": "2025-02-21",
+      "expire_date": "2026-02-24",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000019"
+      "donation": "DON0000019",
+      "chain": "CHA0000010"
     }
   },
   {
@@ -580,11 +625,12 @@
       "name": "Kimchi Side Dish Tubs",
       "quantity": 40,
       "unit": "tub",
-      "expire_date": "2025-02-18",
+      "expire_date": "2025-12-05",
       "is_expired": true,
       "is_claimed": false,
       "is_distributed": true,
-      "donation": "DON0000019"
+      "donation": "DON0000019",
+      "chain": "CHA0000010"
     }
   },
   {
@@ -594,11 +640,12 @@
       "name": "Footlong Sandwich Packs",
       "quantity": 24,
       "unit": "pack",
-      "expire_date": "2025-02-22",
+      "expire_date": "2026-02-26",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000020"
+      "donation": "DON0000020",
+      "chain": "CHA0000013"
     }
   },
   {
@@ -608,11 +655,12 @@
       "name": "Cookie Assortment Boxes",
       "quantity": 30,
       "unit": "box",
-      "expire_date": "2025-02-23",
+      "expire_date": "2026-02-27",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000020"
+      "donation": "DON0000020",
+      "chain": "CHA0000013"
     }
   },
   {
@@ -622,11 +670,12 @@
       "name": "Crispy Chicken Party Buckets",
       "quantity": 22,
       "unit": "bucket",
-      "expire_date": "2025-02-24",
+      "expire_date": "2026-02-28",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000021"
+      "donation": "DON0000021",
+      "chain": "CHA0000001"
     }
   },
   {
@@ -636,11 +685,12 @@
       "name": "Buttermilk Biscuit Packs",
       "quantity": 40,
       "unit": "pack",
-      "expire_date": "2025-02-25",
+      "expire_date": "2026-03-01",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000021"
+      "donation": "DON0000021",
+      "chain": "CHA0000001"
     }
   },
   {
@@ -650,11 +700,12 @@
       "name": "Spicy Popcorn Chicken Cups",
       "quantity": 36,
       "unit": "cup",
-      "expire_date": "2025-02-20",
-      "is_expired": true,
+      "expire_date": "2026-03-02",
+      "is_expired": false,
       "is_claimed": false,
       "is_distributed": true,
-      "donation": "DON0000021"
+      "donation": "DON0000021",
+      "chain": "CHA0000001"
     }
   },
   {
@@ -664,11 +715,12 @@
       "name": "Thai Seafood Pizza Slices",
       "quantity": 48,
       "unit": "slice",
-      "expire_date": "2025-02-26",
+      "expire_date": "2026-03-03",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000022"
+      "donation": "DON0000022",
+      "chain": "CHA0000002"
     }
   },
   {
@@ -678,11 +730,12 @@
       "name": "Stuffed Crust Pizza Boxes",
       "quantity": 20,
       "unit": "box",
-      "expire_date": "2025-02-27",
+      "expire_date": "2026-03-04",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000022"
+      "donation": "DON0000022",
+      "chain": "CHA0000002"
     }
   },
   {
@@ -692,11 +745,12 @@
       "name": "Garlic Bread Twist Bags",
       "quantity": 30,
       "unit": "bag",
-      "expire_date": "2025-02-28",
+      "expire_date": "2026-03-05",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": true,
-      "donation": "DON0000022"
+      "donation": "DON0000022",
+      "chain": "CHA0000002"
     }
   },
   {
@@ -706,11 +760,12 @@
       "name": "Grilled Sirloin Portions",
       "quantity": 26,
       "unit": "portion",
-      "expire_date": "2025-03-01",
+      "expire_date": "2026-03-06",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000023"
+      "donation": "DON0000023",
+      "chain": "CHA0000003"
     }
   },
   {
@@ -720,11 +775,12 @@
       "name": "Roasted Vegetable Medleys",
       "quantity": 24,
       "unit": "tray",
-      "expire_date": "2025-02-19",
-      "is_expired": true,
+      "expire_date": "2026-03-07",
+      "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000023"
+      "donation": "DON0000023",
+      "chain": "CHA0000003"
     }
   },
   {
@@ -734,11 +790,12 @@
       "name": "Baked Potato Soup Tubs",
       "quantity": 18,
       "unit": "tub",
-      "expire_date": "2025-03-02",
+      "expire_date": "2026-03-08",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": true,
-      "donation": "DON0000023"
+      "donation": "DON0000023",
+      "chain": "CHA0000003"
     }
   },
   {
@@ -748,11 +805,12 @@
       "name": "Big Mac Combo Kits",
       "quantity": 34,
       "unit": "kit",
-      "expire_date": "2025-03-03",
+      "expire_date": "2026-03-09",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000024"
+      "donation": "DON0000024",
+      "chain": "CHA0000004"
     }
   },
   {
@@ -762,11 +820,12 @@
       "name": "Apple Slices Snack Packs",
       "quantity": 42,
       "unit": "pack",
-      "expire_date": "2025-02-22",
-      "is_expired": true,
+      "expire_date": "2026-03-10",
+      "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000024"
+      "donation": "DON0000024",
+      "chain": "CHA0000004"
     }
   },
   {
@@ -776,11 +835,12 @@
       "name": "Chocolate Sundae Cups",
       "quantity": 28,
       "unit": "cup",
-      "expire_date": "2025-03-04",
+      "expire_date": "2026-03-11",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": true,
-      "donation": "DON0000024"
+      "donation": "DON0000024",
+      "chain": "CHA0000004"
     }
   },
   {
@@ -790,11 +850,12 @@
       "name": "BBQ Bacon King Sets",
       "quantity": 25,
       "unit": "set",
-      "expire_date": "2025-03-05",
+      "expire_date": "2026-03-12",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000025"
+      "donation": "DON0000025",
+      "chain": "CHA0000005"
     }
   },
   {
@@ -804,11 +865,12 @@
       "name": "French Toast Sticks Boxes",
       "quantity": 30,
       "unit": "box",
-      "expire_date": "2025-02-21",
-      "is_expired": true,
+      "expire_date": "2026-03-13",
+      "is_expired": false,
       "is_claimed": false,
       "is_distributed": true,
-      "donation": "DON0000025"
+      "donation": "DON0000025",
+      "chain": "CHA0000005"
     }
   },
   {
@@ -818,11 +880,12 @@
       "name": "Frozen Cola Mix Bags",
       "quantity": 16,
       "unit": "bag",
-      "expire_date": "2025-03-06",
+      "expire_date": "2026-03-14",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000025"
+      "donation": "DON0000025",
+      "chain": "CHA0000005"
     }
   },
   {
@@ -832,11 +895,12 @@
       "name": "Loaded Onion Ring Buckets",
       "quantity": 24,
       "unit": "bucket",
-      "expire_date": "2025-03-05",
+      "expire_date": "2026-03-15",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000025"
+      "donation": "DON0000025",
+      "chain": "CHA0000005"
     }
   },
   {
@@ -846,11 +910,12 @@
       "name": "King Fusion Dessert Packs",
       "quantity": 18,
       "unit": "pack",
-      "expire_date": "2025-03-06",
+      "expire_date": "2026-03-16",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": true,
-      "donation": "DON0000025"
+      "donation": "DON0000025",
+      "chain": "CHA0000005"
     }
   },
   {
@@ -860,11 +925,12 @@
       "name": "Mocha Shake Syrup Bags",
       "quantity": 14,
       "unit": "bag",
-      "expire_date": "2025-02-24",
-      "is_expired": true,
+      "expire_date": "2026-03-17",
+      "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000025"
+      "donation": "DON0000025",
+      "chain": "CHA0000005"
     }
   },
   {
@@ -874,11 +940,12 @@
       "name": "Nitro Cold Brew Kegs",
       "quantity": 6,
       "unit": "keg",
-      "expire_date": "2025-03-07",
+      "expire_date": "2026-03-18",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": true,
-      "donation": "DON0000026"
+      "donation": "DON0000026",
+      "chain": "CHA0000006"
     }
   },
   {
@@ -888,11 +955,12 @@
       "name": "Vegan Sandwich Wrap Cases",
       "quantity": 18,
       "unit": "case",
-      "expire_date": "2025-03-08",
+      "expire_date": "2026-03-19",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000026"
+      "donation": "DON0000026",
+      "chain": "CHA0000006"
     }
   },
   {
@@ -902,11 +970,12 @@
       "name": "Chocolate Croissant Trays",
       "quantity": 20,
       "unit": "tray",
-      "expire_date": "2025-02-26",
-      "is_expired": true,
+      "expire_date": "2026-03-20",
+      "is_expired": false,
       "is_claimed": false,
       "is_distributed": true,
-      "donation": "DON0000026"
+      "donation": "DON0000026",
+      "chain": "CHA0000006"
     }
   },
   {
@@ -916,11 +985,12 @@
       "name": "Roasted Duck Slice Platters",
       "quantity": 22,
       "unit": "platter",
-      "expire_date": "2025-03-09",
+      "expire_date": "2026-03-21",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000027"
+      "donation": "DON0000027",
+      "chain": "CHA0000007"
     }
   },
   {
@@ -930,11 +1000,12 @@
       "name": "Fresh Noodle Bundles",
       "quantity": 35,
       "unit": "bundle",
-      "expire_date": "2025-03-04",
+      "expire_date": "2026-03-22",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000027"
+      "donation": "DON0000027",
+      "chain": "CHA0000007"
     }
   },
   {
@@ -944,11 +1015,12 @@
       "name": "Herbal Broth Sachet Packs",
       "quantity": 40,
       "unit": "pack",
-      "expire_date": "2025-02-25",
-      "is_expired": true,
+      "expire_date": "2026-03-23",
+      "is_expired": false,
       "is_claimed": false,
       "is_distributed": true,
-      "donation": "DON0000027"
+      "donation": "DON0000027",
+      "chain": "CHA0000007"
     }
   },
   {
@@ -958,11 +1030,12 @@
       "name": "Beef Slice Boats",
       "quantity": 28,
       "unit": "boat",
-      "expire_date": "2025-03-10",
+      "expire_date": "2026-03-24",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000028"
+      "donation": "DON0000028",
+      "chain": "CHA0000008"
     }
   },
   {
@@ -972,11 +1045,12 @@
       "name": "Vegetable Basket Refills",
       "quantity": 32,
       "unit": "basket",
-      "expire_date": "2025-03-03",
+      "expire_date": "2026-03-25",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": true,
-      "donation": "DON0000028"
+      "donation": "DON0000028",
+      "chain": "CHA0000008"
     }
   },
   {
@@ -986,11 +1060,12 @@
       "name": "Signature Sauce Gallons",
       "quantity": 12,
       "unit": "gallon",
-      "expire_date": "2025-03-12",
+      "expire_date": "2026-03-26",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": false,
-      "donation": "DON0000028"
+      "donation": "DON0000028",
+      "chain": "CHA0000008"
     }
   },
   {
@@ -1000,11 +1075,12 @@
       "name": "Honey Garlic Drumette Trays",
       "quantity": 30,
       "unit": "tray",
-      "expire_date": "2025-03-11",
+      "expire_date": "2026-03-27",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000029"
+      "donation": "DON0000029",
+      "chain": "CHA0000010"
     }
   },
   {
@@ -1014,11 +1090,12 @@
       "name": "Pickled Radish Packs",
       "quantity": 45,
       "unit": "pack",
-      "expire_date": "2025-03-02",
+      "expire_date": "2026-03-28",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": true,
-      "donation": "DON0000029"
+      "donation": "DON0000029",
+      "chain": "CHA0000010"
     }
   },
   {
@@ -1028,11 +1105,12 @@
       "name": "Whole Wheat Bread Cases",
       "quantity": 26,
       "unit": "case",
-      "expire_date": "2025-03-05",
+      "expire_date": "2026-03-29",
       "is_expired": false,
       "is_claimed": false,
       "is_distributed": false,
-      "donation": "DON0000030"
+      "donation": "DON0000030",
+      "chain": "CHA0000013"
     }
   },
   {
@@ -1042,11 +1120,12 @@
       "name": "Chopped Veggie Prep Tubs",
       "quantity": 20,
       "unit": "tub",
-      "expire_date": "2025-02-28",
+      "expire_date": "2026-03-30",
       "is_expired": false,
       "is_claimed": true,
       "is_distributed": true,
-      "donation": "DON0000030"
+      "donation": "DON0000030",
+      "chain": "CHA0000013"
     }
   }
 ]
