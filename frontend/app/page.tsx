@@ -5807,7 +5807,8 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
     if (!cat) return cat;
     // Internally we use "Vegan"; display as "Vegetarian" per request
     if (cat === "Vegan") return "Vegetarian";
-    return cat;
+    // Normalize casing for display (e.g. "islamic" -> "Islamic")
+    return cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase();
   };
 
   const groupItemsByCategory = (items: FoodItemApiRecord[]) => {
@@ -5900,7 +5901,7 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
         </div>
       </div>
 
-      <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[28px] border border-[#CFE6D8] bg-[#F6FBF7] p-6 shadow-lg shadow-[#B6DEC8]/30">
+  <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-[28px] border border-[#CFE6D8] bg-[#F6FBF7] p-6 shadow-lg shadow-[#B6DEC8]/30">
         {/* header is sticky so controls don't shift when left column content changes */}
         <div className="sticky top-6 z-20 mb-4 bg-[#F6FBF7] py-2">
           <div className="flex flex-shrink-0 flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -5945,7 +5946,7 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
             </select>
           </div>
 
-          <div className="md:w-48">
+          <div className="md:w-52">
             <label className="mb-1 block text-xs font-semibold text-gray-600">Category</label>
             <select
               className={INPUT_STYLES}
@@ -5985,7 +5986,7 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
             No food items match the selected status for this warehouse.
           </p>
         ) : (
-          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
+          <div className="min-h-0 min-w-0 flex-1 space-y-3 overflow-y-auto pr-1">
             {groupByCategory ? (
               // group items and then apply category selection to groups (if any)
               Object.entries(groupItemsByCategory(filteredItems))
@@ -5996,7 +5997,7 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
                 })
                 .map(([cat, items]) => (
                 <div key={cat} className="space-y-2">
-                  <h3 className="px-2 text-sm font-semibold text-gray-700">{displayCategoryLabel(cat)} ({items.length})</h3>
+                  <h3 className="px-2 mt-1.5 text-sm font-semibold text-gray-700 w-full break-words whitespace-normal">{displayCategoryLabel(cat)} ({items.length})</h3>
                   {items.map((item) => {
                     const expired = isItemExpired(item);
                     return (
