@@ -11,6 +11,7 @@ from community.models import Community
 from restaurants.models import Restaurant
 from restaurant_chain.models import RestaurantChain
 from donation.models import Donation
+from donation_request.models import DonationRequest
 from .models import Delivery
 
 
@@ -48,7 +49,30 @@ class DeliveryAPITests(APITestCase):
         self.donation = Donation.objects.create(
             donation_id="DON001",
             restaurant=self.restaurant,
+            created_by=None,
         )
+        self.donor_user = DomainUser.objects.create(
+            user_id="USR0100",
+            username="donor01",
+            fname="Donor",
+            lname="User",
+            bod=date(1992, 3, 3),
+            phone="0900000000",
+            email="donor@example.com",
+            password="pw12345",
+        )
+        self.other_user = DomainUser.objects.create(
+            user_id="USR0200",
+            username="other01",
+            fname="Other",
+            lname="Person",
+            bod=date(1990, 4, 4),
+            phone="0900000001",
+            email="other@example.com",
+            password="pw12345",
+        )
+        self.donation.created_by = self.donor_user
+        self.donation.save()
         self.delivery_user = DomainUser.objects.create(
             user_id="USR0001",
             username="recipient01",
@@ -78,6 +102,19 @@ class DeliveryAPITests(APITestCase):
             "HTTP_X_USER_IS_DELIVERY": "true",
             "HTTP_X_USER_ID": self.delivery_user.user_id,
         }
+        self.user_headers = {"HTTP_X_USER_ID": self.donor_user.user_id}
+        self.other_user_headers = {"HTTP_X_USER_ID": self.other_user.user_id}
+        self.donation_request = DonationRequest.objects.create(
+            request_id="REQ0001",
+            title="Meals for North Block",
+            community_name=self.community.name,
+            recipient_address=self.community.address,
+            expected_delivery=timezone.now() + timedelta(days=2),
+            people_count=100,
+            contact_phone="0999999999",
+            notes="",
+            created_by=self.donor_user,
+        )
 
     # 1. List endpoint returns a delivery with related IDs resolved
     def test_list_deliveries_returns_related_ids(self):
@@ -501,3 +538,101 @@ class DeliveryAPITests(APITestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTrue(all(item["delivery_type"] == "distribution" for item in response.data))
+
+    # 31. Regular user sees only deliveries tied to their donations
+    def test_regular_user_sees_their_donation_deliveries(self):
+        other_donation = Donation.objects.create(
+            donation_id="DON9999",
+            restaurant=self.restaurant,
+            created_by=self.other_user,
+        )
+        other_delivery = Delivery.objects.create(
+            delivery_id="DLV0999",
+            delivery_type="donation",
+            pickup_time=timezone.now(),
+            dropoff_time=timedelta(hours=2),
+            pickup_location_type="restaurant",
+            dropoff_location_type="warehouse",
+            warehouse_id=self.warehouse,
+            user_id=self.delivery_user,
+            donation_id=other_donation,
+            community_id=self.community,
+        )
+
+        response = self.client.get(self.list_url, **self.user_headers)
+        self.assertEqual(response.status_code, 200)
+        delivery_ids = {item["delivery_id"] for item in response.data}
+        self.assertIn(self.existing_delivery.delivery_id, delivery_ids)
+        self.assertNotIn(other_delivery.delivery_id, delivery_ids)
+
+    # 32. Legacy donations without owner still appear for logged-in donors
+    def test_user_sees_legacy_donation_deliveries(self):
+        legacy_donation = Donation.objects.create(
+            donation_id="DON0700",
+            restaurant=self.restaurant,
+            created_by=None,
+        )
+        legacy_delivery = Delivery.objects.create(
+            delivery_id="DLV0700",
+            delivery_type="donation",
+            pickup_time=timezone.now(),
+            dropoff_time=timedelta(hours=1),
+            pickup_location_type="restaurant",
+            dropoff_location_type="warehouse",
+            warehouse_id=self.warehouse,
+            user_id=self.delivery_user,
+            donation_id=legacy_donation,
+            community_id=self.community,
+        )
+
+        response = self.client.get(self.list_url, **self.user_headers)
+        self.assertEqual(response.status_code, 200)
+        delivery_ids = {item["delivery_id"] for item in response.data}
+        self.assertIn(legacy_delivery.delivery_id, delivery_ids)
+
+    # 32. Regular user sees distribution deliveries for their requested communities only
+    def test_regular_user_sees_distribution_for_requested_communities(self):
+        matching_distribution = Delivery.objects.create(
+            delivery_id="DLV0500",
+            delivery_type="distribution",
+            pickup_time=timezone.now(),
+            dropoff_time=timedelta(hours=3),
+            pickup_location_type="warehouse",
+            dropoff_location_type="community",
+            warehouse_id=self.warehouse,
+            user_id=self.delivery_user,
+            donation_id=self.donation,
+            community_id=self.community,
+        )
+        other_community = Community.objects.create(
+            community_id="COM999",
+            name="South Block",
+            address="9 Down Street",
+            received_time=timezone.now(),
+            population=50,
+            warehouse_id=self.warehouse,
+        )
+        other_distribution = Delivery.objects.create(
+            delivery_id="DLV0600",
+            delivery_type="distribution",
+            pickup_time=timezone.now(),
+            dropoff_time=timedelta(hours=4),
+            pickup_location_type="warehouse",
+            dropoff_location_type="community",
+            warehouse_id=self.warehouse,
+            user_id=self.delivery_user,
+            donation_id=self.donation,
+            community_id=other_community,
+        )
+
+        response = self.client.get(self.list_url, **self.user_headers)
+        self.assertEqual(response.status_code, 200)
+        delivery_ids = {item["delivery_id"] for item in response.data}
+        self.assertIn(matching_distribution.delivery_id, delivery_ids)
+        self.assertNotIn(other_distribution.delivery_id, delivery_ids)
+
+    # 33. Users without related donations or requests see no deliveries
+    def test_unrelated_user_sees_no_deliveries(self):
+        response = self.client.get(self.list_url, **self.other_user_headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])

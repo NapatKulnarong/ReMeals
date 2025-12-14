@@ -1,12 +1,13 @@
-from rest_framework import viewsets
+from django.db.models import Q
+from rest_framework import status as drf_status, viewsets
 from rest_framework.response import Response
-from rest_framework import status as drf_status
+import uuid
 
-from .models import Delivery
-from .serializers import DeliverySerializer
+from donation_request.models import DonationRequest
 from impactrecord.models import ImpactRecord
 from fooditem.models import FoodItem
-import uuid
+from .models import Delivery
+from .serializers import DeliverySerializer
 
 
 def _str_to_bool(value):
@@ -36,6 +37,23 @@ class DeliveryViewSet(viewsets.ModelViewSet):
             return qs
         if is_driver and user_id:
             return qs.filter(user_id__user_id=user_id)
+        if user_id:
+            donation_filter = Q(delivery_type="donation") & (
+                Q(donation_id__created_by__user_id=user_id)
+                | Q(donation_id__created_by__isnull=True)
+            )
+            requested_communities = list(
+                DonationRequest.objects.filter(created_by__user_id=user_id).values_list(
+                    "community_name", flat=True
+                )
+            )
+            community_filter = Q()
+            if requested_communities:
+                community_filter = Q(
+                    delivery_type="distribution",
+                    community_id__name__in=requested_communities,
+                )
+            return qs.filter(donation_filter | community_filter)
         return qs.none()
 
     def create(self, request, *args, **kwargs):

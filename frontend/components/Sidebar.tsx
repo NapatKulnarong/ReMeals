@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { ReactNode } from "react";
-import { Squares2X2Icon, ArrowRightOnRectangleIcon } from "@heroicons/react/24/solid";
+import { Squares2X2Icon, ArrowRightOnRectangleIcon, TruckIcon, CubeIcon } from "@heroicons/react/24/solid";
+import { InboxStackIcon } from "@heroicons/react/24/solid";
 
 // This marks the component as a Client Component (required because we use state + event handlers)
 
@@ -53,14 +54,22 @@ const renderSidebarIcon = (id: number, className?: string) => {
     return <Squares2X2Icon className={className} />;
   }
   if (id === 4) {
+    // Pickup icon - TruckIcon from Heroicons
+    return <TruckIcon className={className} />;
+  }
+  if (id === 5) {
+    // Warehouse icon - InboxStackIcon from Heroicons
+    return <InboxStackIcon className={className} />;
+  }
+  if (id === 6) {
+    // Deliver icon - CubeIcon from Heroicons
+    return <CubeIcon className={className} />;
+  }
+  if (id === 7) {
+    // Status icon - ChartBarIcon from Heroicons
     return (
-      <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="6.5" width="11" height="9" rx="2.25" />
-        <path d="M14 9.5h2.9c.38 0 .74.15 1 .42l2.1 2.18c.19.2.3.47.3.75v2.65H17" />
-        <path d="M6.25 17.5a1.75 1.75 0 1 0 0-3.5 1.75 1.75 0 0 0 0 3.5Z" />
-        <path d="M17.25 17.5a1.75 1.75 0 1 0 0-3.5 1.75 1.75 0 0 0 0 3.5Z" />
-        <path d="M14 13.5h5.3" />
-        <path d="M3 13.5h11" />
+      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
       </svg>
     );
   }
@@ -136,7 +145,7 @@ export default function Sidebar({
           <button
             onClick={() => onTabChange(homeTab.id)}
             className={[
-              "flex items-center justify-between rounded-2xl border px-4 py-5 text-left text-base font-semibold shadow-sm transition duration-200",
+              "flex items-center justify-between rounded-2xl border px-4 py-4 text-left text-base font-semibold shadow-sm transition duration-200",
               activeTab === homeTab.id
                 ? "border-[#B86A49] bg-[#F1CBB5] text-[#4B2415] shadow-md"
                 : "border-[#E6B9A2] bg-white text-[#70402B] hover:border-[#B86A49] hover:shadow",
