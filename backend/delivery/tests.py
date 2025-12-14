@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 from rest_framework.test import APITestCase, APIClient
 
-from users.models import User as DomainUser
+from users.models import Recipient, User as DomainUser
 from warehouse.models import Warehouse
 from community.models import Community
 from restaurants.models import Restaurant
@@ -113,7 +113,12 @@ class DeliveryAPITests(APITestCase):
             people_count=100,
             contact_phone="0999999999",
             notes="",
-            created_by=self.donor_user,
+            community=self.community,
+        )
+        Recipient.objects.create(
+            user=self.donor_user,
+            address="789 Request St",
+            donation_request=self.donation_request,
         )
 
     # 1. List endpoint returns a delivery with related IDs resolved

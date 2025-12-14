@@ -8,6 +8,7 @@ from impactrecord.models import ImpactRecord
 from fooditem.models import FoodItem
 from .models import Delivery
 from .serializers import DeliverySerializer
+from users.models import Recipient
 
 
 def _str_to_bool(value):
@@ -43,15 +44,18 @@ class DeliveryViewSet(viewsets.ModelViewSet):
                 | Q(donation_id__created_by__isnull=True)
             )
             requested_communities = list(
-                DonationRequest.objects.filter(created_by__user_id=user_id).values_list(
-                    "community_name", flat=True
+                Recipient.objects.filter(
+                    user__user_id=user_id,
+                    donation_request__community__isnull=False,
                 )
+                .values_list("donation_request__community__community_id", flat=True)
+                .distinct()
             )
             community_filter = Q()
             if requested_communities:
                 community_filter = Q(
                     delivery_type="distribution",
-                    community_id__name__in=requested_communities,
+                    community_id__community_id__in=requested_communities,
                 )
             return qs.filter(donation_filter | community_filter)
         return qs.none()

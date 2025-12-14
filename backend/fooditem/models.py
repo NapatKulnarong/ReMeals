@@ -1,6 +1,7 @@
 from django.db import models
 
 from donation.models import Donation
+from restaurant_chain.models import RestaurantChain
 from re_meals_api.id_utils import generate_prefixed_id
 
 
@@ -24,11 +25,24 @@ class FoodItem(models.Model):
         db_column="donation_id"
     )
 
+    chain = models.ForeignKey(
+        RestaurantChain,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column="chain_id",
+        related_name="food_items",
+    )
+
     class Meta:
         db_table = "fooditem"
         ordering = ["food_id"]
 
     def save(self, *args, **kwargs):
+        if self.donation and not self.chain:
+            restaurant = getattr(self.donation, "restaurant", None)
+            if restaurant and restaurant.chain:
+                self.chain = restaurant.chain
         if not self.food_id:
             self.food_id = generate_prefixed_id(
                 self.__class__,
@@ -40,4 +54,3 @@ class FoodItem(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.quantity} {self.unit})"
-

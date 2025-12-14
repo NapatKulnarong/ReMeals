@@ -65,13 +65,13 @@ class DeliveryStaff(models.Model):
 class Recipient(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recipient_roles')
     address = models.CharField(max_length=300)
-    community_id = models.ForeignKey(
-        "community.Community",
-        on_delete=models.CASCADE,
-        related_name="recipients",
+    donation_request = models.ForeignKey(
+        "donation_request.DonationRequest",
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        db_column="community_id",
+        related_name="recipients",
+        db_column="request_id",
     )
 
     class Meta:

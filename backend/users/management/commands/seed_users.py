@@ -1,12 +1,14 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.hashers import make_password
 from django.db import transaction
+from django.utils import timezone
 
 from users.models import User, Admin, Donor, DeliveryStaff, Recipient
 from restaurants.models import Restaurant
 from restaurant_chain.models import RestaurantChain
 from warehouse.models import Warehouse
 from community.models import Community
+from donation_request.models import DonationRequest
 
 
 class Command(BaseCommand):
@@ -285,19 +287,47 @@ class Command(BaseCommand):
             }
         )
 
+        # Donation requests for recipients
+        request_one, _ = DonationRequest.objects.get_or_create(
+            request_id='REQSEED001',
+            defaults={
+                'title': 'Seed Request One',
+                'community_name': 'Community Alpha',
+                'recipient_address': '123 Klong Toey, Bangkok 10110',
+                'expected_delivery': timezone.now(),
+                'people_count': 100,
+                'contact_phone': '0800000001',
+                'notes': 'Seed donation request',
+                'community': communities[0],
+            }
+        )
+        request_two, _ = DonationRequest.objects.get_or_create(
+            request_id='REQSEED002',
+            defaults={
+                'title': 'Seed Request Two',
+                'community_name': 'Community Beta',
+                'recipient_address': '456 Bang Khen, Bangkok 10220',
+                'expected_delivery': timezone.now(),
+                'people_count': 150,
+                'contact_phone': '0800000002',
+                'notes': 'Seed donation request',
+                'community': communities[1],
+            }
+        )
+
         # Recipients (user is the primary key)
         Recipient.objects.get_or_create(
             user=User.objects.get(user_id='SEED006'),
             defaults={
                 'address': '123 Klong Toey, Bangkok 10110',
-                'community_id': Community.objects.get(community_id='COM001')
+                'donation_request': request_one,
             }
         )
         Recipient.objects.get_or_create(
             user=User.objects.get(user_id='SEED007'),
             defaults={
                 'address': '456 Bang Khen, Bangkok 10220',
-                'community_id': Community.objects.get(community_id='COM002')
+                'donation_request': request_two,
             }
         )
 

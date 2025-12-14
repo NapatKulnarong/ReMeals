@@ -8,7 +8,7 @@ class DonationRequestAdmin(admin.ModelAdmin):
     list_display = (
         "request_id",
         "title",
-        "community_name",
+        "community",
         "people_count",
         "expected_delivery",
         "created_at",

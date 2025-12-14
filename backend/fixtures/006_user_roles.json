@@ -103,6 +103,150 @@
     }
   },
   {
+    "model": "users.donor",
+    "pk": 13,
+    "fields": {
+      "user": "DON0000013",
+      "restaurant_id": "RES0000013"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 14,
+    "fields": {
+      "user": "DON0000014",
+      "restaurant_id": "RES0000014"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 15,
+    "fields": {
+      "user": "DON0000015",
+      "restaurant_id": "RES0000015"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 16,
+    "fields": {
+      "user": "DON0000016",
+      "restaurant_id": "RES0000016"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 17,
+    "fields": {
+      "user": "DON0000017",
+      "restaurant_id": "RES0000017"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 18,
+    "fields": {
+      "user": "DON0000018",
+      "restaurant_id": "RES0000018"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 19,
+    "fields": {
+      "user": "DON0000019",
+      "restaurant_id": "RES0000019"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 20,
+    "fields": {
+      "user": "DON0000020",
+      "restaurant_id": "RES0000020"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 21,
+    "fields": {
+      "user": "DON0000021",
+      "restaurant_id": "RES0000021"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 22,
+    "fields": {
+      "user": "DON0000022",
+      "restaurant_id": "RES0000022"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 23,
+    "fields": {
+      "user": "DON0000023",
+      "restaurant_id": "RES0000023"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 24,
+    "fields": {
+      "user": "DON0000024",
+      "restaurant_id": "RES0000024"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 25,
+    "fields": {
+      "user": "DON0000025",
+      "restaurant_id": "RES0000025"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 26,
+    "fields": {
+      "user": "DON0000026",
+      "restaurant_id": "RES0000026"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 27,
+    "fields": {
+      "user": "DON0000027",
+      "restaurant_id": "RES0000027"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 28,
+    "fields": {
+      "user": "DON0000028",
+      "restaurant_id": "RES0000028"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 29,
+    "fields": {
+      "user": "DON0000029",
+      "restaurant_id": "RES0000029"
+    }
+  },
+  {
+    "model": "users.donor",
+    "pk": 30,
+    "fields": {
+      "user": "DON0000030",
+      "restaurant_id": "RES0000030"
+    }
+  },
+  {
     "model": "users.deliverystaff",
     "pk": 1,
     "fields": {
@@ -162,7 +306,7 @@
     "fields": {
       "user": "REC0000001",
       "address": "123 Klong Toey, Bangkok 10110",
-      "community_id": "COM0000001"
+      "donation_request": "REQ0000001"
     }
   },
   {
@@ -171,7 +315,7 @@
     "fields": {
       "user": "REC0000002",
       "address": "12/5 Rama 4 Rd, Bangkok 10110",
-      "community_id": "COM0000001"
+      "donation_request": "REQ0000002"
     }
   },
   {
@@ -180,7 +324,7 @@
     "fields": {
       "user": "REC0000003",
       "address": "22 Phahon Yothin Rd, Bangkok 10220",
-      "community_id": "COM0000002"
+      "donation_request": "REQ0000003"
     }
   },
   {
@@ -189,7 +333,7 @@
     "fields": {
       "user": "REC0000004",
       "address": "199 Chaeng Watthana Rd, Bangkok 10220",
-      "community_id": "COM0000002"
+      "donation_request": "REQ0000004"
     }
   },
   {
@@ -198,7 +342,7 @@
     "fields": {
       "user": "REC0000005",
       "address": "45 Pathum Thani Rd, Pathum Thani 12000",
-      "community_id": "COM0000003"
+      "donation_request": "REQ0000005"
     }
   },
   {
@@ -207,7 +351,7 @@
     "fields": {
       "user": "REC0000006",
       "address": "88 Lat Krabang Rd, Bangkok 10520",
-      "community_id": "COM0000004"
+      "donation_request": "REQ0000006"
     }
   },
   {
@@ -216,7 +360,7 @@
     "fields": {
       "user": "REC0000007",
       "address": "55 Bang Na-Trat Rd, Bangkok 10260",
-      "community_id": "COM0000005"
+      "donation_request": "REQ0000007"
     }
   },
   {
@@ -225,7 +369,7 @@
     "fields": {
       "user": "REC0000008",
       "address": "33 Samut Prakan Rd, Bang Phli 10540",
-      "community_id": "COM0000006"
+      "donation_request": "REQ0000008"
     }
   }
 ]

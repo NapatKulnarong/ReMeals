@@ -1,13 +1,17 @@
 from rest_framework import serializers
 
+from community.models import Community
 from .models import DonationRequest
 
 
 class DonationRequestSerializer(serializers.ModelSerializer):
     request_id = serializers.CharField(read_only=True)
-    created_by_user_id = serializers.CharField(
-        source="created_by.user_id", read_only=True, allow_null=True
+    community_id = serializers.PrimaryKeyRelatedField(
+        queryset=Community.objects.all(),
+        source="community",
+        write_only=True,
     )
+    community_name = serializers.CharField()
 
     class Meta:
         model = DonationRequest
@@ -21,6 +25,6 @@ class DonationRequestSerializer(serializers.ModelSerializer):
             "contact_phone",
             "notes",
             "created_at",
-            "created_by_user_id",
+            "community_id",
         ]
-        read_only_fields = ["created_at", "request_id", "created_by_user_id"]
+        read_only_fields = ["created_at", "request_id"]
