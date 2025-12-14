@@ -2488,6 +2488,8 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
   const [submitting, setSubmitting] = useState(false);
   const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
   const [staffInputs, setStaffInputs] = useState<Record<string, { notes: string }>>({});
+  const [editingDeliveryId, setEditingDeliveryId] = useState<string | null>(null);
+  const [deletingDeliveryId, setDeletingDeliveryId] = useState<string | null>(null);
 
   const [pickupForm, setPickupForm] = useState({
     donationId: "",
@@ -2553,6 +2555,49 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
     setStaffInputs(next);
   }, [deliveries]);
 
+  const handleEditDelivery = (delivery: DeliveryRecordApi) => {
+    setEditingDeliveryId(delivery.delivery_id);
+    setPickupForm({
+      donationId: delivery.donation_id || "",
+      warehouseId: delivery.warehouse_id || "",
+      userId: delivery.user_id || "",
+      pickupTime: delivery.pickup_time ? toDateTimeLocalValue(delivery.pickup_time) : "",
+    });
+    // Scroll to form
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingDeliveryId(null);
+    setPickupForm({
+      donationId: "",
+      warehouseId: "",
+      userId: "",
+      pickupTime: "",
+    });
+  };
+
+  const handleDeleteDelivery = async (deliveryId: string) => {
+    if (!confirm("Are you sure you want to delete this pickup task? This action cannot be undone.")) {
+      return;
+    }
+    setDeletingDeliveryId(deliveryId);
+    setError(null);
+    setNotice(null);
+    try {
+      await apiFetch(`${API_PATHS.deliveries}${deliveryId}/`, {
+        method: "DELETE",
+        headers: buildAuthHeaders(currentUser),
+      });
+      setNotice("Pickup task deleted successfully.");
+      await loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to delete pickup task.");
+    } finally {
+      setDeletingDeliveryId(null);
+    }
+  };
+
   const handleSubmitPickup = async () => {
     setSubmitting(true);
     setNotice(null);
@@ -2565,7 +2610,6 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
         throw new Error("Pickup time is required.");
       }
       const payload: Record<string, unknown> = {
-        delivery_id: generateDeliveryId(),
         delivery_type: "donation",
         pickup_time: new Date(pickupForm.pickupTime).toISOString(),
         dropoff_time: "02:00:00",
@@ -2576,13 +2620,25 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
         donation_id: pickupForm.donationId,
       };
 
-      await apiFetch(API_PATHS.deliveries, {
-        method: "POST",
-        body: JSON.stringify(payload),
-        headers: buildAuthHeaders(currentUser),
-      });
+      if (editingDeliveryId) {
+        // Update existing delivery
+        await apiFetch(`${API_PATHS.deliveries}${editingDeliveryId}/`, {
+          method: "PATCH",
+          body: JSON.stringify(payload),
+          headers: buildAuthHeaders(currentUser),
+        });
+        setNotice("Pickup assignment updated.");
+      } else {
+        // Create new delivery
+        payload.delivery_id = generateDeliveryId();
+        await apiFetch(API_PATHS.deliveries, {
+          method: "POST",
+          body: JSON.stringify(payload),
+          headers: buildAuthHeaders(currentUser),
+        });
+        setNotice("Pickup assignment saved.");
+      }
 
-      setNotice("Pickup assignment saved.");
       await loadData();
       setPickupForm({
         donationId: "",
@@ -2590,6 +2646,7 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
         userId: "",
         pickupTime: "",
       });
+      setEditingDeliveryId(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to save pickup assignment.");
     } finally {
@@ -2709,7 +2766,14 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
             <div className="h-full overflow-y-auto pr-1 pb-4 sm:pr-3">
               <div className="space-y-4 rounded-2xl border border-[#F3C7A0] bg-white p-6 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm font-semibold text-gray-900">Pickup to warehouse</p>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">
+                      {editingDeliveryId ? "Edit pickup task" : "Pickup to warehouse"}
+                    </p>
+                    {editingDeliveryId && (
+                      <p className="text-xs text-gray-500 mt-1">Editing: {editingDeliveryId}</p>
+                    )}
+                  </div>
                   <span className="text-xs text-gray-500">From restaurant</span>
                 </div>
                 <div className="grid gap-4">
@@ -2777,14 +2841,30 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
                       }
                     />
                   </div>
-                  <button
-                    type="button"
-                    disabled={submitting}
-                    onClick={handleSubmitPickup}
-                    className="mt-4 w-full rounded-2xl bg-[#E48A3A] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#D37623] disabled:opacity-60 disabled:cursor-not-allowed transition"
-                  >
-                    {submitting ? "Saving..." : "Save pickup assignment"}
-                  </button>
+                  <div className="mt-4 flex gap-3">
+                    <button
+                      type="button"
+                      disabled={submitting}
+                      onClick={handleSubmitPickup}
+                      className="flex-1 rounded-2xl bg-[#E48A3A] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#D37623] disabled:opacity-60 disabled:cursor-not-allowed transition"
+                    >
+                      {submitting
+                        ? "Saving..."
+                        : editingDeliveryId
+                          ? "Update pickup assignment"
+                          : "Save pickup assignment"}
+                    </button>
+                    {editingDeliveryId && (
+                      <button
+                        type="button"
+                        disabled={submitting}
+                        onClick={handleCancelEdit}
+                        className="rounded-2xl border border-[#F3C7A0] px-6 py-3 text-sm font-semibold text-[#8B4C1F] hover:bg-[#FFF1E3] disabled:opacity-60 transition"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -2824,98 +2904,168 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
                 : "No tasks assigned to you yet."}
             </p>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {visibleDeliveries.map((delivery) => (
                 <div
                   key={delivery.delivery_id}
-                  className="rounded-2xl border border-[#CFE6D8] bg-white p-5 shadow-sm transition hover:shadow-md"
+                  className="rounded-2xl border border-[#CFE6D8] bg-white p-4 shadow-sm transition hover:shadow-md"
                 >
-                  <div className="mb-4 flex items-start justify-between gap-3">
+                  <div className="mb-3 flex items-start justify-between gap-2">
                     <div className="flex-1">
-                      <div className="mb-2 flex items-center gap-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#E6F7EE]">
-                          <span className="text-lg">📥</span>
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#E6F7EE]">
+                          <span className="text-base">📥</span>
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-gray-900">
+                          <p className="text-sm font-semibold text-gray-900 leading-tight">
                             Pickup to warehouse
                           </p>
-                          <span className="text-xs font-medium text-[#2F855A]">
+                          <span className="text-[11px] font-medium text-[#2F855A] leading-tight">
                             {delivery.delivery_id}
                           </span>
                         </div>
                       </div>
                     </div>
-                    <span
-                      className={`rounded-full px-3 py-1.5 text-xs font-semibold ${statusLabel(delivery.status).className}`}
-                    >
-                      {statusLabel(delivery.status).text}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusLabel(delivery.status).className}`}
+                      >
+                        {statusLabel(delivery.status).text}
+                      </span>
+                      {canEdit && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleEditDelivery(delivery)}
+                            disabled={deletingDeliveryId === delivery.delivery_id}
+                            className="rounded-lg bg-[#E6F4FF] p-1.5 text-[#1D4ED8] hover:bg-[#D0E7FF] disabled:opacity-60 transition"
+                            title="Edit pickup task"
+                          >
+                            <svg
+                              className="h-3.5 w-3.5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteDelivery(delivery.delivery_id)}
+                            disabled={deletingDeliveryId === delivery.delivery_id}
+                            className="rounded-lg bg-[#FDECEA] p-1.5 text-[#B42318] hover:bg-[#FCD7D2] disabled:opacity-60 transition"
+                            title="Delete pickup task"
+                          >
+                            {deletingDeliveryId === delivery.delivery_id ? (
+                              <svg
+                                className="h-3.5 w-3.5 animate-spin"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                />
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                />
+                              </svg>
+                            ) : (
+                              <svg
+                                className="h-3.5 w-3.5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                              </svg>
+                            )}
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="space-y-3 border-t border-gray-100 pt-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0">
-                        <span className="text-gray-400">🍽️</span>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2 border-t border-gray-100 pt-3">
+                    <div className="flex items-start gap-2">
+                      <div className="flex-shrink-0 pt-0.5">
+                        <span className="text-sm text-gray-400">🍽️</span>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-medium text-gray-500">Donation</p>
-                        <p className="text-sm font-semibold text-gray-900">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] font-medium text-gray-500 leading-tight">Donation</p>
+                        <p className="text-xs font-semibold text-gray-900 leading-tight truncate">
                           {lookupRestaurantName(delivery.donation_id)}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0">
-                        <span className="text-gray-400">🥘</span>
+                    <div className="flex items-start gap-2">
+                      <div className="flex-shrink-0 pt-0.5">
+                        <span className="text-sm text-gray-400">🥘</span>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-medium text-gray-500">Food Amount</p>
-                        <p className="text-sm font-semibold text-gray-900">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] font-medium text-gray-500 leading-tight">Food Amount</p>
+                        <p className="text-xs font-semibold text-gray-900 leading-tight">
                           {formatFoodAmount(delivery.donation_id)}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0">
-                        <span className="text-gray-400">📦</span>
+                    <div className="flex items-start gap-2 col-span-2">
+                      <div className="flex-shrink-0 pt-0.5">
+                        <span className="text-sm text-gray-400">📦</span>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-medium text-gray-500">Warehouse</p>
-                        <p className="text-sm font-semibold text-gray-900">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] font-medium text-gray-500 leading-tight">Warehouse</p>
+                        <p className="text-xs font-semibold text-gray-900 leading-tight">
                           {delivery.warehouse_id} — {lookupWarehouseAddress(delivery.warehouse_id)}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0">
-                        <span className="text-gray-400">👤</span>
+                    <div className="flex items-start gap-2">
+                      <div className="flex-shrink-0 pt-0.5">
+                        <span className="text-sm text-gray-400">👤</span>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-medium text-gray-500">Assigned Staff</p>
-                        <p className="text-sm font-semibold text-gray-900">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] font-medium text-gray-500 leading-tight">Assigned Staff</p>
+                        <p className="text-xs font-semibold text-gray-900 leading-tight truncate">
                           {lookupStaffName(delivery.user_id)}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0">
-                        <span className="text-gray-400">🕐</span>
+                    <div className="flex items-start gap-2">
+                      <div className="flex-shrink-0 pt-0.5">
+                        <span className="text-sm text-gray-400">🕐</span>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-medium text-gray-500">Pickup Time</p>
-                        <p className="text-sm font-semibold text-gray-900">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] font-medium text-gray-500 leading-tight">Pickup Time</p>
+                        <p className="text-xs font-semibold text-gray-900 leading-tight">
                           {formatDisplayDate(delivery.pickup_time)}
                         </p>
                       </div>
                     </div>
                   </div>
                   {!canEdit && (
-                    <div className="space-y-3 mt-4 border-t border-gray-100 pt-4">
+                    <div className="space-y-2 mt-3 border-t border-gray-100 pt-3">
                       <div>
                         <label className="mb-1 block text-[11px] font-semibold text-gray-700">
                           Notes
@@ -4108,9 +4258,9 @@ export default function Home() {
     ? [
         { id: 0, label: "Home", icon: <span aria-hidden>🏠</span> },
         { id: 3, label: "Dashboard", icon: <span aria-hidden>🛠️</span> },
+        { id: 5, label: "Warehouse", icon: <span aria-hidden>📦</span> },
         { id: 4, label: "Pickup", icon: <span aria-hidden>📥</span> },
         { id: 6, label: "Deliver", icon: <span aria-hidden>🚚</span> },
-        { id: 5, label: "Warehouse", icon: <span aria-hidden>📦</span> },
       ]
     : currentUser?.isDeliveryStaff
       ? [
