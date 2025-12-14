@@ -9,7 +9,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 from django.contrib.auth.hashers import make_password, check_password, identify_hasher
 
-from .serializers import SignupSerializer, LoginSerializer
+from .serializers import SignupSerializer, LoginSerializer, UpdateProfileSerializer
 from .models import User, Admin, DeliveryStaff
 
 def _is_hashed(value: str) -> bool:
@@ -169,3 +169,57 @@ def list_delivery_staff(request):
             }
         )
     return Response(data, status=200)
+
+
+@swagger_auto_schema(method="patch", request_body=UpdateProfileSerializer)
+@api_view(["PATCH"])
+def update_profile(request):
+    """
+    Update user profile information.
+    Requires X-USER-ID header to identify the user.
+    """
+    user_id = request.headers.get("X-USER-ID")
+    if not user_id:
+        return Response({"error": "User ID required"}, status=401)
+
+    try:
+        user = User.objects.get(user_id=user_id)
+    except User.DoesNotExist:
+        return Response({"error": "User not found"}, status=404)
+
+    serializer = UpdateProfileSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+
+    data = serializer.validated_data
+
+    # Check for username uniqueness if changing username
+    if "username" in data and data["username"] != user.username:
+        if User.objects.filter(username=data["username"]).exists():
+            return Response({"error": "Username already exists"}, status=400)
+        user.username = data["username"]
+
+    # Check for email uniqueness if changing email
+    if "email" in data and data["email"] != user.email:
+        if User.objects.filter(email=data["email"]).exists():
+            return Response({"error": "Email already exists"}, status=400)
+        user.email = data["email"]
+
+    # Update other fields
+    if "fname" in data:
+        user.fname = data["fname"]
+    if "lname" in data:
+        user.lname = data["lname"]
+    if "phone" in data:
+        user.phone = data["phone"]
+
+    user.save()
+
+    return Response({
+        "message": "Profile updated successfully",
+        "username": user.username,
+        "email": user.email,
+        "fname": user.fname,
+        "lname": user.lname,
+        "phone": user.phone,
+    }, status=200)

@@ -3165,30 +3165,84 @@ function ProfileModal({
     lname: user.lname ?? "",
     phone: user.phone ?? "",
   });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      const response = await apiFetch<{
+        message: string;
+        username: string;
+        email: string;
+        fname: string;
+        lname: string;
+        phone: string;
+      }>("/users/profile/", {
+        method: "PATCH",
+        headers: buildAuthHeaders(user),
+        body: JSON.stringify(form),
+      });
+
+      // Update local state with saved data
+      onSave({
+        username: response.username,
+        email: response.email,
+        fname: response.fname,
+        lname: response.lname,
+        phone: response.phone,
+      });
+
+      setSuccess(true);
+      setTimeout(() => {
+        onClose();
+      }, 1000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-2xl">
+    <div className="absolute inset-0 flex items-center justify-center bg-black/40 z-50">
+      <div className="w-full max-w-xl rounded-2xl border border-[#F3C7A0] bg-[#FFF8F0] p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Edit profile</h3>
-            <p className="text-xs text-gray-500">Update your personal information.</p>
+            <h3 className="text-lg font-semibold text-[#B25C23]">Edit Profile</h3>
+            <p className="text-xs text-gray-600">Update your personal information.</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-sm font-semibold text-gray-500 hover:text-gray-800"
+            className="text-sm font-semibold text-[#B25C23] hover:text-[#8B4C1F] transition"
           >
             ✕
           </button>
         </div>
+
+        {error && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-700">
+            Profile updated successfully!
+          </div>
+        )}
 
         <div className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-xs font-semibold text-gray-700">First name</label>
               <input
-                className={INPUT_STYLES}
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-[#d48a68] focus:ring-2 focus:ring-[#d48a68]/20"
                 value={form.fname}
                 onChange={(e) => setForm((prev) => ({ ...prev, fname: e.target.value }))}
               />
@@ -3196,7 +3250,7 @@ function ProfileModal({
             <div>
               <label className="mb-1 block text-xs font-semibold text-gray-700">Last name</label>
               <input
-                className={INPUT_STYLES}
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-[#d48a68] focus:ring-2 focus:ring-[#d48a68]/20"
                 value={form.lname}
                 onChange={(e) => setForm((prev) => ({ ...prev, lname: e.target.value }))}
               />
@@ -3205,7 +3259,7 @@ function ProfileModal({
           <div>
             <label className="mb-1 block text-xs font-semibold text-gray-700">Username</label>
             <input
-              className={INPUT_STYLES}
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-[#d48a68] focus:ring-2 focus:ring-[#d48a68]/20"
               value={form.username}
               onChange={(e) => setForm((prev) => ({ ...prev, username: e.target.value }))}
             />
@@ -3213,7 +3267,8 @@ function ProfileModal({
           <div>
             <label className="mb-1 block text-xs font-semibold text-gray-700">Email</label>
             <input
-              className={INPUT_STYLES}
+              type="email"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-[#d48a68] focus:ring-2 focus:ring-[#d48a68]/20"
               value={form.email}
               onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
             />
@@ -3221,7 +3276,7 @@ function ProfileModal({
           <div>
             <label className="mb-1 block text-xs font-semibold text-gray-700">Phone</label>
             <input
-              className={INPUT_STYLES}
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-[#d48a68] focus:ring-2 focus:ring-[#d48a68]/20"
               value={form.phone}
               onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
             />
@@ -3232,16 +3287,18 @@ function ProfileModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+            disabled={saving}
+            className="rounded-lg border border-[#F3C7A0] bg-white px-4 py-2 text-sm font-semibold text-[#B25C23] hover:bg-[#FFF8F0] transition disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             type="button"
-            onClick={() => onSave(form)}
-            className="rounded-lg bg-[#111828] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0f1628]"
+            onClick={handleSave}
+            disabled={saving}
+            className="rounded-lg bg-[#d48a68] px-4 py-2 text-sm font-semibold text-white hover:bg-[#c47958] transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Save changes
+            {saving ? "Saving..." : "Save changes"}
           </button>
         </div>
       </div>
@@ -6291,6 +6348,7 @@ export default function Home() {
         isDriver={currentUser?.isDeliveryStaff}
         currentUser={currentUser ? { username: currentUser.username, email: currentUser.email } : undefined}
         onProfileClick={() => setShowProfileModal(true)}
+        onSettingsClick={() => setShowProfileModal(true)}
         onLogout={() => {
           setCurrentUser(null);
           setActiveTab(0); // Redirect to home after logout

@@ -33,3 +33,10 @@ class LoginSerializer(serializers.Serializer):
                 "password": "12345"
             }
         }
+
+class UpdateProfileSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=20, required=False)
+    fname = serializers.CharField(required=False)
+    lname = serializers.CharField(required=False)
+    phone = serializers.CharField(required=False)
+    email = serializers.EmailField(required=False)
