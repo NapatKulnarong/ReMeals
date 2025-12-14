@@ -204,6 +204,44 @@ type DeliveryRecordApi = {
   notes?: string;
 };
 
+type ImpactRecord = {
+  impact_id: string;
+  meals_saved: number;
+  weight_saved_kg: number;
+  co2_reduced_kg: number;
+  impact_date: string;
+  food: string;
+};
+
+const normalizeImpactData = (raw: unknown): ImpactRecord[] => {
+  // Handle paginated response
+  let data: ImpactRecord[] = [];
+  if (Array.isArray(raw)) {
+    data = raw;
+  } else if (raw && typeof raw === "object") {
+    const obj = raw as { results?: unknown; data?: unknown };
+    if (Array.isArray(obj.results)) {
+      data = obj.results;
+    } else if (Array.isArray(obj.data)) {
+      data = obj.data;
+    }
+  }
+  
+  return data.map((record: any) => {
+    // Handle both 'impact_id' and 'pk' field names
+    const impactId = record.impact_id || record.pk || record.id || "";
+    
+    return {
+      impact_id: impactId,
+      meals_saved: Number(record.meals_saved) || 0,
+      weight_saved_kg: Number(record.weight_saved_kg) || 0,
+      co2_reduced_kg: Number(record.co2_reduced_kg) || 0,
+      impact_date: record.impact_date || "",
+      food: record.food || "",
+    };
+  });
+};
+
 const POPULAR_RESTAURANT_SUGGESTIONS: RestaurantSuggestion[] = [
   {
     name: "KFC Thailand",
@@ -284,6 +322,7 @@ const API_PATHS = {
   restaurants: "/restaurants/",
   deliveryStaff: "/users/delivery-staff/",
   donationRequests: "/donation-requests/",
+  impact: "/impact/",
 };
 
 // Helper function to format API errors into user-friendly messages
@@ -403,12 +442,9 @@ function HomePage({
   setShowAuthModal: (show: boolean) => void;
   setAuthMode: (mode: AuthMode) => void;
 }) {
-  const stats = [
-    { label: "Meals rescued", value: "2,340", helper: "+128 today" },
-    { label: "Communities served", value: "48", helper: "active deliveries" },
-    { label: "Avg. pickup", value: "22 mins", helper: "from restaurant ping" },
-    { label: "Food saved", value: "3.8 tons", helper: "kept out of landfills" },
-  ];
+  const [impactRecords, setImpactRecords] = useState<ImpactRecord[]>([]);
+  const [impactLoading, setImpactLoading] = useState(false);
+  const [impactError, setImpactError] = useState<string | null>(null);
 
   const journey = [
     {
@@ -434,56 +470,295 @@ function HomePage({
     },
   ];
 
+  useEffect(() => {
+    let ignore = false;
+    async function loadImpact() {
+      setImpactLoading(true);
+      setImpactError(null);
+      try {
+        const candidates = [
+          API_PATHS.impact,
+          "/impact/",
+        ];
+
+        let loaded: ImpactRecord[] = [];
+        let lastError: unknown = null;
+
+        for (const path of candidates) {
+          try {
+            const raw = await apiFetch<unknown>(path);
+            loaded = normalizeImpactData(raw);
+            if (loaded.length) break;
+          } catch (err) {
+            lastError = err;
+          }
+        }
+
+        if (!ignore) {
+          if (!loaded.length && lastError) {
+            throw lastError;
+          }
+          setImpactRecords(loaded);
+        }
+      } catch (err) {
+        if (!ignore) {
+          setImpactError(
+            err instanceof Error ? err.message : "Unable to load impact data."
+          );
+        }
+      } finally {
+        if (!ignore) {
+          setImpactLoading(false);
+        }
+      }
+    }
+    loadImpact();
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const impactTotals = useMemo(() => {
+    return impactRecords.reduce(
+      (acc, record) => ({
+        meals: acc.meals + (record.meals_saved || 0),
+        weight: acc.weight + (record.weight_saved_kg || 0),
+        co2: acc.co2 + (record.co2_reduced_kg || 0),
+      }),
+      { meals: 0, weight: 0, co2: 0 }
+    );
+  }, [impactRecords]);
+
+  const dailyImpact = useMemo(() => {
+    const byDate = new Map<
+      string,
+      { meals: number; weight: number; co2: number }
+    >();
+    impactRecords.forEach((record) => {
+      const key = record.impact_date;
+      const current = byDate.get(key) ?? { meals: 0, weight: 0, co2: 0 };
+      current.meals += record.meals_saved || 0;
+      current.weight += record.weight_saved_kg || 0;
+      current.co2 += record.co2_reduced_kg || 0;
+      byDate.set(key, current);
+    });
+    const sorted = Array.from(byDate.entries()).sort(
+      ([a], [b]) => new Date(a).getTime() - new Date(b).getTime()
+    );
+    return sorted.slice(-10);
+  }, [impactRecords]);
+
+  const chartPoints = useMemo(() => {
+    if (!dailyImpact.length) return [];
+    const maxMeals = Math.max(...dailyImpact.map(([, v]) => v.meals || 0), 1);
+    const width = 100;
+    const height = 60;
+    const step = width / Math.max(dailyImpact.length - 1, 1);
+    return dailyImpact.map(([date, values], index) => ({
+      x: index * step,
+      y: height - (values.meals / maxMeals) * height,
+      label: formatDisplayDate(date),
+      value: values.meals,
+    }));
+  }, [dailyImpact]);
+
   return (
     <div className="mx-auto w-full max-w-8xl space-y-8">
       <div className="relative overflow-hidden rounded-[40px] bg-[#e8ede3] p-8 shadow-[0_40px_120px_-45px rgba(59,31,16,0.6)] sm:p-10">
         <div aria-hidden className="pointer-events-none absolute -right-8 top-6 hidden h-64 w-64 rounded-[40px] bg-[#DEF7EA]/60 blur-3xl lg:block" />
         <div aria-hidden className="pointer-events-none absolute bottom-8 left-4 h-24 w-24 rounded-full bg-[#F1FBF5]/70 blur-2xl" />
-        <div className="relative grid items-start gap-10 lg:grid-cols-[1.15fr,0.85fr]">
-          <div className="space-y-6 text-[#2C1A10]">
-            <div className="inline-flex items-center gap-2 rounded-full bg-[#708A58] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-md">
-              <span aria-hidden className="text-lg">✦</span>
-              <span>Re-purpose every meal</span>
-            </div>
-            <h1 className="text-[2.65rem] leading-tight text-[#3a3a3a] sm:text-[3.25rem] sm:leading-[1.1]">
-              Redirect surplus meals. <span className="text-[#d48a68]">Rebuild communities.</span>
-            </h1>
-            <p className="max-w-2xl text-lg text-[#5a4f45]">
-              Re-Meals links restaurants, drivers, and community leaders so good food never sits idle.
-              Share donations, request support, and move meals where they are needed most.
-            </p>
-            
+        <div className="relative space-y-6 text-[#2C1A10]">
+          <div className="inline-flex items-center gap-2 rounded-full bg-[#708A58] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-md">
+            <span aria-hidden className="text-lg">✦</span>
+            <span>Re-purpose every meal</span>
           </div>
-          <div className="relative rounded-[32px] border-2 border-dashed border-[#708958] bg-white p-6">
-            <div className="mb-4 flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#708A58]">
-                  Impact snapshot
-                </p>
-                <h3 className="text-2xl font-bold text-[#3a3a3a]">This week on Re-Meals</h3>
-              </div>
-              <div className="rounded-full bg-[#D25D5D] px-3 py-1 text-sm font-semibold text-white">
-                Live
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              {stats.map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-2xl border-2 border-[#d48a68] bg-[#fdf8f4] px-4 py-3 shadow-sm hover:bg-[#d48a68] hover:text-white transition-all group"
-                >
-                  <p className="text-[0.55rem] font-semibold uppercase tracking-[0.15em] text-[#7E6A57] group-hover:text-white">
-                    {item.label}
-                  </p>
-                  <p className="text-2xl font-bold text-[#3a3a3a] group-hover:text-white">{item.value}</p>
-                  <p className="text-xs font-semibold text-[#708A58] group-hover:text-white">{item.helper}</p>
-                </div>
-              ))}
-            </div>
-            
+          <h1 className="text-[2.65rem] leading-tight text-[#3a3a3a] sm:text-[3.25rem] sm:leading-[1.1]">
+            Redirect surplus meals. <span className="text-[#d48a68]">Rebuild communities.</span>
+          </h1>
+          <p className="max-w-3xl text-lg text-[#5a4f45]">
+            Re-Meals links restaurants, drivers, and community leaders so good food never sits idle.
+            Share donations, request support, and move meals where they are needed most.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <button
+              className="rounded-full bg-[#708A58] px-5 py-3 text-sm font-semibold text-white shadow hover:bg-[#576c45] transition"
+              onClick={() => {
+                setAuthMode("signup");
+                setShowAuthModal(true);
+              }}
+              type="button"
+            >
+              Join the rescue
+            </button>
+            <button
+              className="rounded-full border border-[#d48a68] bg-white px-5 py-3 text-sm font-semibold text-[#d48a68] shadow-sm hover:bg-[#fde5d6] transition"
+              onClick={() => {
+                setAuthMode("login");
+                setShowAuthModal(true);
+              }}
+              type="button"
+            >
+              Login to donate / request
+            </button>
           </div>
         </div>
       </div>
+
+      <section className="rounded-[32px] border border-[#C7D2C0] bg-[#F4F7EF] p-6 shadow-inner shadow-[#C7D2C0]/30">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-[#4E673E]">
+              Impact dashboard
+            </p>
+            <h2 className="text-2xl font-semibold text-gray-900">Food rescued at a glance</h2>
+            <p className="text-sm text-gray-600">
+              Live from impact records: meals saved, weight diverted, and CO₂ reduced.
+            </p>
+          </div>
+          <span className="rounded-full border border-[#A8B99A] bg-white px-3 py-1 text-xs font-semibold text-[#365032] shadow-sm">
+            {impactRecords.length} records
+          </span>
+        </div>
+
+        {impactError && (
+          <p className="mt-3 rounded-xl border border-[#FDECEA] bg-[#FFF1F0] px-4 py-3 text-sm font-semibold text-[#B42318]">
+            {impactError}
+          </p>
+        )}
+
+        <div className="mt-5 grid gap-4 lg:grid-cols-3">
+          {[
+            { label: "Meals saved", value: impactTotals.meals, suffix: "", classes: "text-[#365032]" },
+            { label: "Weight saved (kg)", value: impactTotals.weight, suffix: " kg", classes: "text-[#365032]" },
+            { label: "CO₂ reduced (kg)", value: impactTotals.co2, suffix: " kg", classes: "text-[#9A5328]" },
+          ].map((card) => (
+            <div
+              key={card.label}
+              className="rounded-2xl border border-dashed border-[#A8B99A] bg-white p-4 shadow-sm"
+            >
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#708A58]">
+                {card.label}
+              </p>
+              <p className={`text-3xl font-bold ${card.classes}`}>
+                {impactLoading ? "…" : card.value.toLocaleString(undefined, { maximumFractionDigits: 1 })}{card.suffix}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr,0.8fr]">
+          <div className="rounded-2xl border border-[#A8B99A] bg-white p-5 shadow-sm">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Last 10 days</h3>
+              <span className="rounded-full bg-[#E9F1E3] px-3 py-1 text-[11px] font-semibold text-[#365032]">
+                Meals per day
+              </span>
+            </div>
+            {impactLoading ? (
+              <p className="text-sm text-gray-600">Loading impact trend...</p>
+            ) : dailyImpact.length === 0 ? (
+              <p className="text-sm text-gray-600">No impact records yet.</p>
+            ) : (
+              <div className="relative w-full overflow-hidden rounded-2xl border border-dashed border-[#A8B99A] bg-[#F7FBF6] p-4">
+                <svg viewBox="0 0 100 70" className="h-52 w-full">
+                  <defs>
+                    <linearGradient id="mealsGradient" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0%" stopColor="#7BA061" stopOpacity="0.8" />
+                      <stop offset="100%" stopColor="#7BA061" stopOpacity="0.05" />
+                    </linearGradient>
+                  </defs>
+                  {chartPoints.length > 1 && (
+                    <>
+                      <path
+                        d={`M 0 70 L ${chartPoints
+                          .map((p) => `${p.x} ${p.y}`)
+                          .join(" L ")} L 100 70 Z`}
+                        fill="url(#mealsGradient)"
+                        opacity="0.7"
+                      />
+                      <polyline
+                        fill="none"
+                        stroke="#4E673E"
+                        strokeWidth="1.5"
+                        points={chartPoints.map((p) => `${p.x},${p.y}`).join(" ")}
+                      />
+                    </>
+                  )}
+                  {chartPoints.map((p, idx) => (
+                    <g key={idx}>
+                      <circle cx={p.x} cy={p.y} r="1.6" fill="#4E673E" />
+                      <text
+                        x={p.x}
+                        y={p.y - 2.5}
+                        fontSize="3"
+                        textAnchor="middle"
+                        fill="#365032"
+                      >
+                        {p.value.toFixed(0)}
+                      </text>
+                      <text
+                        x={p.x}
+                        y="68"
+                        fontSize="3"
+                        textAnchor="middle"
+                        fill="#708A58"
+                      >
+                        {p.label.slice(0, 6)}
+                      </text>
+                    </g>
+                  ))}
+                </svg>
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-2xl border border-[#F3C7A0] bg-[#FFF8F0] p-5 shadow-sm">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Latest impact records</h3>
+              <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[#B25C23] border border-[#F3C7A0]">
+                {impactRecords.slice(-5).length} shown
+              </span>
+            </div>
+            {impactLoading ? (
+              <p className="text-sm text-gray-600">Loading details...</p>
+            ) : impactRecords.length === 0 ? (
+              <p className="text-sm text-gray-600">No impact records yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {impactRecords
+                  .slice(-5)
+                  .reverse()
+                  .map((record) => (
+                    <div
+                      key={record.impact_id}
+                      className="rounded-xl border border-dashed border-[#F3C7A0] bg-white p-3"
+                    >
+                      <div className="flex items-center justify-between text-sm">
+                        <div>
+                          <p className="text-xs uppercase tracking-wide text-gray-400">
+                            {record.impact_id}
+                          </p>
+                          <p className="text-sm font-semibold text-gray-900">
+                            {formatDisplayDate(record.impact_date)}
+                          </p>
+                        </div>
+                        <div className="text-right text-xs text-gray-600">
+                          <p className="font-semibold text-[#365032]">
+                            {record.meals_saved.toLocaleString(undefined, { maximumFractionDigits: 1 })} meals
+                          </p>
+                          <p>{record.weight_saved_kg.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg</p>
+                          <p className="text-[#B25C23]">
+                            {record.co2_reduced_kg.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg CO₂
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
 
       <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
         <div className="rounded-[32px] bg-[#fde5d6] p-7 flex flex-col">

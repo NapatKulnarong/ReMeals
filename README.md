@@ -138,8 +138,9 @@ docker compose exec backend python manage.py loaddata \
   fixtures/006_user_roles.json \
   fixtures/007_donations.json \
   fixtures/008_food_items.json \
+  fixtures/009_donation_requests.json \
   fixtures/010_deliveries.json \
-  fixtures/009_donation_requests.json
+  fixtures/011_impactrecord.json
 ```
 
 > Tip: run this command against a fresh database (or after `python manage.py flush`) to avoid duplicate-key errors while reloading fixtures.

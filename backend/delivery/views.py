@@ -101,17 +101,35 @@ class DeliveryViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def _create_impact_records(self, delivery: Delivery):
+        """
+        Create impact records for all food items in a delivered donation.
+        Uses the same calculation logic as FoodItemViewSet for consistency.
+        """
         donation = delivery.donation_id
         if not donation:
             return
-        items = FoodItem.objects.filter(donation=donation)
+        
+        from impactrecord.models import ImpactRecord
+        
+        items = FoodItem.objects.filter(donation=donation, is_distributed=True)
         for item in items:
-            if hasattr(item, "impact"):
-                continue
+            # Check if impact record already exists for this food item
+            if ImpactRecord.objects.filter(food=item).exists():
+                continue  # Skip if already exists
+            
+            # Use same calculation as FoodItemViewSet for consistency
+            MEAL_FACTOR = 0.5
+            WEIGHT_FACTOR = 0.2
+            CO2_FACTOR = 2.5
+
+            meals_saved = item.quantity * MEAL_FACTOR
+            weight_saved = item.quantity * WEIGHT_FACTOR
+            co2_saved = weight_saved * CO2_FACTOR
+
+            # Don't set impact_id - let the model generate it automatically
             ImpactRecord.objects.create(
-                impact_id=uuid.uuid4().hex[:10].upper(),
-                meals_saved=item.quantity,
-                weight_saved_kg=item.quantity,
-                co2_reduced_kg=0.0,
+                meals_saved=meals_saved,
+                weight_saved_kg=weight_saved,
+                co2_reduced_kg=co2_saved,
                 food=item,
             )

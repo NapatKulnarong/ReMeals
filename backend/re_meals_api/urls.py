@@ -48,8 +48,6 @@ urlpatterns = [
     path("api/", include("fooditem.urls")),
     path("api/", include("impactrecord.urls")),
     path("api/", include("donation_request.urls")),
-    path("api/", include("impactrecord.urls")),
-    path("api/", include("donation_request.urls")),
 ]
 
 if schema_view:
