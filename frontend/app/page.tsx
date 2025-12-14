@@ -5889,6 +5889,7 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
   const warehouseItems = selectedWarehouseId ? getWarehouseItems(selectedWarehouseId) : [];
   const filteredItems = filterItems(warehouseItems);
   const expiredItems = filteredItems.filter(isItemExpired);
+  const visibleItems = filteredItems.filter((it) => !isItemExpired(it));
 
   return (
     <div className="grid h-[calc(100vh-4rem)] min-h-0 gap-6 lg:[grid-template-columns:320px_1fr]">
@@ -6022,15 +6023,17 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
             No food items match the selected status for this warehouse.
           </p>
         ) : (
-          <div className="min-h-0 min-w-0 flex-1 overflow-y-auto pr-1">
-            <div className="flex gap-2 items-start">
-              <div className="md:w-[65%] mt-3 w-full space-y-3">
-                {filteredItems.map((item) => {
+          <div className="min-h-0 min-w-0 flex-1 flex pr-1">
+            <div className="flex gap-2 items-stretch w-full min-h-0">
+              <div className="md:w-[65%] mt-3 w-full flex-1 flex flex-col space-y-3 min-h-0 overflow-y-auto">
+                {visibleItems.map((item) => {
                   const expired = isItemExpired(item);
                   return (
                     <div
                       key={item.food_id}
-                      className="rounded-2xl border border-[#CFE6D8] bg-white p-4 shadow-sm transition hover:shadow-md"
+                      className={`rounded-2xl p-4 shadow-sm transition hover:shadow-md ${
+                        expired ? 'border-2 border-dashed border-[#F5C6C1] bg-[#FFF5F5]' : 'border border-[#CFE6D8] bg-white'
+                      }`}
                     >
                       <div className="mb-3 flex items-start justify-between gap-2">
                         <div className="flex-1">
@@ -6103,10 +6106,10 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
                 })}
               </div>
 
-              <aside className="md:w-[32%] mt-3 w-56 shrink-0 md:ml-auto rounded-lg border border-[#F5C6C1] bg-[#FFF5F5] p-3 space-y-3">
-                <h3 className="text-sm font-semibold text-[#B42318]">Expired items ({expiredItems.length})</h3>
+              <aside className="md:w-[32%] mt-3 w-56 shrink-0 md:ml-auto rounded-lg border-2 border-dashed border-[#F5C6C1] bg-[#FFF5F5] p-3 space-y-3 min-h-0 h-full overflow-y-auto self-stretch">
+                <h3 className="text-sm font-semibold text-[#B42318]">Expired food ({expiredItems.length})</h3>
                 {expiredItems.length === 0 ? (
-                  <p className="text-xs text-gray-500">No expired items</p>
+                  <p className="text-xs text-gray-500">No expired food</p>
                 ) : (
                   expiredItems.map((ei) => (
                     <div key={ei.food_id} className="text-sm">
