@@ -394,8 +394,6 @@ class DonationTests(APITestCase):
             "restaurant_name",
             "restaurant_branch",
             "restaurant_address",
-            "created_by_user_id",
-            "created_by_username",
         }
         self.assertEqual(set(response.data.keys()), expected_keys)
 
@@ -411,27 +409,29 @@ class DonationTests(APITestCase):
             Donation.objects.filter(donation_id=response.data["donation_id"]).exists()
         )
 
-    # 35. Donation owner can delete pending donation
-    def test_owner_can_delete_pending_donation(self):
+    # 35. Non-admin cannot delete pending donation
+    def test_non_admin_cannot_delete_pending_donation(self):
         donation = Donation.objects.create(
             donation_id="DONOWN1",
             restaurant=self.restaurant,
             status="pending",
-            created_by=self.owner,
         )
-        response = self.client.delete(f"/api/donations/{donation.donation_id}/", **self.owner_headers)
-        self.assertEqual(response.status_code, 204)
-        self.assertFalse(Donation.objects.filter(donation_id="DONOWN1").exists())
+        response = self.client.delete(
+            f"/api/donations/{donation.donation_id}/", **self.owner_headers
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(Donation.objects.filter(donation_id="DONOWN1").exists())
 
-    # 36. Non-owner cannot delete pending donation
-    def test_non_owner_cannot_delete_pending_donation(self):
+    # 36. Other non-admin also cannot delete pending donation
+    def test_other_non_admin_cannot_delete_pending_donation(self):
         donation = Donation.objects.create(
             donation_id="DONFORBID",
             restaurant=self.restaurant,
             status="pending",
-            created_by=self.owner,
         )
-        response = self.client.delete(f"/api/donations/{donation.donation_id}/", **self.other_headers)
+        response = self.client.delete(
+            f"/api/donations/{donation.donation_id}/", **self.other_headers
+        )
         self.assertEqual(response.status_code, 403)
         self.assertTrue(Donation.objects.filter(donation_id="DONFORBID").exists())
 
@@ -441,31 +441,32 @@ class DonationTests(APITestCase):
             donation_id="DONADMIN",
             restaurant=self.restaurant,
             status="pending",
-            created_by=self.owner,
         )
-        response = self.client.delete(f"/api/donations/{donation.donation_id}/", **self.admin_headers)
+        response = self.client.delete(
+            f"/api/donations/{donation.donation_id}/", **self.admin_headers
+        )
         self.assertEqual(response.status_code, 204)
         self.assertFalse(Donation.objects.filter(donation_id="DONADMIN").exists())
 
-    # 38. Cannot delete non-pending donation even if owner
+    # 38. Cannot delete non-pending donation even as admin
     def test_cannot_delete_non_pending(self):
         donation = Donation.objects.create(
             donation_id="DONLOCK",
             restaurant=self.restaurant,
             status="accepted",
-            created_by=self.owner,
         )
-        response = self.client.delete(f"/api/donations/{donation.donation_id}/", **self.owner_headers)
+        response = self.client.delete(
+            f"/api/donations/{donation.donation_id}/", **self.admin_headers
+        )
         self.assertEqual(response.status_code, 400)
         self.assertTrue(Donation.objects.filter(donation_id="DONLOCK").exists())
 
-    # 39. Non-owner cannot update pending donation
-    def test_non_owner_cannot_update_pending(self):
+    # 39. Non-admin cannot update pending donation
+    def test_non_admin_cannot_update_pending(self):
         donation = Donation.objects.create(
             donation_id="DONUPD1",
             restaurant=self.restaurant,
             status="pending",
-            created_by=self.owner,
         )
         response = self.client.patch(
             f"/api/donations/{donation.donation_id}/",
