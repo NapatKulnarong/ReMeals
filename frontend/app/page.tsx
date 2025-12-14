@@ -1989,11 +1989,6 @@ function DonationRequestSection({
     event.preventDefault();
     setNotification({});
 
-    if (!form.requestTitle.trim()) {
-      setNotification({ error: "Please provide a request title." });
-      return;
-    }
-
     if (!form.expectedDelivery) {
       setNotification({ error: "Please provide the requested delivery time." });
       return;
@@ -2022,8 +2017,12 @@ function DonationRequestSection({
 
     setIsSubmitting(true);
 
+    const computedTitle =
+      form.requestTitle.trim() ||
+      (form.communityName.trim() ? `${form.communityName.trim()} request` : "Meal request");
+
     const payload = {
-      title: form.requestTitle.trim(),
+      title: computedTitle,
       community_name: form.communityName.trim(),
       recipient_address: form.recipientAddress.trim(),
       expected_delivery: new Date(form.expectedDelivery).toISOString(),
@@ -2167,125 +2166,97 @@ function DonationRequestSection({
             className="space-y-6 h-full overflow-y-auto pr-1 pb-4 sm:pr-3"
             onSubmit={handleSubmit}
           >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-gray-700">
-                Request title
-              </label>
-              <input
-                type="text"
-                className={INPUT_STYLES}
-                placeholder="e.g. Fresh produce for Ban Klang"
-                value={form.requestTitle}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, requestTitle: event.target.value }))
-                }
-                required
-              />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-sm font-semibold text-gray-700">
+                  Expected delivery window
+                </label>
+                <input
+                  type="datetime-local"
+                  className={INPUT_STYLES}
+                  value={form.expectedDelivery}
+                  onChange={(event) =>
+                    setForm((prev) => ({ ...prev, expectedDelivery: event.target.value }))
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-semibold text-gray-700">
+                  Number of people to serve
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  className={INPUT_STYLES}
+                  value={form.numberOfPeople}
+                  onChange={(event) =>
+                    setForm((prev) => ({ ...prev, numberOfPeople: event.target.value }))
+                  }
+                  required
+                />
+              </div>
             </div>
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-gray-700">
-                Expected delivery window
-              </label>
-              <input
-                type="datetime-local"
-                className={INPUT_STYLES}
-                value={form.expectedDelivery}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, expectedDelivery: event.target.value }))
-                }
-                required
-              />
-            </div>
-          </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <p className="mb-4 text-sm font-semibold text-gray-700">Community details</p>
-              <div className="rounded-2xl border border-[#E6B9A2] bg-[#f2d6c3] p-4">
-                <div className="space-y-4">
-                  <div>
-                    <label className="mb-1 block text-sm font-semibold text-gray-700">
-                      Community name
-                    </label>
-                    <input
-                      type="text"
-                      className={INPUT_STYLES}
-                      value={form.communityName}
-                      onChange={(event) =>
-                        setForm((prev) => ({ ...prev, communityName: event.target.value }))
-                      }
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-sm font-semibold text-gray-700">
-                      Number of people to serve
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      className={INPUT_STYLES}
-                      value={form.numberOfPeople}
-                      onChange={(event) =>
-                        setForm((prev) => ({ ...prev, numberOfPeople: event.target.value }))
-                      }
-                      required
-                    />
-                  </div>
-                </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-sm font-semibold text-gray-700">
+                  Community name
+                </label>
+                <input
+                  type="text"
+                  className={INPUT_STYLES}
+                  value={form.communityName}
+                  onChange={(event) =>
+                    setForm((prev) => ({ ...prev, communityName: event.target.value }))
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-semibold text-gray-700">
+                  Contact phone
+                </label>
+                <input
+                  type="tel"
+                  className={INPUT_STYLES}
+                  value={form.contactPhone}
+                  onChange={(event) =>
+                    setForm((prev) => ({ ...prev, contactPhone: event.target.value }))
+                  }
+                  required
+                />
               </div>
             </div>
 
             <div>
-              <p className="mb-4 text-sm font-semibold text-gray-700">Recipient details</p>
-              <div className="rounded-2xl border border-[#E6B9A2] bg-[#f2d6c3] p-4">
-                <div className="space-y-4">
-                  <div>
-                    <label className="mb-1 block text-sm font-semibold text-gray-700">
-                      Recipient address
-                    </label>
-                    <input
-                      type="text"
-                      className={INPUT_STYLES}
-                      value={form.recipientAddress}
-                      onChange={(event) =>
-                        setForm((prev) => ({ ...prev, recipientAddress: event.target.value }))
-                      }
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-sm font-semibold text-gray-700">
-                      Contact phone (optional)
-                    </label>
-                    <input
-                      type="tel"
-                      className={INPUT_STYLES}
-                      value={form.contactPhone}
-                      onChange={(event) =>
-                        setForm((prev) => ({ ...prev, contactPhone: event.target.value }))
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
+              <label className="mb-1 block text-sm font-semibold text-gray-700">
+                Recipient address
+              </label>
+              <textarea
+                className={`${INPUT_STYLES} min-h-[120px] resize-y`}
+                placeholder="Delivery location, landmarks, access notes..."
+                value={form.recipientAddress}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, recipientAddress: event.target.value }))
+                }
+                required
+              />
             </div>
-          </div>
 
-          <div>
-            <label className="mb-1 block text-sm font-semibold text-gray-700">
-              Additional notes (optional)
-            </label>
-            <textarea
-              className={`${INPUT_STYLES} h-24`}
-              placeholder="Distribution plan, vulnerable households, delivery constraints..."
-              value={form.notes}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, notes: event.target.value }))
-              }
-            />
-          </div>
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-gray-700">
+                Additional notes (optional)
+              </label>
+              <textarea
+                className={`${INPUT_STYLES} min-h-[120px] resize-y`}
+                placeholder="Distribution plan, vulnerable households, delivery constraints..."
+                value={form.notes}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, notes: event.target.value }))
+                }
+              />
+            </div>
 
           {notification.error && (
             <p className="text-sm font-semibold text-[#C2410C]">
