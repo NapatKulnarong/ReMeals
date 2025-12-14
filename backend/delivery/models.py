@@ -35,7 +35,6 @@ class Delivery(models.Model):
         ("pending", "Pending"),
         ("in_transit", "In transit"),
         ("delivered", "Delivered"),
-        ("cancelled", "Cancelled"),
     ]
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     notes = models.TextField(blank=True, default="")
