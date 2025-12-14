@@ -12,6 +12,12 @@ class FoodItem(models.Model):
     quantity = models.IntegerField()
     unit = models.CharField(max_length=20)
     expire_date = models.DateField()
+    # optional category for grouping (e.g., Vegan, Islamic)
+    CATEGORY_CHOICES = [
+        ("Vegan", "Vegan"),
+        ("Islamic", "Islamic"),
+    ]
+    category = models.CharField(max_length=32, choices=CATEGORY_CHOICES, null=True, blank=True)
 
     is_expired = models.BooleanField(default=False)
     is_claimed = models.BooleanField(default=False)
