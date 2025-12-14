@@ -5660,6 +5660,8 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [foodItems, setFoodItems] = useState<FoodItemApiRecord[]>([]);
   const [deliveries, setDeliveries] = useState<DeliveryRecordApi[]>([]);
+  const [donations, setDonations] = useState<DonationApiRecord[]>([]);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<string>("");
@@ -5667,19 +5669,20 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [expiryFilter, setExpiryFilter] = useState<string>("all");
   // Grouping is enabled by default; allow toggling to flat list
-  const [groupByCategory, setGroupByCategory] = useState<boolean>(true);
+  // grouping removed: show flat list filtered by category selection
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [warehouseData, deliveryData, donationData] = await Promise.all([
+      const [warehouseData, deliveryData, donationData, restaurantData] = await Promise.all([
         apiFetch<Warehouse[]>(API_PATHS.warehouses),
         apiFetch<DeliveryRecordApi[]>(API_PATHS.deliveries, {
           headers: buildAuthHeaders(currentUser),
         }),
         apiFetch<DonationApiRecord[]>(API_PATHS.donations),
+        apiFetch<Restaurant[]>(API_PATHS.restaurants),
       ]);
 
       const metroWarehouses = warehouseData.filter((warehouse) =>
@@ -5687,6 +5690,8 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
       );
       setWarehouses(metroWarehouses);
       setDeliveries(deliveryData);
+      setDonations(donationData);
+      setRestaurants(restaurantData);
 
       const allFoodItems: FoodItemApiRecord[] = [];
       for (const donation of donationData) {
@@ -5760,9 +5765,28 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
       result = result.filter((item) => isExpiringThisMonth(item));
     }
 
-    // category selection is applied at render time for grouped view
+    // Apply category filter (display labels used in the UI)
+    if (categoryFilter && categoryFilter !== "all") {
+      result = result.filter((item) => displayCategoryLabel(getCategory(item)) === categoryFilter);
+    }
 
     return result;
+  };
+
+  const handleRemoveItem = async (foodId: string) => {
+    if (!foodId) return;
+    const ok = window.confirm("Remove this food item from the warehouse? This will delete the item.");
+    if (!ok) return;
+    try {
+      await apiFetch(`/fooditems/${foodId}/`, {
+        method: "DELETE",
+        headers: buildAuthHeaders(currentUser),
+      });
+      // Remove from local state so UI updates immediately
+      setFoodItems((prev) => prev.filter((f) => f.food_id !== foodId));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to remove item");
+    }
   };
 
   const isExpiringWithinDays = (item: FoodItemApiRecord, days: number) => {
@@ -5811,6 +5835,25 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
     return cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase();
   };
 
+  // Format a donation id into a human-friendly label (restaurant name + branch)
+  const getDonationLabel = (donationId?: string | null) => {
+    if (!donationId) return "";
+    // Try to find the donation record from loaded donations
+    const donation = donations.find((d) => d.donation_id === donationId);
+    if (donation) {
+      // Prefer the donation-provided restaurant_name if available
+      const restaurantId = donation.restaurant;
+  const restaurant = restaurants.find((r: Restaurant) => r.restaurant_id === restaurantId);
+  const restaurantName = donation.restaurant_name || restaurant?.name || restaurant?.restaurant_id || "";
+  const branchName = donation.restaurant_branch || restaurant?.branch_name || "";
+      if (branchName) return `${restaurantName}${restaurantName ? " - " : ""}${branchName}`;
+      return restaurantName || donation.donation_id;
+    }
+
+    // Fallback: show the raw id
+    return donationId;
+  };
+
   const groupItemsByCategory = (items: FoodItemApiRecord[]) => {
     const groups: Record<string, FoodItemApiRecord[]> = {};
     for (const it of items) {
@@ -5845,9 +5888,10 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
   const selectedWarehouse = warehouses.find((w) => w.warehouse_id === selectedWarehouseId) || null;
   const warehouseItems = selectedWarehouseId ? getWarehouseItems(selectedWarehouseId) : [];
   const filteredItems = filterItems(warehouseItems);
+  const expiredItems = filteredItems.filter(isItemExpired);
 
   return (
-    <div className="grid h-[calc(100vh-4rem)] min-h-0 gap-6 lg:grid-cols-2">
+    <div className="grid h-[calc(100vh-4rem)] min-h-0 gap-6 lg:[grid-template-columns:320px_1fr]">
       <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[28px] border border-[#CFE6D8] bg-white p-6 shadow-lg shadow-[#B6DEC8]/30">
         <div className="mb-4 flex flex-shrink-0 items-center justify-between">
           <div>
@@ -5904,7 +5948,7 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
   <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-[28px] border border-[#CFE6D8] bg-[#F6FBF7] p-6 shadow-lg shadow-[#B6DEC8]/30">
         {/* header is sticky so controls don't shift when left column content changes */}
         <div className="sticky top-6 z-20 mb-4 bg-[#F6FBF7] py-2">
-          <div className="flex flex-shrink-0 flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div className="flex flex-shrink-0 flex-col gap-4 md:flex-row md:items-start md:gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-[#2F855A]">
               Warehouse management
@@ -5916,60 +5960,52 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
               <p className="text-sm text-gray-600">{selectedWarehouse.address}</p>
             )}
           </div>
-          <div className="md:w-60">
-            <label className="mb-1 block text-xs font-semibold text-gray-600">
-              Filter by status
-            </label>
-            <select
-              className={INPUT_STYLES}
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-            >
-              <option value="all">All items</option>
-              <option value="available">Available</option>
-              <option value="claimed">Claimed</option>
-              <option value="distributed">Distributed</option>
-              <option value="expired">Expired</option>
-            </select>
-          </div>
-          <div className="md:w-60">
-            <label className="mb-1 block text-xs font-semibold text-gray-600">Expiry filter</label>
-            <select
-              className={INPUT_STYLES}
-              value={expiryFilter}
-              onChange={(e) => setExpiryFilter(e.target.value)}
-            >
-              <option value="all">All</option>
-              <option value="within_3_days">Expiring within 3 days</option>
-              <option value="this_week">Expiring this week</option>
-              <option value="this_month">Expiring this month</option>
-            </select>
+          <div className="flex w-full md:w-auto md:ml-auto gap-4 flex-wrap">
+            <div className="w-full md:w-40">
+              <label className="mb-1 block text-xs font-semibold text-gray-600">
+                Filter by status
+              </label>
+              <select
+                className={INPUT_STYLES}
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+              >
+                <option value="all">All items</option>
+                <option value="available">Available</option>
+                <option value="claimed">Claimed</option>
+                <option value="distributed">Distributed</option>
+                <option value="expired">Expired</option>
+              </select>
+            </div>
+            <div className="w-full md:w-40">
+              <label className="mb-1 block text-xs font-semibold text-gray-600">Expiry filter</label>
+              <select
+                className={INPUT_STYLES}
+                value={expiryFilter}
+                onChange={(e) => setExpiryFilter(e.target.value)}
+              >
+                <option value="all">All</option>
+                <option value="within_3_days">Expiring within 3 days</option>
+                <option value="this_week">Expiring this week</option>
+                <option value="this_month">Expiring this month</option>
+              </select>
+            </div>
+
+            <div className="w-full md:w-40">
+              <label className="mb-1 block text-xs font-semibold text-gray-600">Category</label>
+              <select
+                className={INPUT_STYLES}
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+              >
+                <option value="all">All</option>
+                <option value="Vegetarian">Vegetarian</option>
+                <option value="Islamic">Islamic</option>
+              </select>
+            </div>
           </div>
 
-          <div className="md:w-52">
-            <label className="mb-1 block text-xs font-semibold text-gray-600">Category</label>
-            <select
-              className={INPUT_STYLES}
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-            >
-              <option value="all">All</option>
-              <option value="Vegetarian">Vegetarian</option>
-              <option value="Islamic">Islamic</option>
-            </select>
-          </div>
-
-          <div className="md:w-48 flex items-end">
-            <label className="inline-flex items-center gap-2 text-xs">
-              <input
-                type="checkbox"
-                checked={groupByCategory}
-                onChange={(e) => setGroupByCategory(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300"
-              />
-              <span className="text-gray-600">Group by category</span>
-            </label>
-          </div>
+          {/* grouping UI removed - category selection drives filtering */}
   </div>
   </div>
 
@@ -5986,184 +6022,108 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
             No food items match the selected status for this warehouse.
           </p>
         ) : (
-          <div className="min-h-0 min-w-0 flex-1 space-y-3 overflow-y-auto pr-1">
-            {groupByCategory ? (
-              // group items and then apply category selection to groups (if any)
-              Object.entries(groupItemsByCategory(filteredItems))
-                .filter(([cat]) => {
-                  if (!categoryFilter || categoryFilter === "all") return true;
-                  // categoryFilter uses display label (e.g., "Vegetarian")
-                  return displayCategoryLabel(cat) === categoryFilter;
-                })
-                .map(([cat, items]) => (
-                <div key={cat} className="space-y-2">
-                  <h3 className="px-2 mt-1.5 text-sm font-semibold text-gray-700 w-full break-words whitespace-normal">{displayCategoryLabel(cat)} ({items.length})</h3>
-                  {items.map((item) => {
-                    const expired = isItemExpired(item);
-                    return (
-                      <div
-                        key={item.food_id}
-                        className="rounded-2xl border border-[#CFE6D8] bg-white p-4 shadow-sm transition hover:shadow-md"
-                      >
-                  <div className="mb-3 flex items-start justify-between gap-2">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#E6F7EE]">
-                          <span className="text-base">🥘</span>
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-gray-900 leading-tight">
-                            {item.name}
-                          </p>
-                          <span className="text-[11px] font-medium text-[#2F855A] leading-tight">
-                            {item.food_id}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                        expired
-                          ? "bg-[#FDECEA] text-[#B42318]"
-                          : item.is_distributed
-                          ? "bg-[#E6F7EE] text-[#1F4D36]"
-                          : item.is_claimed
-                          ? "bg-[#E6F4FF] text-[#1D4ED8]"
-                          : "bg-[#FFF1E3] text-[#C46A24]"
-                      }`}
+          <div className="min-h-0 min-w-0 flex-1 overflow-y-auto pr-1">
+            <div className="flex gap-2 items-start">
+              <div className="md:w-[65%] mt-3 w-full space-y-3">
+                {filteredItems.map((item) => {
+                  const expired = isItemExpired(item);
+                  return (
+                    <div
+                      key={item.food_id}
+                      className="rounded-2xl border border-[#CFE6D8] bg-white p-4 shadow-sm transition hover:shadow-md"
                     >
-                      {expired
-                        ? "Expired"
-                        : item.is_distributed
-                        ? "Distributed"
-                        : item.is_claimed
-                        ? "Claimed"
-                        : "Available"}
-                    </span>
-                  </div>
-
-                  <div className="space-y-3 border-t border-gray-100 pt-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0">
-                        <span className="text-gray-400">🍽️</span>
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-medium text-gray-500">Donation</p>
-                        <p className="text-sm font-semibold text-gray-900">
-                          {item.donation}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0">
-                        <span className="text-gray-400">📦</span>
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-medium text-gray-500">Quantity</p>
-                        <p className="text-sm font-semibold text-gray-900">
-                          {item.quantity} {item.unit}
-                        </p>
-                      </div>
-                    </div>
-
-                    {item.expire_date && (
-                      <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0">
-                          <span className="text-gray-400">📅</span>
-                        </div>
+                      <div className="mb-3 flex items-start justify-between gap-2">
                         <div className="flex-1">
-                          <p className="text-xs font-medium text-gray-500">Expires</p>
-                          <p className="text-sm font-semibold text-gray-900">
-                            {formatDisplayDate(item.expire_date)}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ))
-            ) : (
-              filteredItems.map((item) => {
-                const expired = isItemExpired(item);
-                return (
-                  <div
-                    key={item.food_id}
-                    className="rounded-2xl border border-[#CFE6D8] bg-white p-4 shadow-sm transition hover:shadow-md"
-                  >
-                    <div className="mb-3 flex items-start justify-between gap-2">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#E6F7EE]">
-                            <span className="text-base">🥘</span>
-                          </div>
-                          <div>
-                            <p className="text-sm font-semibold text-gray-900 leading-tight">{item.name}</p>
-                            <span className="text-[11px] font-medium text-[#2F855A] leading-tight">{item.food_id}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#E6F7EE]">
+                              <span className="text-base">🥘</span>
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-gray-900 leading-tight">{item.name}</p>
+                              <span className="text-[11px] font-medium text-[#2F855A] leading-tight">{item.food_id}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                          expired
-                            ? "bg-[#FDECEA] text-[#B42318]"
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                            expired
+                              ? "bg-[#FDECEA] text-[#B42318]"
+                              : item.is_distributed
+                              ? "bg-[#E6F7EE] text-[#1F4D36]"
+                              : item.is_claimed
+                              ? "bg-[#E6F4FF] text-[#1D4ED8]"
+                              : "bg-[#FFF1E3] text-[#C46A24]"
+                          }`}
+                        >
+                          {expired
+                            ? "Expired"
                             : item.is_distributed
-                            ? "bg-[#E6F7EE] text-[#1F4D36]"
+                            ? "Distributed"
                             : item.is_claimed
-                            ? "bg-[#E6F4FF] text-[#1D4ED8]"
-                            : "bg-[#FFF1E3] text-[#C46A24]"
-                        }`}
-                      >
-                        {expired
-                          ? "Expired"
-                          : item.is_distributed
-                          ? "Distributed"
-                          : item.is_claimed
-                          ? "Claimed"
-                          : "Available"}
-                      </span>
-                    </div>
-
-                    <div className="space-y-3 border-t border-gray-100 pt-4">
-                      <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0">
-                          <span className="text-gray-400">🍽️</span>
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-xs font-medium text-gray-500">Donation</p>
-                          <p className="text-sm font-semibold text-gray-900">{item.donation}</p>
-                        </div>
+                            ? "Claimed"
+                            : "Available"}
+                        </span>
                       </div>
 
-                      <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0">
-                          <span className="text-gray-400">📦</span>
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-xs font-medium text-gray-500">Quantity</p>
-                          <p className="text-sm font-semibold text-gray-900">{item.quantity} {item.unit}</p>
-                        </div>
-                      </div>
-
-                      {item.expire_date && (
+                      <div className="space-y-3 border-t border-gray-100 pt-4">
                         <div className="flex items-start gap-3">
                           <div className="flex-shrink-0">
-                            <span className="text-gray-400">📅</span>
+                            <span className="text-gray-400">🍽️</span>
                           </div>
                           <div className="flex-1">
-                            <p className="text-xs font-medium text-gray-500">Expires</p>
-                            <p className="text-sm font-semibold text-gray-900">{formatDisplayDate(item.expire_date)}</p>
+                            <p className="text-xs font-medium text-gray-500">Donation</p>
+                            <p className="text-sm font-semibold text-gray-900">{getDonationLabel(item.donation)}</p>
                           </div>
                         </div>
-                      )}
+
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0">
+                            <span className="text-gray-400">📦</span>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs font-medium text-gray-500">Quantity</p>
+                            <p className="text-sm font-semibold text-gray-900">{item.quantity} {item.unit}</p>
+                          </div>
+                        </div>
+
+                        {item.expire_date && (
+                          <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0">
+                              <span className="text-gray-400">📅</span>
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-xs font-medium text-gray-500">Expires</p>
+                              <p className="text-sm font-semibold text-gray-900">{formatDisplayDate(item.expire_date)}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })
-            )}
+                  );
+                })}
+              </div>
+
+              <aside className="md:w-[32%] mt-3 w-56 shrink-0 md:ml-auto rounded-lg border border-[#F5C6C1] bg-[#FFF5F5] p-3 space-y-3">
+                <h3 className="text-sm font-semibold text-[#B42318]">Expired items ({expiredItems.length})</h3>
+                {expiredItems.length === 0 ? (
+                  <p className="text-xs text-gray-500">No expired items</p>
+                ) : (
+                  expiredItems.map((ei) => (
+                    <div key={ei.food_id} className="text-sm">
+                      <p className="font-medium text-gray-900">{ei.name}</p>
+                      <p className="text-xs text-[#7A1F1F]">{ei.expire_date ? formatDisplayDate(ei.expire_date) : 'No date'}</p>
+                      <p className="text-xs text-gray-700">Qty: {ei.quantity} {ei.unit}</p>
+                      <button
+                        onClick={() => handleRemoveItem(ei.food_id)}
+                        className="mt-2 w-full rounded-md bg-[#B42318] px-2 py-1 text-xs font-semibold text-white hover:bg-[#991b1b]"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))
+                )}
+              </aside>
+            </div>
           </div>
         )}
       </div>
