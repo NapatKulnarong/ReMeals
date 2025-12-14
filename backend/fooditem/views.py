@@ -104,6 +104,11 @@ class FoodItemViewSet(viewsets.ModelViewSet):
         Create an ImpactRecord the first time the food item becomes distributed.
         Impact values are constant based on quantity — not on food attributes.
         """
+        from impactrecord.models import ImpactRecord
+        
+        # Check if impact record already exists for this food item
+        if ImpactRecord.objects.filter(food=item).exists():
+            return  # Don't create duplicate
 
         # Constants (fixed coefficients)
         MEAL_FACTOR = 0.5
@@ -114,10 +119,8 @@ class FoodItemViewSet(viewsets.ModelViewSet):
         weight_saved = item.quantity * WEIGHT_FACTOR
         co2_saved = weight_saved * CO2_FACTOR
 
-        from impactrecord.models import ImpactRecord
-
+        # Don't set impact_id - let the model generate it automatically
         ImpactRecord.objects.create(
-            impact_id=f"I{item.food_id}",
             meals_saved=meals_saved,
             weight_saved_kg=weight_saved,
             co2_reduced_kg=co2_saved,

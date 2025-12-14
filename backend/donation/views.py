@@ -50,6 +50,10 @@ class DonationViewSet(viewsets.ModelViewSet):
         request_user = self._get_request_user()
         if not request_user:
             return False
+        # If created_by is not set (legacy donations), allow logged-in users to manage
+        if donation.created_by_id is None:
+            return True
+        # Otherwise, must be the owner
         return donation.created_by_id == request_user.user_id
 
     def _ensure_manageable(self, donation):
