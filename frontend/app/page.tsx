@@ -2852,120 +2852,143 @@ function StatusSection({ currentUser }: { currentUser: LoggedUser | null }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-gray-800">Status</h2>
+        <h2 className="text-2xl font-semibold text-gray-900">Status</h2>
         <p className="mt-1 text-sm text-gray-600">
           View your donations and requests that have been assigned or accepted by the admin.
         </p>
       </div>
 
-      {/* Assigned Donations */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">
-          Assigned Donations ({assignedDonations.length})
-        </h3>
-        {assignedDonations.length === 0 ? (
-          <p className="text-sm text-gray-500">
-            No donations have been assigned to pickup tasks yet.
-          </p>
-        ) : (
-          <div className="space-y-4">
-            {assignedDonations.map(({ donation, delivery }) => {
-              const statusLabel = (status: DeliveryRecordApi["status"]) => {
-                switch (status) {
-                  case "pending":
-                    return { text: "Pending", className: "bg-[#FFF1E3] text-[#C46A24]" };
-                  case "in_transit":
-                    return { text: "In transit", className: "bg-[#E6F4FF] text-[#1D4ED8]" };
-                  case "delivered":
-                    return { text: "Delivered", className: "bg-[#E6F7EE] text-[#1F4D36]" };
-                  case "cancelled":
-                  default:
-                    return { text: "Cancelled", className: "bg-[#FDECEA] text-[#B42318]" };
-                }
-              };
-              const status = statusLabel(delivery.status);
-              
-              return (
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Assigned Donations */}
+        <section className="flex min-h-[60vh] flex-col rounded-3xl border border-[#C7D2C0] bg-[#F4F7EF] p-6 shadow-inner shadow-[#C7D2C0]/40">
+          <div className="mb-3 flex items-start justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-[#4E673E]">
+                Assigned Donations
+              </p>
+              <h3 className="text-xl font-semibold text-gray-900">
+                Pickup tasks
+              </h3>
+            </div>
+            <span className="rounded-full border border-[#A8B99A] bg-white px-3 py-1 text-xs font-semibold text-[#365032] shadow-sm">
+              {assignedDonations.length} active
+            </span>
+          </div>
+          <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+            {assignedDonations.length === 0 ? (
+              <p className="rounded-2xl border border-dashed border-[#C7D2C0] bg-white p-4 text-sm text-gray-600">
+                No donations have been assigned to pickup tasks yet.
+              </p>
+            ) : (
+              assignedDonations.map(({ donation, delivery }) => {
+                const statusLabel = (status: DeliveryRecordApi["status"]) => {
+                  switch (status) {
+                    case "pending":
+                      return { text: "Pending", className: "bg-[#E9F1E3] text-[#4E673E]" };
+                    case "in_transit":
+                      return { text: "In transit", className: "bg-[#E6F4FF] text-[#1D4ED8]" };
+                    case "delivered":
+                      return { text: "Delivered", className: "bg-[#E6F7EE] text-[#1F4D36]" };
+                    case "cancelled":
+                    default:
+                      return { text: "Cancelled", className: "bg-[#FDECEA] text-[#B42318]" };
+                  }
+                };
+                const status = statusLabel(delivery.status);
+
+                return (
+                  <article
+                    key={donation.id}
+                    className="rounded-2xl border border-dashed border-[#4d673f] bg-white p-4 shadow-sm"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs uppercase tracking-wide text-gray-400">
+                          {donation.restaurantId ?? "Manual entry"}
+                        </p>
+                        <p className="text-lg font-semibold text-gray-900">
+                          {donation.restaurantName}
+                        </p>
+                        {donation.branch && (
+                          <p className="text-sm text-gray-500">{donation.branch}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="text-right text-xs text-gray-500">
+                          <p>{formatDisplayDate(donation.createdAt)}</p>
+                          <p>{donation.items.length} item(s)</p>
+                        </div>
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}
+                        >
+                          {status.text}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mt-3 rounded-lg border border-[#D7DCC7] bg-[#F7FBF6] p-2.5">
+                      <p className="text-xs font-medium text-[#4B5F39]">
+                        ✓ Assigned to pickup. Status:{" "}
+                        <span className="font-semibold">{status.text}</span>
+                      </p>
+                    </div>
+                  </article>
+                );
+              })
+            )}
+          </div>
+        </section>
+
+        {/* Accepted Requests */}
+        <section className="flex min-h-[60vh] flex-col rounded-3xl border border-[#F3C7A0] bg-[#FFF8F0] p-6 shadow-inner shadow-[#F3C7A0]/30">
+          <div className="mb-3 flex items-start justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-[#C46A24]">
+                Accepted Requests
+              </p>
+              <h3 className="text-xl font-semibold text-gray-900">
+                Community deliveries
+              </h3>
+            </div>
+            <span className="rounded-full border border-[#E6B9A2] bg-white px-3 py-1 text-xs font-semibold text-[#B25C23] shadow-sm">
+              {acceptedRequests.length} active
+            </span>
+          </div>
+          <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+            {acceptedRequests.length === 0 ? (
+              <p className="rounded-2xl border border-dashed border-[#F3C7A0] bg-white p-4 text-sm text-gray-600">
+                No meal requests have been accepted yet.
+              </p>
+            ) : (
+              acceptedRequests.map((request) => (
                 <article
-                  key={donation.id}
-                  className="rounded-xl border border-dashed border-[#4d673f] bg-[#F4F7EF] p-4"
+                  key={request.id}
+                  className="rounded-2xl border border-dashed border-[#F3C7A0] bg-white p-4 shadow-sm"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="text-xs uppercase tracking-wide text-gray-400">
-                        {donation.restaurantId ?? "Manual entry"}
+                        {request.id}
                       </p>
                       <p className="text-lg font-semibold text-gray-900">
-                        {donation.restaurantName}
+                        {request.requestTitle}
                       </p>
-                      {donation.branch && (
-                        <p className="text-sm text-gray-500">{donation.branch}</p>
-                      )}
+                      <p className="text-sm text-gray-500">{request.communityName}</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="text-right text-xs text-gray-500">
-                        <p>{formatDisplayDate(donation.createdAt)}</p>
-                        <p>{donation.items.length} item(s)</p>
-                      </div>
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}
-                      >
-                        {status.text}
-                      </span>
+                    <div className="text-right text-xs text-gray-500">
+                      <p>{formatDisplayDate(request.createdAt)}</p>
+                      <p>{request.numberOfPeople} people</p>
                     </div>
                   </div>
-                  <div className="mt-3 rounded-lg border border-[#D7DCC7] bg-white p-2.5">
-                    <p className="text-xs font-medium text-[#4B5F39]">
-                      ✓ This donation has been assigned to a pickup task. Status: <span className="font-semibold">{status.text}</span>
+                  <div className="mt-3 rounded-lg border border-[#F3C7A0] bg-[#FFF3E7] p-2.5">
+                    <p className="text-xs font-medium text-[#8B4C1F]">
+                      ✓ This request has been accepted and assigned for delivery.
                     </p>
                   </div>
                 </article>
-              );
-            })}
+              ))
+            )}
           </div>
-        )}
-      </div>
-
-      {/* Accepted Requests */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">
-          Accepted Requests ({acceptedRequests.length})
-        </h3>
-        {acceptedRequests.length === 0 ? (
-          <p className="text-sm text-gray-500">
-            No meal requests have been accepted yet.
-          </p>
-        ) : (
-          <div className="space-y-4">
-            {acceptedRequests.map((request) => (
-              <article
-                key={request.id}
-                className="rounded-xl border border-dashed border-[#F3C7A0] bg-[#FFF8F0] p-4"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-wide text-gray-400">
-                      {request.id}
-                    </p>
-                    <p className="text-lg font-semibold text-gray-900">
-                      {request.requestTitle}
-                    </p>
-                    <p className="text-sm text-gray-500">{request.communityName}</p>
-                  </div>
-                  <div className="text-right text-xs text-gray-500">
-                    <p>{formatDisplayDate(request.createdAt)}</p>
-                    <p>{request.numberOfPeople} people</p>
-                  </div>
-                </div>
-                <div className="mt-3 rounded-lg border border-[#F3C7A0] bg-white p-2.5">
-                  <p className="text-xs font-medium text-[#8B4C1F]">
-                    ✓ This request has been accepted and assigned for delivery.
-                  </p>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
+        </section>
       </div>
     </div>
   );
