@@ -2657,7 +2657,33 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
   const visibleDeliveries = (canEdit
     ? deliveries
     : deliveries.filter((delivery) => delivery.user_id === currentUserId)
-  ).filter((delivery) => delivery.delivery_type === "donation");
+  )
+    .filter((delivery) => delivery.delivery_type === "donation")
+    .sort((a, b) => {
+      const timeA = new Date(a.pickup_time).getTime();
+      const timeB = new Date(b.pickup_time).getTime();
+      return timeA - timeB; // Sort ascending (earliest first)
+    });
+
+  // Get donation IDs that are already assigned to pickup deliveries
+  const assignedDonationIds = new Set(
+    deliveries
+      .filter((delivery) => delivery.delivery_type === "donation" && delivery.donation_id)
+      .map((delivery) => delivery.donation_id)
+  );
+
+  // Filter donations to exclude those already assigned, but include the one being edited
+  const availableDonations = donations.filter((donation) => {
+    // If we're editing a delivery that uses this donation, include it
+    if (editingDeliveryId) {
+      const editingDelivery = deliveries.find((d) => d.delivery_id === editingDeliveryId);
+      if (editingDelivery?.donation_id === donation.donation_id) {
+        return true;
+      }
+    }
+    // Otherwise, exclude if it's already assigned
+    return !assignedDonationIds.has(donation.donation_id);
+  });
 
   const lookupRestaurantName = (donationId: string) => {
     const donation = donations.find((d) => d.donation_id === donationId);
@@ -2787,7 +2813,7 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
                       onChange={(e) => setPickupForm((prev) => ({ ...prev, donationId: e.target.value }))}
                     >
                       <option value="">Select donation</option>
-                      {donations.map((donation) => (
+                      {availableDonations.map((donation) => (
                         <option key={donation.donation_id} value={donation.donation_id}>
                           {donation.donation_id} • {lookupRestaurantName(donation.donation_id)}
                         </option>
@@ -3028,18 +3054,6 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-2 col-span-2">
-                      <div className="flex-shrink-0 pt-0.5">
-                        <span className="text-sm text-gray-400">📦</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[11px] font-medium text-gray-500 leading-tight">Warehouse</p>
-                        <p className="text-xs font-semibold text-gray-900 leading-tight">
-                          {delivery.warehouse_id} — {lookupWarehouseAddress(delivery.warehouse_id)}
-                        </p>
-                      </div>
-                    </div>
-
                     <div className="flex items-start gap-2">
                       <div className="flex-shrink-0 pt-0.5">
                         <span className="text-sm text-gray-400">👤</span>
@@ -3053,6 +3067,18 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
                     </div>
 
                     <div className="flex items-start gap-2">
+                      <div className="flex-shrink-0 pt-0.5">
+                        <span className="text-sm text-gray-400">📦</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] font-medium text-gray-500 leading-tight">Warehouse</p>
+                        <p className="text-xs font-semibold text-gray-900 leading-tight">
+                          {delivery.warehouse_id}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-2 col-span-2">
                       <div className="flex-shrink-0 pt-0.5">
                         <span className="text-sm text-gray-400">🕐</span>
                       </div>
@@ -3250,7 +3276,13 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
   const visibleDeliveries = (canEdit
     ? deliveries
     : deliveries.filter((delivery) => delivery.user_id === currentUserId)
-  ).filter((delivery) => delivery.delivery_type === "distribution");
+  )
+    .filter((delivery) => delivery.delivery_type === "distribution")
+    .sort((a, b) => {
+      const timeA = new Date(a.pickup_time).getTime();
+      const timeB = new Date(b.pickup_time).getTime();
+      return timeA - timeB; // Sort ascending (earliest first)
+    });
 
   const lookupCommunityName = (communityId: string) => {
     const community = communities.find((c) => c.community_id === communityId);

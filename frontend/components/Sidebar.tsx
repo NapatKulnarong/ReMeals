@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { ReactNode } from "react";
-import { Squares2X2Icon, ArrowRightOnRectangleIcon, TruckIcon } from "@heroicons/react/24/solid";
+import { Squares2X2Icon, ArrowRightOnRectangleIcon, TruckIcon, CubeIcon } from "@heroicons/react/24/solid";
 import { InboxStackIcon } from "@heroicons/react/24/solid";
 
 // This marks the component as a Client Component (required because we use state + event handlers)
@@ -62,8 +62,8 @@ const renderSidebarIcon = (id: number, className?: string) => {
     return <InboxStackIcon className={className} />;
   }
   if (id === 6) {
-    // Deliver icon - TruckIcon from Heroicons
-    return <TruckIcon className={className} />;
+    // Deliver icon - CubeIcon from Heroicons
+    return <CubeIcon className={className} />;
   }
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
