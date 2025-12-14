@@ -4093,7 +4093,6 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
   const [foodItems, setFoodItems] = useState<Record<string, FoodItemApiRecord[]>>({});
   const [warehouses, setWarehouses] = useState<Record<string, Warehouse>>({});
   const [communities, setCommunities] = useState<Record<string, Community>>({});
-  const [staff, setStaff] = useState<DeliveryStaffInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -4102,7 +4101,6 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState<DeliveryRecordApi["status"] | "all">("all");
-  const [staffFilter, setStaffFilter] = useState<string>("all"); // "all", "unassigned", or user_id
   const [areaFilter, setAreaFilter] = useState<string>("all");
   const [dateFilter, setDateFilter] = useState<"all" | "today" | "tomorrow" | "week">("all");
 
@@ -4130,7 +4128,6 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
       });
       const warehouseData = await apiFetch<Warehouse[]>(API_PATHS.warehouses);
       const communityData = await apiFetch<Community[]>(API_PATHS.communities);
-      const staffData = await apiFetch<DeliveryStaffInfo[]>(API_PATHS.deliveryStaff);
 
       const donationIds = Array.from(
         new Set(
@@ -4179,7 +4176,6 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
       setFoodItems(itemsByDonation);
       setWarehouses(warehouseMap);
       setCommunities(communityMap);
-      setStaff(staffData);
 
       const nextInputs: Record<string, { notes: string }> = {};
       deliveryData.forEach((d) => {
@@ -4199,10 +4195,13 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
     }
   }, [currentUser, loadData]);
 
-  // Helper function to extract area from address
+  // Helper function to extract province from address
   const extractArea = (address: string): string => {
     const lowerAddress = address.toLowerCase();
-    if (lowerAddress.includes("bangkok central") || lowerAddress.includes("central bangkok")) return "Bangkok Central";
+    // Check longer/more specific names first to avoid partial matches
+    if (lowerAddress.includes("phra nakhon si ayutthaya") || lowerAddress.includes("ayutthaya")) return "Phra Nakhon Si Ayutthaya";
+    if (lowerAddress.includes("nakhon pathom")) return "Nakhon Pathom";
+    if (lowerAddress.includes("samut sakhon")) return "Samut Sakhon";
     if (lowerAddress.includes("samut prakan")) return "Samut Prakan";
     if (lowerAddress.includes("pathum thani")) return "Pathum Thani";
     if (lowerAddress.includes("nonthaburi")) return "Nonthaburi";
@@ -4210,34 +4209,81 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
     return "Other";
   };
 
-  // Get area for a delivery
+  // Get area for a delivery based on dropoff location
   const getDeliveryArea = (delivery: DeliveryRecordApi): string => {
-    if (delivery.community_id && communities[delivery.community_id]) {
+    // For pickups (donation type): dropoff is warehouse
+    if (delivery.delivery_type === "donation" && delivery.warehouse_id && warehouses[delivery.warehouse_id]) {
+      return extractArea(warehouses[delivery.warehouse_id].address);
+    }
+    // For deliveries (distribution type): dropoff is community
+    if (delivery.delivery_type === "distribution" && delivery.community_id && communities[delivery.community_id]) {
       return extractArea(communities[delivery.community_id].address);
     }
+    // Fallback: try warehouse if available
     if (delivery.warehouse_id && warehouses[delivery.warehouse_id]) {
       return extractArea(warehouses[delivery.warehouse_id].address);
     }
     return "Other";
   };
 
-  // Get unique areas from deliveries
+  // Get unique areas from ALL addresses in deliveries (pickup and dropoff)
   const uniqueAreas = useMemo(() => {
     const areas = new Set<string>();
     deliveries.forEach(d => {
-      areas.add(getDeliveryArea(d));
+      // For pickups: extract from restaurant address (pickup) and warehouse address (dropoff)
+      if (d.delivery_type === "donation") {
+        // Get restaurant address from donation
+        if (d.donation_id && donations[d.donation_id]?.restaurant_address) {
+          const restaurantAddress = donations[d.donation_id].restaurant_address;
+          if (restaurantAddress) {
+            const restaurantArea = extractArea(restaurantAddress);
+            if (restaurantArea && restaurantArea !== "Other") {
+              areas.add(restaurantArea);
+            }
+          }
+        }
+        // Get warehouse address (dropoff)
+        if (d.warehouse_id && warehouses[d.warehouse_id]) {
+          const warehouseAddress = warehouses[d.warehouse_id].address;
+          if (warehouseAddress) {
+            const warehouseArea = extractArea(warehouseAddress);
+            if (warehouseArea && warehouseArea !== "Other") {
+              areas.add(warehouseArea);
+            }
+          }
+        }
+      }
+      // For deliveries: extract from warehouse address (pickup) and community address (dropoff)
+      if (d.delivery_type === "distribution") {
+        // Get warehouse address (pickup)
+        if (d.warehouse_id && warehouses[d.warehouse_id]) {
+          const warehouseAddress = warehouses[d.warehouse_id].address;
+          if (warehouseAddress) {
+            const warehouseArea = extractArea(warehouseAddress);
+            if (warehouseArea && warehouseArea !== "Other") {
+              areas.add(warehouseArea);
+            }
+          }
+        }
+        // Get community address (dropoff)
+        if (d.community_id && communities[d.community_id]) {
+          const communityAddress = communities[d.community_id].address;
+          if (communityAddress) {
+            const communityArea = extractArea(communityAddress);
+            if (communityArea && communityArea !== "Other") {
+              areas.add(communityArea);
+            }
+          }
+        }
+      }
     });
     return Array.from(areas).sort();
-  }, [deliveries, communities, warehouses]);
+  }, [deliveries, communities, warehouses, donations]);
 
   // Filter function
   const applyFilters = (delivery: DeliveryRecordApi): boolean => {
     // Status filter
     if (statusFilter !== "all" && delivery.status !== statusFilter) return false;
-
-    // Staff filter
-    if (staffFilter === "unassigned" && delivery.user_id) return false;
-    if (staffFilter !== "all" && staffFilter !== "unassigned" && delivery.user_id !== staffFilter) return false;
 
     // Area filter
     if (areaFilter !== "all" && getDeliveryArea(delivery) !== areaFilter) return false;
@@ -4274,7 +4320,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
         .filter((d) => d.delivery_type === "donation")
         .filter(applyFilters)
         .sort((a, b) => new Date(a.pickup_time).getTime() - new Date(b.pickup_time).getTime()),
-    [deliveries, statusFilter, staffFilter, areaFilter, dateFilter, communities, warehouses]
+    [deliveries, statusFilter, areaFilter, dateFilter, communities, warehouses]
   );
   const distributionTasks = useMemo(
     () =>
@@ -4282,7 +4328,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
         .filter((d) => d.delivery_type === "distribution")
         .filter(applyFilters)
         .sort((a, b) => new Date(a.pickup_time).getTime() - new Date(b.pickup_time).getTime()),
-    [deliveries, statusFilter, staffFilter, areaFilter, dateFilter, communities, warehouses]
+    [deliveries, statusFilter, areaFilter, dateFilter, communities, warehouses]
   );
 
   const formatFoodAmount = (donationId?: string | null) => {
@@ -4401,10 +4447,30 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
               {formatFoodAmount(delivery.donation_id ?? undefined)}
             </p>
           </div>
-          {donation?.restaurant_address && (
+          {/* Pickup Address */}
+          {isPickup && donation?.restaurant_address && (
             <div className="col-span-2">
               <p className="text-[11px] uppercase tracking-wide text-gray-500">Pickup address</p>
               <p className="font-medium text-gray-800">{donation.restaurant_address}</p>
+            </div>
+          )}
+          {!isPickup && delivery.warehouse_id && warehouses[delivery.warehouse_id] && (
+            <div className="col-span-2">
+              <p className="text-[11px] uppercase tracking-wide text-gray-500">Pickup address</p>
+              <p className="font-medium text-gray-800">{warehouses[delivery.warehouse_id].address}</p>
+            </div>
+          )}
+          {/* Dropoff Address */}
+          {isPickup && delivery.warehouse_id && warehouses[delivery.warehouse_id] && (
+            <div className="col-span-2">
+              <p className="text-[11px] uppercase tracking-wide text-gray-500">Dropoff address</p>
+              <p className="font-medium text-gray-800">{warehouses[delivery.warehouse_id].address}</p>
+            </div>
+          )}
+          {!isPickup && delivery.community_id && communities[delivery.community_id] && (
+            <div className="col-span-2">
+              <p className="text-[11px] uppercase tracking-wide text-gray-500">Dropoff address</p>
+              <p className="font-medium text-gray-800">{communities[delivery.community_id].address}</p>
             </div>
           )}
           {isPickup && items.length > 0 && (
@@ -4420,14 +4486,6 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
                   </span>
                 ))}
               </div>
-            </div>
-          )}
-          {!isPickup && delivery.community_id && (
-            <div className="col-span-2">
-              <p className="text-[11px] uppercase tracking-wide text-gray-500">Community</p>
-              <p className="font-medium text-gray-800">
-                {communities[delivery.community_id]?.name ?? delivery.community_id}
-              </p>
             </div>
           )}
         </div>
@@ -4559,8 +4617,8 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
           </div>
         </div>
 
-        {/* Date, Staff, and Area Filters */}
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        {/* Date and Area Filters */}
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {/* Date Filter */}
           <div>
             <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">
@@ -4575,26 +4633,6 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
               <option value="today">Today</option>
               <option value="tomorrow">Tomorrow</option>
               <option value="week">This week</option>
-            </select>
-          </div>
-
-          {/* Staff Filter */}
-          <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">
-              Staff Assignment
-            </label>
-            <select
-              value={staffFilter}
-              onChange={(e) => setStaffFilter(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-[#8B4C1F] focus:outline-none focus:ring-2 focus:ring-[#8B4C1F]/20"
-            >
-              <option value="all">All staff</option>
-              <option value="unassigned">Unassigned</option>
-              {staff.map((s) => (
-                <option key={s.user_id} value={s.user_id}>
-                  {s.name} ({s.assigned_area})
-                </option>
-              ))}
             </select>
           </div>
 
@@ -4619,7 +4657,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
         </div>
 
         {/* Active Filters Count */}
-        {(statusFilter !== "all" || staffFilter !== "all" || areaFilter !== "all" || dateFilter !== "all") && (
+        {(statusFilter !== "all" || areaFilter !== "all" || dateFilter !== "all") && (
           <div className="flex items-center justify-between border-t border-gray-200 pt-3">
             <p className="text-xs text-gray-600">
               <span className="font-semibold">
@@ -4631,7 +4669,6 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
               type="button"
               onClick={() => {
                 setStatusFilter("all");
-                setStaffFilter("all");
                 setAreaFilter("all");
                 setDateFilter("all");
               }}
