@@ -16,6 +16,10 @@ type SignupCredentials = {
   phone: string;
   email: string;
   password: string;
+  restaurant_id?: string;
+  restaurant_name?: string;
+  branch?: string;
+  restaurant_address?: string;
 };
 
 type LoginCredentials = {
@@ -38,6 +42,10 @@ type LoggedUser = {
   fname?: string;
   lname?: string;
   phone?: string;
+  restaurantId?: string;
+  restaurantName?: string;
+  branch?: string;
+  restaurantAddress?: string;
 };
 
 type Restaurant = {
@@ -351,7 +359,7 @@ function WeeklyMealsChart({ data }: { data: Array<{ weekKey: string; meals: numb
                   y={y}
                   width={barWidth}
                   height={barHeight}
-                  fill={isHovered ? "#d48a68" : "#A8B99A"}
+                  fill={isHovered ? "#A8B99A" : "#d48a68"}
                   rx="4"
                   ry="4"
                   className="transition-all duration-200 cursor-pointer"
@@ -364,12 +372,12 @@ function WeeklyMealsChart({ data }: { data: Array<{ weekKey: string; meals: numb
                   onMouseLeave={handleBarLeave}
                 />
                 
-                {barHeight > 20 && (
+                {barHeight > 20 && !isHovered && (
                   <text
                     x={x + barWidth / 2}
                     y={y - 5}
                     fontSize="11"
-                    fill={isHovered ? "#d48a68" : "#365032"}
+                    fill="#d48a68"
                     textAnchor="middle"
                     fontWeight="600"
                     className="pointer-events-none"
@@ -1079,43 +1087,45 @@ function HomePage({
         <div aria-hidden className="pointer-events-none absolute -right-8 top-6 hidden h-64 w-64 rounded-[40px] bg-[#DEF7EA]/60 blur-3xl lg:block" />
         <div aria-hidden className="pointer-events-none absolute bottom-8 left-4 h-24 w-24 rounded-full bg-[#F1FBF5]/70 blur-2xl" />
         <div className="relative space-y-6 text-[#2C1A10]">
-          <div className="inline-flex items-center gap-2 rounded-full bg-[#708A58] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-md">
-            <span aria-hidden className="text-lg">✦</span>
-            <span>Re-purpose every meal</span>
-          </div>
           <h1 className="text-[2.65rem] leading-tight text-[#3a3a3a] sm:text-[3.25rem] sm:leading-[1.1]">
-            Redirect surplus meals. <span className="text-[#d48a68]">Rebuild communities.</span>
+            Redirect surplus meals.
+            <br />
+            <span className="text-[#d48a68]">Rebuild communities.</span>
           </h1>
           <p className="max-w-3xl text-lg text-[#5a4f45]">
-            Re-Meals links restaurants, drivers, and community leaders so good food never sits idle.
-            Share donations, request support, and move meals where they are needed most.
+          Re-Meals brings together restaurants, drivers, and community hearts to ensure no good meal goes to waste—and no neighbor goes without. Share what you have, ask for what you need, and help nourish the people around you."
           </p>
           <div className="flex flex-wrap gap-3">
             <button
-              className="rounded-full bg-[#708A58] px-5 py-3 text-sm font-semibold text-white shadow hover:bg-[#576c45] transition"
+              className="flex items-center gap-3 rounded-full bg-[#708A58] px-5 py-3 pr-3 text-sm font-semibold text-white shadow hover:bg-[#576c45] transition"
               onClick={() => {
                 setAuthMode("signup");
                 setShowAuthModal(true);
               }}
               type="button"
             >
-              Join the rescue
-            </button>
-            <button
-              className="rounded-full border border-[#d48a68] bg-white px-5 py-3 text-sm font-semibold text-[#d48a68] shadow-sm hover:bg-[#fde5d6] transition"
-              onClick={() => {
-                setAuthMode("login");
-                setShowAuthModal(true);
-              }}
-              type="button"
-            >
-              Login to donate / request
+              Login / Sign up to donate or request
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
+                <svg
+                  className="h-6 w-6 text-[#d48a68]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  />
+                </svg>
+              </span>
             </button>
           </div>
         </div>
       </div>
 
-      <section className="rounded-[32px] border border-[#C7D2C0] bg-[#F4F7EF] p-6 shadow-inner shadow-[#C7D2C0]/30">
+      <section className="rounded-[32px] bg-[#e8ede3] p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-[#4E673E]">
@@ -1162,8 +1172,11 @@ function HomePage({
           {/* Top Restaurants Leaderboard - First visualization */}
           <div className="rounded-2xl border border-[#F3C7A0] bg-[#FFF8F0] p-5 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Top Restaurants by Impact</h3>
-              <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[#B25C23] border border-[#F3C7A0]">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Impact Leaders</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Top performing restaurants</p>
+              </div>
+              <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[#d48a68] border border-[#F3C7A0]">
                 Top 5
               </span>
             </div>
@@ -1235,13 +1248,13 @@ function HomePage({
 
         {/* Weekly Meals Saved Chart - Full Width */}
         <div className="mt-6">
-          <div className="rounded-2xl border border-[#A8B99A] bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-[#F3C7A0] bg-white p-6 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Weekly Meals Saved</h3>
                 <p className="text-xs text-gray-500 mt-1">Hover over bars to see details</p>
               </div>
-              <span className="rounded-full bg-[#E9F1E3] px-3 py-1 text-[11px] font-semibold text-[#365032]">
+              <span className="rounded-full bg-[#FFF4E6] px-3 py-1 text-[11px] font-semibold text-[#D97706]">
                 Last {weeklyMealsData.length} weeks
               </span>
             </div>
@@ -1272,7 +1285,7 @@ function HomePage({
           <p className="mt-3 text-black/70 mb-5">
             Log extra meals with quantities, expiry, and packaging notes so our delivery team can pick up while everything stays fresh.
           </p>
-          <div className="grid grid-cols-2 gap-3 flex-1">
+          <div className="flex flex-col gap-3 flex-1">
             <div className="flex items-start gap-4 rounded-2xl border-2 border-dashed border-[#d48a68] bg-white p-4 cursor-pointer transition-all hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98] group">
               <span className="text-3xl flex-shrink-0 transition-transform group-hover:scale-125 group-active:scale-110" aria-hidden>
                 💚
@@ -1303,17 +1316,6 @@ function HomePage({
                 <p className="text-sm font-semibold text-black/70">Packaging guidance</p>
                 <p className="text-sm text-black/70">
                   Tips for sealing, labeling, and keeping items cool before pickup arrives.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4 rounded-2xl border-2 border-dashed border-[#d48a68] bg-white p-4 cursor-pointer transition-all hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98] group">
-              <span className="text-3xl flex-shrink-0 transition-transform group-hover:scale-125 group-active:scale-110" aria-hidden>
-                🎧
-              </span>
-              <div>
-                <p className="text-sm font-semibold text-black/70">Concierge support</p>
-                <p className="text-sm text-black/70">
-                  Need help? Tag the admin team and we&apos;ll follow up before your shift ends.
                 </p>
               </div>
             </div>
@@ -1564,34 +1566,18 @@ function DonationSection(props: {
     setDonations((prev) => prioritizeDonations(prev));
   }, [prioritizeDonations]);
 
+  // Auto-populate restaurant info from user profile when user changes
   useEffect(() => {
-    let ignore = false;
-    async function loadRestaurants() {
-      setRestaurantsLoading(true);
-      setRestaurantLoadError(null);
-      try {
-        const data = await apiFetch<Restaurant[]>("/restaurants/");
-        if (!ignore) {
-          setRestaurants(data);
-        }
-      } catch (error) {
-        if (!ignore) {
-          setRestaurantLoadError(
-            error instanceof Error ? error.message : "Unable to load restaurants"
-          );
-        }
-      } finally {
-        if (!ignore) {
-          setRestaurantsLoading(false);
-        }
-      }
+    if (currentUser) {
+      setForm((prev) => ({
+        ...prev,
+        restaurantId: currentUser.restaurantId ?? "",
+        restaurantName: currentUser.restaurantName ?? "",
+        branch: currentUser.branch ?? "",
+        restaurantAddress: currentUser.restaurantAddress ?? "",
+      }));
     }
-
-    loadRestaurants();
-    return () => {
-      ignore = true;
-    };
-  }, []);
+  }, [currentUser]);
 
   const loadDonationsData = useCallback(async () => {
     try {
@@ -1861,24 +1847,41 @@ function DonationSection(props: {
     event.preventDefault();
     setNotification({});
 
-    const trimmedRestaurantName = form.restaurantName.trim();
-    const branchValue = form.branch.trim();
-    const selectedLabel = selectedRestaurant ? formatRestaurantLabel(selectedRestaurant) : "";
-    const nameMatchesSelected =
-      Boolean(selectedRestaurant) &&
-      (trimmedRestaurantName === selectedLabel ||
-        trimmedRestaurantName === (selectedRestaurant?.name ?? ""));
-    const branchMatchesSelected =
-      Boolean(selectedRestaurant) &&
-      branchValue === (selectedRestaurant?.branch_name ?? "");
-    const manualEntry = !selectedRestaurant || !nameMatchesSelected || !branchMatchesSelected;
+    // Validate restaurant info from user profile
+    if (!currentUser) {
+      setNotification({ error: "Please log in to create donations." });
+      return;
+    }
 
-    if (manualEntry && !trimmedRestaurantName.length) {
+    if (!currentUser.restaurantName && !currentUser.restaurantId) {
       setNotification({
-        error: "Enter the restaurant name or choose one from the suggestions.",
+        error: "Please set your restaurant information in Settings before creating donations.",
       });
       return;
     }
+
+    const trimmedRestaurantName = form.restaurantName.trim() || currentUser.restaurantName || "";
+    const branchValue = form.branch.trim() || currentUser.branch || "";
+    const restaurantAddress = form.restaurantAddress.trim() || currentUser.restaurantAddress || "";
+
+    if (!trimmedRestaurantName) {
+      setNotification({
+        error: "Restaurant name is required. Please update your profile in Settings.",
+      });
+      return;
+    }
+
+    if (!restaurantAddress) {
+      setNotification({
+        error: "Restaurant address is required. Please update your profile in Settings.",
+      });
+      return;
+    }
+
+    // Determine if using existing restaurant or manual entry
+    const restaurantId = currentUser.restaurantId || form.restaurantId;
+    const selectedRestaurant = restaurantId ? restaurants.find(r => r.restaurant_id === restaurantId) : null;
+    const manualEntry = !selectedRestaurant || !restaurantId;
 
     const normalizedItems = form.items
       .map((item) => ({
@@ -1923,7 +1926,7 @@ function DonationSection(props: {
       } else {
         donationPayload.manual_restaurant_name = trimmedRestaurantName;
         donationPayload.manual_branch_name = branchValue;
-        donationPayload.manual_restaurant_address = form.restaurantAddress.trim();
+        donationPayload.manual_restaurant_address = restaurantAddress;
       }
       const createdDonation = await apiFetch<DonationApiRecord>("/donations/", {
         method: "POST",
@@ -2195,111 +2198,54 @@ function DonationSection(props: {
             className="space-y-6 h-full overflow-y-auto pr-1 pb-4 sm:pr-3"
             onSubmit={handleSubmit}
           >
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-sm font-semibold text-gray-700">
-                  Restaurant name
-                </label>
-                <div ref={suggestionBoxRef} className="relative">
-                  <input
-                    type="text"
-                    className={INPUT_STYLES}
-                    placeholder="Type or paste the restaurant name"
-                    value={form.restaurantName}
-                    autoComplete="off"
-                    onChange={(event) => handleRestaurantNameChange(event.target.value)}
-                    onFocus={() =>
-                      setIsSuggestionOpen(form.restaurantName.trim().length > 0)
-                    }
-                    required
-                  />
-                  {shouldShowSuggestions && (
-                    <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border border-[#D7DCC7] bg-white shadow-xl shadow-[#D7DCC7]/30">
-                      <div className="max-h-72 overflow-y-auto">
-                        {visibleSuggestions.map((suggestion) => (
-                          <button
-                            key={suggestion.key}
-                            type="button"
-                            className="flex w-full items-start justify-between gap-3 px-3 py-2 text-left transition hover:bg-[#F2F6EE]"
-                            onClick={() => handleSelectSuggestion(suggestion)}
-                          >
-                            <div className="space-y-0.5">
-                              <p className="text-sm font-semibold text-gray-900">
-                                {suggestion.label}
-                              </p>
-                              {suggestion.description ? (
-                                <p className="text-xs text-gray-500">
-                                  {suggestion.description}
-                                </p>
-                              ) : null}
-                            </div>
-                            <span
-                              className={`whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-semibold ${
-                                suggestion.kind === "restaurant"
-                                  ? "bg-[#E9F1E3] text-[#5E7A4A]"
-                                  : "bg-[#F7E3D6] text-[#B86A49]"
-                              }`}
-                            >
-                              {suggestion.kind === "restaurant" ? "In network" : "Popular"}
-                            </span>
-                          </button>
-                        ))}
+            {/* Restaurant Information - Auto-populated from user profile */}
+            {currentUser && (currentUser.restaurantName || currentUser.restaurantId) ? (
+              <div className="space-y-3 rounded-2xl border border-[#D7DCC7] bg-[#F4F7EF] p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[#5E7A4A]">
+                  Restaurant Information
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-gray-600">
+                      Restaurant name
+                    </label>
+                    <div className="rounded-lg border border-[#D7DCC7] bg-white px-3 py-2 text-sm font-semibold text-gray-900">
+                      {form.restaurantName || currentUser.restaurantName || "Not set"}
+                    </div>
+                  </div>
+                  {form.branch || currentUser.branch ? (
+                    <div>
+                      <label className="mb-1 block text-xs font-semibold text-gray-600">
+                        Branch / location
+                      </label>
+                      <div className="rounded-lg border border-[#D7DCC7] bg-white px-3 py-2 text-sm font-semibold text-gray-900">
+                        {form.branch || currentUser.branch || "—"}
                       </div>
                     </div>
-                  )}
+                  ) : null}
                 </div>
-                <p className="mt-2 text-xs text-gray-500">
-                  Type at least one letter to see in-line suggestions from the restaurant list.
-                  {restaurantsLoading ? " Loading restaurants..." : ""}
-                </p>
-                {restaurantLoadError && (
-                  <p className="mt-1 text-xs text-red-500">{restaurantLoadError}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-semibold text-gray-700">
-                  Branch / location
-                </label>
-                <input
-                  type="text"
-                  className={INPUT_STYLES}
-                  value={form.branch}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, branch: event.target.value }))
-                  }
-                  placeholder={
-                    selectedRestaurant
-                      ? "Branch is filled automatically. Adjust if needed."
-                      : "Enter branch or location (optional)"
-                  }
-                />
-                <p className="mt-2 text-xs text-gray-500">
-                  Branch information is filled automatically when a restaurant is selected, or
-                  you can type a custom branch/location.
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">
+                    Restaurant address
+                  </label>
+                  <div className="rounded-lg border border-[#D7DCC7] bg-white px-3 py-2 text-sm font-semibold text-gray-900">
+                    {form.restaurantAddress || currentUser.restaurantAddress || "Not set"}
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500">
+                  Restaurant information is linked to your account. Update it in Settings if needed.
                 </p>
               </div>
-            </div>
-
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-gray-700">
-                Restaurant address
-              </label>
-              <input
-                type="text"
-                className={INPUT_STYLES}
-                placeholder="Enter restaurant address"
-                value={form.restaurantAddress}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, restaurantAddress: event.target.value }))
-                }
-                required
-              />
-              <p className="mt-2 text-xs text-gray-500">
-                Address is filled automatically when a restaurant is selected, or you can type a
-                custom address.
-              </p>
-            </div>
+            ) : (
+              <div className="rounded-2xl border border-yellow-200 bg-yellow-50 p-4">
+                <p className="text-sm font-semibold text-yellow-800">
+                  ⚠️ Restaurant information required
+                </p>
+                <p className="mt-1 text-xs text-yellow-700">
+                  Please set your restaurant information in Settings before creating donations.
+                </p>
+              </div>
+            )}
 
             <div className="space-y-4 rounded-2xl border border-[#D7DCC7] bg-white p-4">
               <div className="flex items-center justify-between">
@@ -2633,6 +2579,16 @@ function DonationRequestSection(props: {
   const [deliveries, setDeliveries] = useState<DeliveryRecordApi[]>([]);
   const [communities, setCommunities] = useState<Community[]>([]);
 
+  // Auto-populate contact phone from user profile
+  useEffect(() => {
+    if (currentUser?.phone) {
+      setForm((prev) => ({
+        ...prev,
+        contactPhone: currentUser.phone || "",
+      }));
+    }
+  }, [currentUser?.phone]);
+
   const prioritizeRequests = useCallback(
     (list: DonationRequestRecord[]) => {
       const userId = currentUser?.userId;
@@ -2792,7 +2748,7 @@ function DonationRequestSection(props: {
       recipient_address: form.recipientAddress.trim(),
       expected_delivery: new Date(form.expectedDelivery).toISOString(),
       people_count: numberOfPeopleValue,
-      contact_phone: form.contactPhone.trim(),
+      contact_phone: currentUser.phone?.trim() || form.contactPhone.trim(),
       notes: form.notes.trim(),
     };
 
@@ -2862,7 +2818,7 @@ function DonationRequestSection(props: {
       numberOfPeople: request.numberOfPeople,
       expectedDelivery: toDateTimeLocalValue(request.expectedDelivery),
       recipientAddress: request.recipientAddress,
-      contactPhone: request.contactPhone,
+      contactPhone: currentUser?.phone || request.contactPhone || "",
       notes: request.notes,
     });
     setEditingId(request.id);
@@ -2963,36 +2919,40 @@ function DonationRequestSection(props: {
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-sm font-semibold text-gray-700">
-                  Community name
-                </label>
-                <input
-                  type="text"
-                  className={INPUT_STYLES}
-                  value={form.communityName}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, communityName: event.target.value }))
-                  }
-                  required
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-semibold text-gray-700">
-                  Contact phone
-                </label>
-                <input
-                  type="tel"
-                  className={INPUT_STYLES}
-                  value={form.contactPhone}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, contactPhone: event.target.value }))
-                  }
-                  required
-                />
-              </div>
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-gray-700">
+                Community name
+              </label>
+              <input
+                type="text"
+                className={INPUT_STYLES}
+                value={form.communityName}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, communityName: event.target.value }))
+                }
+                required
+              />
             </div>
+
+            {/* Contact Phone - Auto-populated from user profile */}
+            {currentUser?.phone && (
+              <div className="rounded-2xl border border-[#F3C7A0] bg-[#FFF8F0] p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[#B25C23] mb-2">
+                  Contact Information
+                </p>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-[#B25C23]">
+                    Contact phone
+                  </label>
+                  <div className="rounded-lg border border-[#F3C7A0] bg-white px-3 py-2 text-sm font-semibold text-[#B25C23]">
+                    {currentUser.phone}
+                  </div>
+                  <p className="mt-2 text-xs text-[#B25C23]/70">
+                    Phone number is linked to your account. Update it in Settings if needed.
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div>
               <label className="mb-1 block text-sm font-semibold text-gray-700">
@@ -3137,7 +3097,7 @@ function DonationRequestSection(props: {
                       Contact phone
                     </p>
                     <p className="font-semibold">
-                      {request.contactPhone || "N/A"}
+                      {currentUser?.phone || request.contactPhone || "N/A"}
                     </p>
                   </div>
                 </div>
@@ -3197,31 +3157,120 @@ function ProfileModal({
     fname: user.fname ?? "",
     lname: user.lname ?? "",
     phone: user.phone ?? "",
+    restaurant_id: user.restaurantId ?? "",
+    restaurant_name: user.restaurantName ?? "",
+    branch: user.branch ?? "",
+    restaurant_address: user.restaurantAddress ?? "",
   });
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [restaurantSelectionMode, setRestaurantSelectionMode] = useState<"existing" | "manual">(
+    user.restaurantId ? "existing" : "manual"
+  );
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  // Load restaurants for dropdown
+  useEffect(() => {
+    let ignore = false;
+    async function loadRestaurants() {
+      try {
+        const data = await apiFetch<Restaurant[]>("/restaurants/");
+        if (!ignore) {
+          setRestaurants(data);
+        }
+      } catch (error) {
+        console.error("Failed to load restaurants:", error);
+      }
+    }
+    loadRestaurants();
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      const response = await apiFetch<{
+        message: string;
+        username: string;
+        email: string;
+        fname: string;
+        lname: string;
+        phone: string;
+        restaurant_id?: string;
+        restaurant_name?: string;
+        branch?: string;
+        restaurant_address?: string;
+      }>("/users/profile/", {
+        method: "PATCH",
+        headers: buildAuthHeaders(user),
+        body: JSON.stringify(form),
+      });
+
+      // Update local state with saved data
+      onSave({
+        username: response.username,
+        email: response.email,
+        fname: response.fname,
+        lname: response.lname,
+        phone: response.phone,
+        restaurantId: (response as any).restaurant_id ?? undefined,
+        restaurantName: (response as any).restaurant_name ?? undefined,
+        branch: (response as any).branch ?? undefined,
+        restaurantAddress: (response as any).restaurant_address ?? undefined,
+      });
+
+      setSuccess(true);
+      setTimeout(() => {
+        onClose();
+      }, 1000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-2xl">
+    <div className="absolute inset-0 flex items-center justify-center bg-black/40 z-50">
+      <div className="w-full max-w-xl rounded-2xl border border-[#F3C7A0] bg-[#FFF8F0] p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Edit profile</h3>
-            <p className="text-xs text-gray-500">Update your personal information.</p>
+            <h3 className="text-lg font-semibold text-[#B25C23]">Edit Profile</h3>
+            <p className="text-xs text-gray-600">Update your personal information.</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-sm font-semibold text-gray-500 hover:text-gray-800"
+            className="text-sm font-semibold text-[#B25C23] hover:text-[#8B4C1F] transition"
           >
             ✕
           </button>
         </div>
+
+        {error && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-700">
+            Profile updated successfully!
+          </div>
+        )}
 
         <div className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-xs font-semibold text-gray-700">First name</label>
               <input
-                className={INPUT_STYLES}
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-[#d48a68] focus:ring-2 focus:ring-[#d48a68]/20"
                 value={form.fname}
                 onChange={(e) => setForm((prev) => ({ ...prev, fname: e.target.value }))}
               />
@@ -3229,7 +3278,7 @@ function ProfileModal({
             <div>
               <label className="mb-1 block text-xs font-semibold text-gray-700">Last name</label>
               <input
-                className={INPUT_STYLES}
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-[#d48a68] focus:ring-2 focus:ring-[#d48a68]/20"
                 value={form.lname}
                 onChange={(e) => setForm((prev) => ({ ...prev, lname: e.target.value }))}
               />
@@ -3238,7 +3287,7 @@ function ProfileModal({
           <div>
             <label className="mb-1 block text-xs font-semibold text-gray-700">Username</label>
             <input
-              className={INPUT_STYLES}
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-[#d48a68] focus:ring-2 focus:ring-[#d48a68]/20"
               value={form.username}
               onChange={(e) => setForm((prev) => ({ ...prev, username: e.target.value }))}
             />
@@ -3246,7 +3295,8 @@ function ProfileModal({
           <div>
             <label className="mb-1 block text-xs font-semibold text-gray-700">Email</label>
             <input
-              className={INPUT_STYLES}
+              type="email"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-[#d48a68] focus:ring-2 focus:ring-[#d48a68]/20"
               value={form.email}
               onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
             />
@@ -3254,27 +3304,127 @@ function ProfileModal({
           <div>
             <label className="mb-1 block text-xs font-semibold text-gray-700">Phone</label>
             <input
-              className={INPUT_STYLES}
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-[#d48a68] focus:ring-2 focus:ring-[#d48a68]/20"
               value={form.phone}
               onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
             />
           </div>
         </div>
 
+        {/* Restaurant Information Section */}
+        <div className="mt-4 space-y-3 rounded-xl border border-[#F3C7A0] bg-[#FFF8F0] p-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-[#B25C23]">Restaurant Information</p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setRestaurantSelectionMode("existing");
+                  setForm((prev) => ({ ...prev, restaurant_name: "", branch: "", restaurant_address: "" }));
+                }}
+                className={`rounded-lg px-2 py-1 text-xs font-semibold transition ${
+                  restaurantSelectionMode === "existing"
+                    ? "bg-[#d48a68] text-white"
+                    : "bg-white text-[#d48a68] border border-[#d48a68]"
+                }`}
+              >
+                Select
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setRestaurantSelectionMode("manual");
+                  setForm((prev) => ({ ...prev, restaurant_id: "" }));
+                }}
+                className={`rounded-lg px-2 py-1 text-xs font-semibold transition ${
+                  restaurantSelectionMode === "manual"
+                    ? "bg-[#d48a68] text-white"
+                    : "bg-white text-[#d48a68] border border-[#d48a68]"
+                }`}
+              >
+                Manual
+              </button>
+            </div>
+          </div>
+
+          {restaurantSelectionMode === "existing" ? (
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-gray-700">Restaurant</label>
+              <select
+                value={form.restaurant_id || ""}
+                onChange={(e) => {
+                  const selectedId = e.target.value;
+                  const selected = restaurants.find(r => r.restaurant_id === selectedId);
+                  setForm((prev) => ({
+                    ...prev,
+                    restaurant_id: selectedId,
+                    restaurant_name: selected?.name || "",
+                    branch: selected?.branch_name || "",
+                    restaurant_address: selected?.address || "",
+                  }));
+                }}
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-[#d48a68] focus:ring-2 focus:ring-[#d48a68]/20"
+              >
+                <option value="">Choose a restaurant...</option>
+                {restaurants.map((restaurant) => (
+                  <option key={restaurant.restaurant_id} value={restaurant.restaurant_id}>
+                    {restaurant.name} {restaurant.branch_name ? `(${restaurant.branch_name})` : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-700">Restaurant Name</label>
+                <input
+                  type="text"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-[#d48a68] focus:ring-2 focus:ring-[#d48a68]/20"
+                  value={form.restaurant_name}
+                  onChange={(e) => setForm((prev) => ({ ...prev, restaurant_name: e.target.value }))}
+                  placeholder="e.g. KFC, McDonald's"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-700">Branch (optional)</label>
+                <input
+                  type="text"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-[#d48a68] focus:ring-2 focus:ring-[#d48a68]/20"
+                  value={form.branch}
+                  onChange={(e) => setForm((prev) => ({ ...prev, branch: e.target.value }))}
+                  placeholder="e.g. Central World"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-700">Restaurant Address</label>
+                <input
+                  type="text"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-[#d48a68] focus:ring-2 focus:ring-[#d48a68]/20"
+                  value={form.restaurant_address}
+                  onChange={(e) => setForm((prev) => ({ ...prev, restaurant_address: e.target.value }))}
+                  placeholder="Full address"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
         <div className="mt-5 flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+            disabled={saving}
+            className="rounded-lg border border-[#F3C7A0] bg-white px-4 py-2 text-sm font-semibold text-[#B25C23] hover:bg-[#FFF8F0] transition disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             type="button"
-            onClick={() => onSave(form)}
-            className="rounded-lg bg-[#111828] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0f1628]"
+            onClick={handleSave}
+            disabled={saving}
+            className="rounded-lg bg-[#d48a68] px-4 py-2 text-sm font-semibold text-white hover:bg-[#c47958] transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Save changes
+            {saving ? "Saving..." : "Save changes"}
           </button>
         </div>
       </div>
@@ -3439,6 +3589,13 @@ function StatusSection({
   const [communities, setCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Filter and sort states
+  const [donationStatusFilter, setDonationStatusFilter] = useState<string>("all");
+  const [requestCommunityFilter, setRequestCommunityFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<string>("all");
+  const [donationSort, setDonationSort] = useState<string>("newest");
+  const [requestSort, setRequestSort] = useState<string>("newest");
 
   useEffect(() => {
     let ignore = false;
@@ -3550,6 +3707,62 @@ function StatusSection({
       }));
   }, [donations, deliveries, currentUser?.userId]);
 
+  // Filter and sort assigned donations
+  const filteredAndSortedDonations = useMemo(() => {
+    let filtered = [...assignedDonations];
+
+    // Status filter
+    if (donationStatusFilter !== "all") {
+      filtered = filtered.filter(({ delivery }) => delivery.status === donationStatusFilter);
+    }
+
+    // Date filter
+    if (dateFilter !== "all") {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekAgo = new Date(today);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const monthAgo = new Date(today);
+      monthAgo.setMonth(monthAgo.getMonth() - 1);
+
+      filtered = filtered.filter(({ donation }) => {
+        const donationDate = new Date(donation.createdAt);
+        switch (dateFilter) {
+          case "today":
+            return donationDate >= today;
+          case "week":
+            return donationDate >= weekAgo;
+          case "month":
+            return donationDate >= monthAgo;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      switch (donationSort) {
+        case "newest":
+          return new Date(b.donation.createdAt).getTime() - new Date(a.donation.createdAt).getTime();
+        case "oldest":
+          return new Date(a.donation.createdAt).getTime() - new Date(b.donation.createdAt).getTime();
+        case "restaurant_az":
+          return a.donation.restaurantName.localeCompare(b.donation.restaurantName);
+        case "restaurant_za":
+          return b.donation.restaurantName.localeCompare(a.donation.restaurantName);
+        case "items_desc":
+          return b.donation.items.length - a.donation.items.length;
+        case "items_asc":
+          return a.donation.items.length - b.donation.items.length;
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [assignedDonations, donationStatusFilter, dateFilter, donationSort]);
+
   // Get accepted requests (requests with distribution deliveries to their community)
   const acceptedRequests = useMemo(() => {
     // Get community IDs that have distribution deliveries
@@ -3572,6 +3785,67 @@ function StatusSection({
       return communityId ? acceptedCommunityIds.has(communityId) : false;
     });
   }, [requests, deliveries, communities, currentUser?.userId]);
+
+  // Filter and sort accepted requests
+  const filteredAndSortedRequests = useMemo(() => {
+    let filtered = [...acceptedRequests];
+
+    // Community filter
+    if (requestCommunityFilter !== "all") {
+      filtered = filtered.filter((request) => request.communityName === requestCommunityFilter);
+    }
+
+    // Date filter
+    if (dateFilter !== "all") {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekAgo = new Date(today);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const monthAgo = new Date(today);
+      monthAgo.setMonth(monthAgo.getMonth() - 1);
+
+      filtered = filtered.filter((request) => {
+        const requestDate = new Date(request.createdAt);
+        switch (dateFilter) {
+          case "today":
+            return requestDate >= today;
+          case "week":
+            return requestDate >= weekAgo;
+          case "month":
+            return requestDate >= monthAgo;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      switch (requestSort) {
+        case "newest":
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case "oldest":
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case "community_az":
+          return a.communityName.localeCompare(b.communityName);
+        case "community_za":
+          return b.communityName.localeCompare(a.communityName);
+        case "people_desc":
+          return parseInt(b.numberOfPeople) - parseInt(a.numberOfPeople);
+        case "people_asc":
+          return parseInt(a.numberOfPeople) - parseInt(b.numberOfPeople);
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [acceptedRequests, requestCommunityFilter, dateFilter, requestSort]);
+
+  // Get unique communities for filter dropdown
+  const uniqueCommunities = useMemo(() => {
+    return Array.from(new Set(acceptedRequests.map(r => r.communityName))).sort();
+  }, [acceptedRequests]);
 
   if (!currentUser) {
     return (
@@ -3651,6 +3925,16 @@ function StatusSection({
     );
   }
 
+  const clearFilters = () => {
+    setDonationStatusFilter("all");
+    setRequestCommunityFilter("all");
+    setDateFilter("all");
+    setDonationSort("newest");
+    setRequestSort("newest");
+  };
+
+  const hasActiveFilters = donationStatusFilter !== "all" || requestCommunityFilter !== "all" || dateFilter !== "all";
+
   return (
     <div className="space-y-6">
       <div>
@@ -3660,9 +3944,72 @@ function StatusSection({
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      {/* Filter Bar */}
+      <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Donation Status Filter */}
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-semibold text-gray-600">Status:</label>
+            <select
+              value={donationStatusFilter}
+              onChange={(e) => setDonationStatusFilter(e.target.value)}
+              className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-[#708A58] focus:outline-none focus:ring-2 focus:ring-[#708A58]/20"
+            >
+              <option value="all">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="in_transit">In Transit</option>
+              <option value="delivered">Delivered</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+
+          {/* Community Filter */}
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-semibold text-gray-600">Community:</label>
+            <select
+              value={requestCommunityFilter}
+              onChange={(e) => setRequestCommunityFilter(e.target.value)}
+              className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-[#708A58] focus:outline-none focus:ring-2 focus:ring-[#708A58]/20"
+            >
+              <option value="all">All Communities</option>
+              {uniqueCommunities.map((community) => (
+                <option key={community} value={community}>
+                  {community}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Date Filter */}
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-semibold text-gray-600">Date:</label>
+            <select
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-[#708A58] focus:outline-none focus:ring-2 focus:ring-[#708A58]/20"
+            >
+              <option value="all">All Time</option>
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+            </select>
+          </div>
+
+          {/* Clear Filters Button */}
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="ml-auto rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:bg-gray-50"
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2 lg:h-[calc(100vh-15rem)]">
         {/* Assigned Donations */}
-        <section className="flex min-h-[60vh] flex-col rounded-3xl border border-[#C7D2C0] bg-[#F4F7EF] p-6 shadow-inner shadow-[#C7D2C0]/40">
+        <section className="flex h-full flex-col rounded-3xl border border-[#C7D2C0] bg-[#F4F7EF] p-6 shadow-inner shadow-[#C7D2C0]/40">
           <div className="mb-3 flex items-start justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-wide text-[#4E673E]">
@@ -3672,17 +4019,33 @@ function StatusSection({
                 Pickup tasks
               </h3>
             </div>
-            <span className="rounded-full border border-[#A8B99A] bg-white px-3 py-1 text-xs font-semibold text-[#365032] shadow-sm">
-              {assignedDonations.length} active
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="rounded-full border border-[#A8B99A] bg-white px-3 py-1 text-xs font-semibold text-[#365032] shadow-sm">
+                {filteredAndSortedDonations.length} {filteredAndSortedDonations.length === 1 ? 'item' : 'items'}
+              </span>
+              <select
+                value={donationSort}
+                onChange={(e) => setDonationSort(e.target.value)}
+                className="rounded-lg border border-[#A8B99A] bg-white px-2 py-1 text-xs font-semibold text-[#365032] focus:outline-none focus:ring-2 focus:ring-[#708A58]/20"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="restaurant_az">Restaurant A-Z</option>
+                <option value="restaurant_za">Restaurant Z-A</option>
+                <option value="items_desc">Most Items</option>
+                <option value="items_asc">Fewest Items</option>
+              </select>
+            </div>
           </div>
-          <div className="flex-1 overflow-y-auto space-y-4 pr-1">
-            {assignedDonations.length === 0 ? (
+          <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1">
+            {filteredAndSortedDonations.length === 0 ? (
               <p className="rounded-2xl border border-dashed border-[#C7D2C0] bg-white p-4 text-sm text-gray-600">
-                No donations have been assigned to pickup tasks yet.
+                {assignedDonations.length === 0
+                  ? "No donations have been assigned to pickup tasks yet."
+                  : "No donations match your filters."}
               </p>
             ) : (
-              assignedDonations.map(({ donation, delivery }) => {
+              filteredAndSortedDonations.map(({ donation, delivery }) => {
                 const statusLabel = (status: DeliveryRecordApi["status"]) => {
                   switch (status) {
                     case "pending":
@@ -3741,7 +4104,7 @@ function StatusSection({
         </section>
 
         {/* Accepted Requests */}
-        <section className="flex min-h-[60vh] flex-col rounded-3xl border border-[#F3C7A0] bg-[#FFF8F0] p-6 shadow-inner shadow-[#F3C7A0]/30">
+        <section className="flex h-full flex-col rounded-3xl border border-[#F3C7A0] bg-[#FFF8F0] p-6 shadow-inner shadow-[#F3C7A0]/30">
           <div className="mb-3 flex items-start justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-wide text-[#C46A24]">
@@ -3751,17 +4114,33 @@ function StatusSection({
                 Community deliveries
               </h3>
             </div>
-            <span className="rounded-full border border-[#E6B9A2] bg-white px-3 py-1 text-xs font-semibold text-[#B25C23] shadow-sm">
-              {acceptedRequests.length} active
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="rounded-full border border-[#E6B9A2] bg-white px-3 py-1 text-xs font-semibold text-[#B25C23] shadow-sm">
+                {filteredAndSortedRequests.length} {filteredAndSortedRequests.length === 1 ? 'item' : 'items'}
+              </span>
+              <select
+                value={requestSort}
+                onChange={(e) => setRequestSort(e.target.value)}
+                className="rounded-lg border border-[#E6B9A2] bg-white px-2 py-1 text-xs font-semibold text-[#B25C23] focus:outline-none focus:ring-2 focus:ring-[#d48a68]/20"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="community_az">Community A-Z</option>
+                <option value="community_za">Community Z-A</option>
+                <option value="people_desc">Most People</option>
+                <option value="people_asc">Fewest People</option>
+              </select>
+            </div>
           </div>
-          <div className="flex-1 overflow-y-auto space-y-4 pr-1">
-            {acceptedRequests.length === 0 ? (
+          <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1">
+            {filteredAndSortedRequests.length === 0 ? (
               <p className="rounded-2xl border border-dashed border-[#F3C7A0] bg-white p-4 text-sm text-gray-600">
-                No meal requests have been accepted yet.
+                {acceptedRequests.length === 0
+                  ? "No meal requests have been accepted yet."
+                  : "No requests match your filters."}
               </p>
             ) : (
-              acceptedRequests.map((request) => (
+              filteredAndSortedRequests.map((request) => (
                 <article
                   key={request.id}
                   className="rounded-2xl border border-dashed border-[#F3C7A0] bg-white p-4 shadow-sm"
@@ -6003,7 +6382,38 @@ function AuthModal({
     phone: "",
     email: "",
     password: "",
+    restaurant_id: "",
+    restaurant_name: "",
+    branch: "",
+    restaurant_address: "",
   });
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [restaurantSelectionMode, setRestaurantSelectionMode] = useState<"existing" | "manual">("existing");
+  const [restaurantsLoading, setRestaurantsLoading] = useState(false);
+
+  // Load restaurants for dropdown
+  useEffect(() => {
+    let ignore = false;
+    async function loadRestaurants() {
+      setRestaurantsLoading(true);
+      try {
+        const data = await apiFetch<Restaurant[]>("/restaurants/");
+        if (!ignore) {
+          setRestaurants(data);
+        }
+      } catch (error) {
+        console.error("Failed to load restaurants:", error);
+      } finally {
+        if (!ignore) {
+          setRestaurantsLoading(false);
+        }
+      }
+    }
+    loadRestaurants();
+    return () => {
+      ignore = true;
+    };
+  }, []);
   const [loginData, setLoginData] = useState<LoginCredentials>({
     identifier: "",
     password: "",
@@ -6051,6 +6461,10 @@ function AuthModal({
         phone: "",
         email: "",
         password: "",
+        restaurant_id: "",
+        restaurant_name: "",
+        branch: "",
+        restaurant_address: "",
       });
 
       // Automatically log the user in after successful signup
@@ -6061,6 +6475,10 @@ function AuthModal({
           userId: payload.user_id ?? "",
           isAdmin: Boolean(payload.is_admin),
           isDeliveryStaff: Boolean(payload.is_delivery_staff),
+          restaurantId: payload.restaurant_id ?? undefined,
+          restaurantName: payload.restaurant_name ?? undefined,
+          branch: payload.branch ?? undefined,
+          restaurantAddress: payload.restaurant_address ?? undefined,
         });
         onClose();
       }
@@ -6109,6 +6527,10 @@ function AuthModal({
           userId: payload.user_id ?? "",
           isAdmin: Boolean(payload.is_admin),
           isDeliveryStaff: Boolean(payload.is_delivery_staff),
+          restaurantId: payload.restaurant_id ?? undefined,
+          restaurantName: payload.restaurant_name ?? undefined,
+          branch: payload.branch ?? undefined,
+          restaurantAddress: payload.restaurant_address ?? undefined,
         });
         onClose();
       }
@@ -6291,6 +6713,127 @@ function AuthModal({
               />
             </div>
 
+            {/* Restaurant Selection Section */}
+            <div className="space-y-3 rounded-2xl border-2 border-[#d48a68] bg-[#fdf8f4] p-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-gray-900">Restaurant Information</p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRestaurantSelectionMode("existing");
+                      setSignupData((prev) => ({ ...prev, restaurant_id: "", restaurant_name: "", branch: "", restaurant_address: "" }));
+                    }}
+                    className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
+                      restaurantSelectionMode === "existing"
+                        ? "bg-[#d48a68] text-white"
+                        : "bg-white text-[#d48a68] border border-[#d48a68]"
+                    }`}
+                  >
+                    Select Existing
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRestaurantSelectionMode("manual");
+                      setSignupData((prev) => ({ ...prev, restaurant_id: "" }));
+                    }}
+                    className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
+                      restaurantSelectionMode === "manual"
+                        ? "bg-[#d48a68] text-white"
+                        : "bg-white text-[#d48a68] border border-[#d48a68]"
+                    }`}
+                  >
+                    Add New
+                  </button>
+                </div>
+              </div>
+
+              {restaurantSelectionMode === "existing" ? (
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                    Select Restaurant
+                  </label>
+                  <select
+                    value={signupData.restaurant_id || ""}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      const selected = restaurants.find(r => r.restaurant_id === selectedId);
+                      setSignupData((prev) => ({
+                        ...prev,
+                        restaurant_id: selectedId,
+                        restaurant_name: selected?.name || "",
+                        branch: selected?.branch_name || "",
+                        restaurant_address: selected?.address || "",
+                      }));
+                    }}
+                    required
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#d48a68] focus:ring-1 focus:ring-[#d48a68] focus:bg-[#fef5f1]"
+                  >
+                    <option value="">Choose a restaurant...</option>
+                    {restaurants.map((restaurant) => (
+                      <option key={restaurant.restaurant_id} value={restaurant.restaurant_id}>
+                        {restaurant.name} {restaurant.branch_name ? `(${restaurant.branch_name})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                  {signupData.restaurant_id && (
+                    <div className="mt-2 space-y-1 text-xs text-gray-600">
+                      {signupData.branch && <p>Branch: {signupData.branch}</p>}
+                      {signupData.restaurant_address && <p>Address: {signupData.restaurant_address}</p>}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">
+                      Restaurant Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={signupData.restaurant_name || ""}
+                      onChange={(e) =>
+                        setSignupData((prev) => ({ ...prev, restaurant_name: e.target.value }))
+                      }
+                      required
+                      placeholder="e.g. KFC, McDonald's"
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#d48a68] focus:ring-1 focus:ring-[#d48a68] focus:bg-[#fef5f1]"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">
+                      Branch (optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={signupData.branch || ""}
+                      onChange={(e) =>
+                        setSignupData((prev) => ({ ...prev, branch: e.target.value }))
+                      }
+                      placeholder="e.g. Central World, Siam Paragon"
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#d48a68] focus:ring-1 focus:ring-[#d48a68] focus:bg-[#fef5f1]"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">
+                      Restaurant Address *
+                    </label>
+                    <input
+                      type="text"
+                      value={signupData.restaurant_address || ""}
+                      onChange={(e) =>
+                        setSignupData((prev) => ({ ...prev, restaurant_address: e.target.value }))
+                      }
+                      required
+                      placeholder="Full address of the restaurant"
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 outline-none focus:border-[#d48a68] focus:ring-1 focus:ring-[#d48a68] focus:bg-[#fef5f1]"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
             {signupStatus.error && (
               <p className="text-xs text-red-500">{signupStatus.error}</p>
             )}
@@ -6424,6 +6967,7 @@ export default function Home() {
         isDriver={currentUser?.isDeliveryStaff}
         currentUser={currentUser ? { username: currentUser.username, email: currentUser.email } : undefined}
         onProfileClick={() => setShowProfileModal(true)}
+        onSettingsClick={() => setShowProfileModal(true)}
         onLogout={() => {
           setCurrentUser(null);
           setActiveTab(0); // Redirect to home after logout

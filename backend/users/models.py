@@ -12,8 +12,16 @@ class User(models.Model):
     phone = models.CharField(max_length=10)
     email = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=128)
-    is_donor = models.BooleanField(default=False)
-    is_recipient = models.BooleanField(default=False)
+    restaurant = models.ForeignKey(
+        Restaurant,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column="restaurant_id",
+        related_name="users",
+    )
+    branch = models.CharField(max_length=100, blank=True, default="")
+    restaurant_address = models.CharField(max_length=300, blank=True, default="")
 
     def __str__(self):
         return f"{self.fname} {self.lname}"

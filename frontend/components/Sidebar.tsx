@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { ReactNode } from "react";
-import { Squares2X2Icon, ArrowRightOnRectangleIcon, TruckIcon, CubeIcon } from "@heroicons/react/24/solid";
+import { Squares2X2Icon, TruckIcon, CubeIcon, Cog6ToothIcon } from "@heroicons/react/24/solid";
 import { InboxStackIcon } from "@heroicons/react/24/solid";
 
 // This marks the component as a Client Component (required because we use state + event handlers)
@@ -20,6 +20,7 @@ type SidebarProps = {
   onAuthClick: () => void;            // callback for auth button
   onLogout?: () => void;
   onProfileClick?: () => void;
+  onSettingsClick?: () => void;       // callback for settings button
   currentUser?: { username: string; email: string };
   tabs: SidebarTab[];
   isAdmin?: boolean;
@@ -86,6 +87,7 @@ export default function Sidebar({
   onAuthClick,
   onLogout,
   onProfileClick,
+  onSettingsClick,
   currentUser,
   tabs,
   isAdmin = false,
@@ -303,24 +305,20 @@ export default function Sidebar({
       <div className="mt-6 border-t border-gray-300 pt-4">
         {currentUser ? (
           <div className="flex w-full items-center justify-between gap-3 rounded-xl border border-[#B86A49] bg-[#F2D6C3] pl-4 pr-3 py-3 text-sm font-semibold text-[#4B2415] transition hover:border-[#9F583C] hover:text-[#3A1A0F]">
-            <button
-              onClick={onProfileClick}
-              type="button"
-              className="flex-1 bg-transparent text-left text-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B86A49]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F2D6C3]"
-            >
+            <span className="flex-1 text-left">
               {currentUser.username}
-            </button>
+            </span>
             <button
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                onLogout?.();
+                onSettingsClick?.();
               }}
               className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white text-[#B86A49] transition hover:bg-gray-100"
               type="button"
-              aria-label="Logout"
+              aria-label="Settings"
             >
-              <ArrowRightOnRectangleIcon className="h-6 w-6" />
+              <Cog6ToothIcon className="h-6 w-6" />
             </button>
           </div>
         ) : (
