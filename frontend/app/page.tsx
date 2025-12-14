@@ -235,7 +235,7 @@ function WeeklyMealsChart({ data }: { data: Array<{ weekKey: string; meals: numb
   const maxMeals = Math.max(...data.map(d => d.meals), 1);
   const chartHeight = 280;
   const chartPadding = { top: 20, right: 20, bottom: 40, left: 50 };
-  const barSpacing = 8;
+  const barSpacing = 5;
   const availableWidth = 800;
   const barWidth = Math.max(32, Math.min(60, (availableWidth - chartPadding.left - chartPadding.right - (data.length - 1) * barSpacing) / data.length));
   const chartWidth = data.length * (barWidth + barSpacing) + chartPadding.left + chartPadding.right;
@@ -251,7 +251,7 @@ function WeeklyMealsChart({ data }: { data: Array<{ weekKey: string; meals: numb
     setHoveredIndex(index);
     setTooltip({
       x: rect.left + rect.width / 2,
-      y: rect.top - 10,
+      y: rect.top - 15,
       week,
       meals,
     });
@@ -266,15 +266,16 @@ function WeeklyMealsChart({ data }: { data: Array<{ weekKey: string; meals: numb
     <div className="relative">
       {tooltip && (
         <div
-          className="fixed z-50 rounded-lg bg-white px-3 py-2 text-xs shadow-lg pointer-events-none border border-gray-200"
+          className="fixed z-50 rounded-lg bg-white px-3 py-2 text-xs shadow-lg pointer-events-none border border-gray-200 h-[60px] flex flex-col justify-center"
           style={{
             left: `${tooltip.x}px`,
             top: `${tooltip.y}px`,
             transform: 'translate(-50%, -100%)',
+            marginTop: '-8px',
           }}
         >
-          <div className="font-semibold mb-1 text-[#d48a68]">{tooltip.week}</div>
-          <div className="text-[#d48a68]">{tooltip.meals.toLocaleString()} meals saved</div>
+          <div className="font-semibold mb-1 text-[#d48a68] text-sm leading-tight">{tooltip.week}</div>
+          <div className="text-[#d48a68] opacity-75 text-xs leading-tight whitespace-nowrap">{tooltip.meals.toLocaleString()} meals saved</div>
         </div>
       )}
 
@@ -290,10 +291,10 @@ function WeeklyMealsChart({ data }: { data: Array<{ weekKey: string; meals: numb
               <stop offset="100%" stopColor="#4E673E" stopOpacity="1" />
             </linearGradient>
             <filter id="glow">
-              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feGaussianBlur stdDeviation="3" result="coloredBlur" />
               <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
           </defs>
@@ -350,7 +351,7 @@ function WeeklyMealsChart({ data }: { data: Array<{ weekKey: string; meals: numb
                   onMouseEnter={(e) => handleBarHover(e, index, formatWeekLabel(week.startDate, week.endDate), week.meals)}
                   onMouseLeave={handleBarLeave}
                 />
-                
+
                 {barHeight > 20 && !isHovered && (
                   <text
                     x={x + barWidth / 2}
@@ -395,12 +396,27 @@ function WeeklyMealsChart({ data }: { data: Array<{ weekKey: string; meals: numb
   );
 }
 
-// Interactive CO₂ Reduction Trend Chart Component
+// Interactive Cumulative CO₂ Reduction Chart Component
 function CO2TrendChart({ data }: { data: Array<{ weekKey: string; co2: number; startDate: Date; endDate: Date }> }) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [tooltip, setTooltip] = useState<{ x: number; y: number; week: string; co2: number } | null>(null);
+  const [animatedIndex, setAnimatedIndex] = useState<number>(0);
+  const [isAnimating, setIsAnimating] = useState<boolean>(true);
+  const [visiblePoint, setVisiblePoint] = useState<number | null>(null);
 
-  const maxCO2 = Math.max(...data.map(d => d.co2), 1);
+  // Calculate cumulative CO₂ values
+  const cumulativeData = useMemo(() => {
+    let cumulative = 0;
+    return data.map((week) => {
+      cumulative += week.co2;
+      return {
+        ...week,
+        cumulativeCO2: cumulative,
+      };
+    });
+  }, [data]);
+
+  const maxCO2 = Math.max(...cumulativeData.map(d => d.cumulativeCO2), 1);
   const chartHeight = 280;
   const chartPadding = { top: 20, right: 20, bottom: 40, left: 50 };
   const chartWidth = Math.max(600, data.length * 60 + chartPadding.left + chartPadding.right);
@@ -412,15 +428,65 @@ function CO2TrendChart({ data }: { data: Array<{ weekKey: string; co2: number; s
   };
 
   const calculatePoints = () => {
-    const step = (chartWidth - chartPadding.left - chartPadding.right) / Math.max(data.length - 1, 1);
-    return data.map((week, index) => {
+    const step = (chartWidth - chartPadding.left - chartPadding.right) / Math.max(cumulativeData.length - 1, 1);
+    return cumulativeData.map((week, index) => {
       const x = chartPadding.left + index * step;
-      const y = chartHeight - chartPadding.bottom - ((week.co2 / maxCO2) * (chartHeight - chartPadding.top - chartPadding.bottom));
+      const y = chartHeight - chartPadding.bottom - ((week.cumulativeCO2 / maxCO2) * (chartHeight - chartPadding.top - chartPadding.bottom));
       return { x, y, ...week, index };
     });
   };
 
   const points = calculatePoints();
+
+  // Animation effect
+  useEffect(() => {
+    if (!isAnimating || points.length === 0) {
+      // When animation completes, show all points
+      if (points.length > 0) {
+        setAnimatedIndex(points.length - 1);
+        setVisiblePoint(null);
+      }
+      return;
+    }
+
+    const pointDelay = 200; // Time between each point in ms
+    const pointShowDuration = 150; // Show point for 150ms
+    const pointHideDuration = 50; // Hide point for 50ms before next
+
+    let currentIndex = 0;
+    let timeoutId: NodeJS.Timeout;
+
+    const animateNext = () => {
+      if (currentIndex >= points.length) {
+        setIsAnimating(false);
+        setAnimatedIndex(points.length - 1);
+        setVisiblePoint(null);
+        return;
+      }
+
+      // Show the point and update line
+      setVisiblePoint(currentIndex);
+      setAnimatedIndex(currentIndex);
+
+      // Hide the point after showing it
+      timeoutId = setTimeout(() => {
+        setVisiblePoint(null);
+
+        // Move to next point
+        timeoutId = setTimeout(() => {
+          currentIndex++;
+          animateNext();
+        }, pointHideDuration);
+      }, pointShowDuration);
+    };
+
+    // Start animation after a brief delay
+    timeoutId = setTimeout(animateNext, 300);
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [isAnimating, points.length]);
 
   const handlePointHover = (e: React.MouseEvent<SVGElement>, point: typeof points[0]) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -429,7 +495,7 @@ function CO2TrendChart({ data }: { data: Array<{ weekKey: string; co2: number; s
       x: rect.left + rect.width / 2,
       y: rect.top - 10,
       week: formatWeekLabel(point.startDate, point.endDate),
-      co2: point.co2,
+      co2: point.cumulativeCO2,
     });
   };
 
@@ -438,7 +504,12 @@ function CO2TrendChart({ data }: { data: Array<{ weekKey: string; co2: number; s
     setTooltip(null);
   };
 
-  const pathData = points.length > 1 
+  // Create animated path that only shows up to animatedIndex
+  const animatedPathData = points.length > 1 && animatedIndex >= 0
+    ? `M ${points.slice(0, animatedIndex + 1).map(p => `${p.x},${p.y}`).join(' L ')}`
+    : '';
+
+  const pathData = points.length > 1
     ? `M ${points.map(p => `${p.x},${p.y}`).join(' L ')}`
     : '';
 
@@ -446,19 +517,23 @@ function CO2TrendChart({ data }: { data: Array<{ weekKey: string; co2: number; s
     ? `M ${points[0].x} ${chartHeight - chartPadding.bottom} L ${pathData.replace('M ', '')} L ${points[points.length - 1].x} ${chartHeight - chartPadding.bottom} Z`
     : '';
 
+  const animatedAreaPath = points.length > 1 && animatedIndex >= 0 && animatedPathData
+    ? `M ${points[0].x} ${chartHeight - chartPadding.bottom} L ${animatedPathData.replace('M ', '')} L ${points[Math.min(animatedIndex, points.length - 1)].x} ${chartHeight - chartPadding.bottom} Z`
+    : '';
+
   return (
     <div className="relative">
       {tooltip && (
         <div
-          className="fixed z-50 rounded-lg bg-gray-900 px-3 py-2 text-xs text-white shadow-lg pointer-events-none"
+          className="fixed z-50 rounded-lg bg-white px-3 py-2 text-xs shadow-lg pointer-events-none border border-gray-200 h-[60px] flex flex-col justify-center"
           style={{
             left: `${tooltip.x}px`,
             top: `${tooltip.y}px`,
             transform: 'translate(-50%, -100%)',
           }}
         >
-          <div className="font-semibold mb-1">{tooltip.week}</div>
-          <div className="text-[#F59E0B]">{tooltip.co2.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg CO₂ reduced</div>
+          <div className="font-semibold mb-1 text-[#d48a68] text-sm leading-tight">{tooltip.week}</div>
+          <div className="text-[#d48a68] opacity-75 text-xs leading-tight whitespace-nowrap">{tooltip.co2.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg CO₂ reduced</div>
         </div>
       )}
 
@@ -478,10 +553,10 @@ function CO2TrendChart({ data }: { data: Array<{ weekKey: string; co2: number; s
               <stop offset="100%" stopColor="#D97706" />
             </linearGradient>
             <filter id="co2Glow">
-              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+              <feGaussianBlur stdDeviation="2" result="coloredBlur" />
               <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
           </defs>
@@ -513,69 +588,64 @@ function CO2TrendChart({ data }: { data: Array<{ weekKey: string; co2: number; s
             );
           })}
 
-          {areaPath && (
+          {animatedAreaPath && (
             <path
-              d={areaPath}
+              d={animatedAreaPath}
               fill="url(#co2AreaGradient)"
               className="transition-opacity duration-200"
               opacity={hoveredIndex !== null ? 0.5 : 0.3}
             />
           )}
 
-          {pathData && (
+          {animatedPathData && (
             <path
-              d={pathData}
+              d={animatedPathData}
               fill="none"
               stroke="url(#co2LineGradient)"
               strokeWidth="2.5"
               className="transition-all duration-200"
               style={{
                 filter: hoveredIndex !== null ? "url(#co2Glow)" : "none",
+                strokeDasharray: isAnimating ? 'none' : 'none',
               }}
             />
           )}
 
-          {points.map((point) => {
+          {points.map((point, idx) => {
             const isHovered = hoveredIndex === point.index;
+            const isVisible = !isAnimating || (visiblePoint === idx) || (idx <= animatedIndex && !isAnimating);
+            const shouldShow = idx <= animatedIndex && (visiblePoint === idx || !isAnimating);
+
             return (
               <g key={point.weekKey}>
+                {/* Invisible larger clickable area */}
                 <circle
                   cx={point.x}
                   cy={point.y}
-                  r="8"
+                  r="30"
                   fill="transparent"
                   className="cursor-pointer"
                   onMouseEnter={(e) => handlePointHover(e, point)}
                   onMouseLeave={handlePointLeave}
                 />
-                <circle
-                  cx={point.x}
-                  cy={point.y}
-                  r={isHovered ? "5" : "4"}
-                  fill={isHovered ? "#F59E0B" : "#D97706"}
-                  stroke="white"
-                  strokeWidth="2"
-                  className="transition-all duration-200"
-                  style={{
-                    filter: isHovered ? "url(#co2Glow)" : "none",
-                  }}
-                />
-                
-                {isHovered && (
-                  <text
-                    x={point.x}
-                    y={point.y - 12}
-                    fontSize="11"
-                    fill="#D97706"
-                    textAnchor="middle"
-                    fontWeight="600"
-                    className="pointer-events-none"
-                  >
-                    {point.co2.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg
-                  </text>
+                {/* Visible data point circle - only show if animation reached this point */}
+                {idx <= animatedIndex && (
+                  <circle
+                    cx={point.x}
+                    cy={point.y}
+                    r={isHovered ? "5" : "4"}
+                    fill={isHovered ? "#F59E0B" : "#D97706"}
+                    stroke="white"
+                    strokeWidth="2"
+                    className="transition-all duration-200 pointer-events-none"
+                    style={{
+                      filter: isHovered ? "url(#co2Glow)" : "none",
+                      opacity: visiblePoint === idx ? 1 : (isAnimating && idx < animatedIndex ? 0 : 1),
+                    }}
+                  />
                 )}
 
-                {point.index % Math.ceil(data.length / 8) === 0 && (
+                {idx % Math.ceil(cumulativeData.length / 8) === 0 && (
                   <text
                     x={point.x}
                     y={chartHeight - chartPadding.bottom + 20}
@@ -618,11 +688,11 @@ const normalizeImpactData = (raw: unknown): ImpactRecord[] => {
       data = obj.data;
     }
   }
-  
+
   return data.map((record: LooseImpactRecord) => {
     // Handle both 'impact_id' and 'pk' field names
     const impactId = record.impact_id ?? record.pk ?? record.id ?? "";
-    
+
     return {
       impact_id: typeof impactId === "string" ? impactId : "",
       meals_saved: Number(record.meals_saved ?? 0),
@@ -894,7 +964,7 @@ function HomePage({
           apiFetch<DonationApiRecord[]>("/donations/").catch(() => []),
           apiFetch<FoodItemApiRecord[]>("/fooditems/").catch(() => []),
         ]);
-        
+
         if (!ignore) {
           setRestaurants(restaurantsData);
           setDonations(donationsData);
@@ -924,23 +994,23 @@ function HomePage({
   // Calculate weekly meals saved
   const weeklyMealsData = useMemo(() => {
     const weeks = new Map<string, { meals: number; co2: number; startDate: Date; endDate: Date }>();
-    
+
     impactRecords.forEach(record => {
       const date = new Date(record.impact_date);
       const weekStart = new Date(date);
       weekStart.setDate(date.getDate() - date.getDay()); // Start of week (Sunday)
       weekStart.setHours(0, 0, 0, 0);
-      
+
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekEnd.getDate() + 6);
-      
+
       const weekKey = weekStart.toISOString().split('T')[0];
-      
-      const current = weeks.get(weekKey) || { 
+
+      const current = weeks.get(weekKey) || {
         meals: 0,
         co2: 0,
-        startDate: weekStart, 
-        endDate: weekEnd 
+        startDate: weekStart,
+        endDate: weekEnd
       };
       current.meals += record.meals_saved || 0;
       current.co2 += record.co2_reduced_kg || 0;
@@ -976,7 +1046,7 @@ function HomePage({
 
     const restaurantMap = new Map(restaurants.map(r => [r.restaurant_id, r]));
     const donationMap = new Map(donations.map(d => [d.donation_id, d]));
-    
+
     const foodItemMap = new Map<string, FoodItemApiRecord>();
     foodItems.forEach(f => {
       const foodId = f.food_id;
@@ -992,22 +1062,22 @@ function HomePage({
     impactRecords.forEach(impact => {
       const normalizedFoodId = normalizeFoodId(impact.food);
       const foodItem = foodItemMap.get(normalizedFoodId) || foodItemMap.get(impact.food);
-      
+
       if (!foodItem) return;
 
       const donationId = foodItem.donation;
       if (!donationId) return;
-      
+
       const donation = donationMap.get(donationId);
       if (!donation) return;
 
       const restaurantId = donation.restaurant;
       if (!restaurantId) return;
-      
+
       const restaurant = restaurantMap.get(restaurantId);
       if (!restaurant) return;
 
-      const restaurantName = donation.restaurant_name || restaurant.name || 
+      const restaurantName = donation.restaurant_name || restaurant.name ||
         (restaurant.branch_name ? `${restaurant.name || ''} - ${restaurant.branch_name}`.trim() : '') ||
         restaurant.restaurant_id;
 
@@ -1043,7 +1113,7 @@ function HomePage({
             <span className="text-[#d48a68]">Rebuild communities.</span>
           </h1>
           <p className="max-w-3xl text-lg text-[#5a4f45]">
-          Re-Meals brings together restaurants, drivers, and community hearts to ensure no good meal goes to waste—and no neighbor goes without. Share what you have, ask for what you need, and help nourish the people around you.
+            Re-Meals brings together restaurants, drivers, and community hearts to ensure no good meal goes to waste—and no neighbor goes without. Share what you have, ask for what you need, and help nourish the people around you.
           </p>
           <div className="flex flex-wrap gap-3">
             <button
@@ -1055,7 +1125,7 @@ function HomePage({
               type="button"
             >
               Login / Sign up to donate or request
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
                 <svg
                   className="h-6 w-6 text-[#d48a68]"
                   fill="none"
@@ -1172,7 +1242,7 @@ function HomePage({
           <div className="rounded-2xl border border-[#F3C7A0] bg-white p-6 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">CO₂ Reduction Trend</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Cumulative CO₂ Reduction</h3>
                 <p className="text-xs text-gray-500 mt-1">Hover over points to see details</p>
               </div>
               <span className="rounded-full bg-[#FFF4E6] px-3 py-1 text-[11px] font-semibold text-[#D97706]">
@@ -1219,8 +1289,8 @@ function HomePage({
         </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
-        <div className="rounded-[32px] bg-[#fde5d6] p-7 flex flex-col">
+      <div className="grid gap-6 lg:grid-cols-2 items-stretch">
+        <div className="rounded-[32px] bg-[#fde5d6] p-7 flex flex-col h-full min-h-0">
           <div className="flex items-center justify-between gap-3 mb-3">
             <div>
               <p className="text-sm font-semibold uppercase tracking-wide text-[#d48a68]">
@@ -1272,7 +1342,7 @@ function HomePage({
           </div>
         </div>
 
-        <div className="rounded-[32px] bg-[#fde5d6] p-7 flex flex-col">
+        <div className="rounded-[32px] bg-[#fde5d6] p-7 flex flex-col h-full min-h-0">
           <div className="flex items-center justify-between gap-3 mb-3">
             <div>
               <p className="text-sm font-semibold uppercase tracking-wide text-[#d48a68]">
@@ -1287,7 +1357,7 @@ function HomePage({
           <p className="mt-3 text-black/70 mb-5">
             Share what your neighbors need, when, and where. We align donations to your delivery window and capacity.
           </p>
-          <div className="space-y-3 flex-1">
+          <div className="flex flex-col gap-3 flex-1">
             <div className="flex items-start gap-3 rounded-2xl border-2 border-dashed border-[#d48a68] bg-white p-4 cursor-pointer transition-all hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98] group">
               <span className="text-3xl flex-shrink-0 transition-transform group-hover:scale-125 group-active:scale-110" aria-hidden>
                 🍽️
@@ -1473,12 +1543,12 @@ function DonationSection(props: {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [notification, setNotification] = useState<Notification>({});
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [donationsLoading, setDonationsLoading] = useState(false);
   const [donationsError, setDonationsError] = useState<string | null>(null);
-  
-  
+
+
   const [deliveries, setDeliveries] = useState<DeliveryRecordApi[]>([]);
   const [deletingDonationId, setDeletingDonationId] = useState<string | null>(null);
 
@@ -1610,7 +1680,7 @@ function DonationSection(props: {
     };
   }, [currentUser]);
 
-  
+
 
   useEffect(() => {
     if (!restaurants.length || !donations.length) {
@@ -1655,7 +1725,7 @@ function DonationSection(props: {
     setEditingId(null);
     setNotification({});
   };
-  
+
 
   const handleItemChange = (
     index: number,
@@ -1874,8 +1944,8 @@ function DonationSection(props: {
   const isDonationAssigned = (donationId: string) => {
     return deliveries.some(
       (delivery) =>
-        delivery.delivery_type === "donation" && 
-        delivery.donation_id && 
+        delivery.delivery_type === "donation" &&
+        delivery.donation_id &&
         delivery.donation_id === donationId
     );
   };
@@ -1965,7 +2035,7 @@ function DonationSection(props: {
       });
       return;
     }
-    
+
     const target = donations.find((donation) => donation.id === donationId);
     if (!target) {
       setNotification({
@@ -1973,7 +2043,7 @@ function DonationSection(props: {
       });
       return;
     }
-    
+
     // Check if assigned - this is the main blocker
     if (isDonationAssigned(donationId)) {
       setNotification({
@@ -1981,7 +2051,7 @@ function DonationSection(props: {
       });
       return;
     }
-    
+
     // Check ownership only if ownerUserId is set
     if (target.ownerUserId && target.ownerUserId !== currentUser.userId && !currentUser.isAdmin) {
       setNotification({
@@ -1989,25 +2059,25 @@ function DonationSection(props: {
       });
       return;
     }
-    
+
     if (!confirm("Are you sure you want to delete this donation? This action cannot be undone.")) {
       return;
     }
-    
+
     setDeletingDonationId(donationId);
     try {
       await apiFetch(`/donations/${donationId}/`, {
         method: "DELETE",
         headers: buildAuthHeaders(currentUser),
       });
-      
+
       // Reload donations from server to ensure UI is in sync
       await loadDonationsData();
-      
+
       if (editingId === donationId) {
         resetForm();
       }
-      
+
       setNotification({ message: "Donation removed from the list." });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unable to delete donation. Please try again.";
@@ -2215,26 +2285,26 @@ function DonationSection(props: {
                 )}
               </div>
               <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="submit"
-              disabled={isSubmitting || !currentUser}
-              className="rounded-2xl bg-[#7ba061] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#4E653D] disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {isSubmitting
-                ? "Saving..."
-                : editingId
-                  ? "Update donation"
-                  : "Save donation"}
-            </button>
-              {editingId && (
                 <button
-                  type="button"
-                  className="rounded-2xl border border-[#D7DCC7] px-6 py-3 text-sm font-semibold text-[#4B3525] transition hover:border-[#B86A49] hover:text-[#3A2617]"
-                  onClick={resetForm}
+                  type="submit"
+                  disabled={isSubmitting || !currentUser}
+                  className="rounded-2xl bg-[#7ba061] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#4E653D] disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Cancel edit
+                  {isSubmitting
+                    ? "Saving..."
+                    : editingId
+                      ? "Update donation"
+                      : "Save donation"}
                 </button>
-              )}
+                {editingId && (
+                  <button
+                    type="button"
+                    className="rounded-2xl border border-[#D7DCC7] px-6 py-3 text-sm font-semibold text-[#4B3525] transition hover:border-[#B86A49] hover:text-[#3A2617]"
+                    onClick={resetForm}
+                  >
+                    Cancel edit
+                  </button>
+                )}
               </div>
             </div>
           </form>
@@ -2277,75 +2347,33 @@ function DonationSection(props: {
             </p>
           ) : (
             <div className="space-y-4">
-            {unassignedDonations.map((donation) => (
-              <article
-                key={donation.id}
-                className="rounded-2xl border border-dashed border-[#4d673f] bg-white/90 p-5 "
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
-                  <div className="flex-1">
-                    <p className="text-xs uppercase tracking-wide text-gray-400">
-                      {donation.restaurantId ?? "Manual entry"}
-                    </p>
-                    <p className="text-lg font-semibold text-gray-900">
-                      {donation.restaurantName}
-                    </p>
-                    {donation.branch && (
-                      <p className="text-sm text-gray-500">{donation.branch}</p>
-                    )}
-                  </div>
-                  <div className="flex flex-col items-end gap-2">
-                    {canShowEditDeleteButtons() && (
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          disabled={!canManageDonation(donation)}
-                          className="rounded-lg bg-[#E6F4FF] p-2 text-[#1D4ED8] hover:bg-[#D0E7FF] disabled:opacity-60 disabled:cursor-not-allowed transition"
-                          title="Edit donation"
-                          onClick={() => handleEdit(donation)}
-                        >
-                          <svg
-                            className="h-4 w-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+              {unassignedDonations.map((donation) => (
+                <article
+                  key={donation.id}
+                  className="rounded-2xl border border-dashed border-[#4d673f] bg-white/90 p-5 "
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+                    <div className="flex-1">
+                      <p className="text-xs uppercase tracking-wide text-gray-400">
+                        {donation.restaurantId ?? "Manual entry"}
+                      </p>
+                      <p className="text-lg font-semibold text-gray-900">
+                        {donation.restaurantName}
+                      </p>
+                      {donation.branch && (
+                        <p className="text-sm text-gray-500">{donation.branch}</p>
+                      )}
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      {canShowEditDeleteButtons() && (
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            disabled={!canManageDonation(donation)}
+                            className="rounded-lg bg-[#E6F4FF] p-2 text-[#1D4ED8] hover:bg-[#D0E7FF] disabled:opacity-60 disabled:cursor-not-allowed transition"
+                            title="Edit donation"
+                            onClick={() => handleEdit(donation)}
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                            />
-                          </svg>
-                        </button>
-                        <button
-                          type="button"
-                          disabled={!canManageDonation(donation) || deletingDonationId === donation.id}
-                          className="rounded-lg bg-[#FDECEA] p-2 text-[#B42318] hover:bg-[#FCD7D2] disabled:opacity-60 disabled:cursor-not-allowed transition"
-                          title="Delete donation"
-                          onClick={() => handleDelete(donation.id)}
-                        >
-                          {deletingDonationId === donation.id ? (
-                            <svg
-                              className="h-4 w-4 animate-spin"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                              />
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                              />
-                            </svg>
-                          ) : (
                             <svg
                               className="h-4 w-4"
                               fill="none"
@@ -2356,53 +2384,95 @@ function DonationSection(props: {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth={2}
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                               />
                             </svg>
-                          )}
-                        </button>
+                          </button>
+                          <button
+                            type="button"
+                            disabled={!canManageDonation(donation) || deletingDonationId === donation.id}
+                            className="rounded-lg bg-[#FDECEA] p-2 text-[#B42318] hover:bg-[#FCD7D2] disabled:opacity-60 disabled:cursor-not-allowed transition"
+                            title="Delete donation"
+                            onClick={() => handleDelete(donation.id)}
+                          >
+                            {deletingDonationId === donation.id ? (
+                              <svg
+                                className="h-4 w-4 animate-spin"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                />
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                />
+                              </svg>
+                            ) : (
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                              </svg>
+                            )}
+                          </button>
+                        </div>
+                      )}
+                      <div className="text-right text-xs text-gray-500">
+                        <p>{formatDisplayDate(donation.createdAt)} • {donation.items.length} item(s)</p>
                       </div>
-                    )}
-                    <div className="text-right text-xs text-gray-500">
-                      <p>{formatDisplayDate(donation.createdAt)} • {donation.items.length} item(s)</p>
                     </div>
                   </div>
-                </div>
 
-                <div className="mt-4 space-y-3">
-                  {donation.items.map((item, index) => (
-                    <div
-                      key={item.id}
-                      className="flex flex-col gap-1 rounded-2xl border border-[#D7DCC7] bg-[#F4F7EF] p-3 text-sm text-gray-700"
-                    >
-                      <div className="flex items-center justify-between text-xs uppercase text-gray-500">
-                        <span>Item {index + 1}</span>
-                        <span>
-                          Qty {item.quantity} {item.unit}
-                        </span>
+                  <div className="mt-4 space-y-3">
+                    {donation.items.map((item, index) => (
+                      <div
+                        key={item.id}
+                        className="flex flex-col gap-1 rounded-2xl border border-[#D7DCC7] bg-[#F4F7EF] p-3 text-sm text-gray-700"
+                      >
+                        <div className="flex items-center justify-between text-xs uppercase text-gray-500">
+                          <span>Item {index + 1}</span>
+                          <span>
+                            Qty {item.quantity} {item.unit}
+                          </span>
+                        </div>
+                        <p className="text-base font-semibold text-gray-900">
+                          {item.name}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Expired:{" "}
+                          {item.expiredDate ? formatDisplayDate(item.expiredDate) : "n/a"}
+                        </p>
                       </div>
-                      <p className="text-base font-semibold text-gray-900">
-                        {item.name}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Expired:{" "}
-                        {item.expiredDate ? formatDisplayDate(item.expiredDate) : "n/a"}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
 
-                {donation.note && (
-                  <p className="mt-4 text-xs italic text-gray-500">
-                    {donation.note}
-                  </p>
-                )}
-              </article>
-            ))}
-          </div>
-        )}
+                  {donation.note && (
+                    <p className="mt-4 text-xs italic text-gray-500">
+                      {donation.note}
+                    </p>
+                  )}
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
     </div>
   );
 }
@@ -2603,13 +2673,13 @@ function DonationRequestSection(props: {
       };
       const result = editingId
         ? await apiFetch<DonationRequestApiRecord>(`/donation-requests/${editingId}/`, {
-            ...requestOptions,
-            method: "PATCH",
-          })
+          ...requestOptions,
+          method: "PATCH",
+        })
         : await apiFetch<DonationRequestApiRecord>("/donation-requests/", {
-            ...requestOptions,
-            method: "POST",
-          });
+          ...requestOptions,
+          method: "POST",
+        });
 
       const mapped: DonationRequestRecord = {
         id: result.request_id,
@@ -2827,39 +2897,39 @@ function DonationRequestSection(props: {
               />
             </div>
 
-          {notification.error && (
-            <p className="text-sm font-semibold text-[#C2410C]">
-              {notification.error}
-            </p>
-          )}
-          {notification.message && (
-            <p className="text-sm font-semibold text-[#B86A49]">
-              {notification.message}
-            </p>
-          )}
-
-          <div className="flex flex-wrap items-center justify-end gap-3">
-            <button
-              type="submit"
-              disabled={isSubmitting || !currentUser}
-              className="rounded-2xl bg-[#B86A49] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#9F583C] disabled:opacity-60 disabled:cursor-not-allowed transition"
-            >
-              {isSubmitting
-                ? "Saving..."
-                : editingId
-                  ? "Update request"
-                  : "Save request"}
-            </button>
-            {editingId && (
-              <button
-                type="button"
-                className="rounded-2xl border border-[#E6B9A2] px-6 py-3 text-sm font-semibold text-[#4B3525] transition hover:border-[#B86A49] hover:text-[#3A2617]"
-                onClick={resetForm}
-              >
-                Cancel edit
-              </button>
+            {notification.error && (
+              <p className="text-sm font-semibold text-[#C2410C]">
+                {notification.error}
+              </p>
             )}
-          </div>
+            {notification.message && (
+              <p className="text-sm font-semibold text-[#B86A49]">
+                {notification.message}
+              </p>
+            )}
+
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              <button
+                type="submit"
+                disabled={isSubmitting || !currentUser}
+                className="rounded-2xl bg-[#B86A49] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#9F583C] disabled:opacity-60 disabled:cursor-not-allowed transition"
+              >
+                {isSubmitting
+                  ? "Saving..."
+                  : editingId
+                    ? "Update request"
+                    : "Save request"}
+              </button>
+              {editingId && (
+                <button
+                  type="button"
+                  className="rounded-2xl border border-[#E6B9A2] px-6 py-3 text-sm font-semibold text-[#4B3525] transition hover:border-[#B86A49] hover:text-[#3A2617]"
+                  onClick={resetForm}
+                >
+                  Cancel edit
+                </button>
+              )}
+            </div>
           </form>
         </div>
       </div>
@@ -2894,86 +2964,86 @@ function DonationRequestSection(props: {
             </p>
           ) : (
             <div className="space-y-4">
-            {unacceptedRequests.map((request) => (
-              <article
-                key={request.id}
-                className="rounded-2xl border border-[#E6B9A2] bg-[#F8F3EE] p-5 shadow-sm"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-wide text-[#B86A49]">
-                      {request.communityName || "Community representative"}
-                    </p>
-                    <p className="text-lg font-semibold text-gray-900">
-                      {request.requestTitle}
-                    </p>
-                    {currentUser?.userId && request.ownerUserId === currentUser.userId && (
-                      <span className="mt-1 inline-flex rounded-full bg-[#B86A49]/10 px-2 py-0.5 text-xs font-semibold text-[#8B4513]">
-                        Your request
-                      </span>
-                    )}
-                    <p className="text-sm text-gray-600">
-                      {request.numberOfPeople} people waiting for food
-                    </p>
-                  </div>
-                  <div className="text-right text-xs text-gray-500">
-                    <p>{formatDisplayDate(request.createdAt)}</p>
-                    {request.expectedDelivery && (
-                      <p>
-                        Due{" "}
-                        {formatDisplayDate(request.expectedDelivery)}
+              {unacceptedRequests.map((request) => (
+                <article
+                  key={request.id}
+                  className="rounded-2xl border border-[#E6B9A2] bg-[#F8F3EE] p-5 shadow-sm"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-[#B86A49]">
+                        {request.communityName || "Community representative"}
                       </p>
-                    )}
+                      <p className="text-lg font-semibold text-gray-900">
+                        {request.requestTitle}
+                      </p>
+                      {currentUser?.userId && request.ownerUserId === currentUser.userId && (
+                        <span className="mt-1 inline-flex rounded-full bg-[#B86A49]/10 px-2 py-0.5 text-xs font-semibold text-[#8B4513]">
+                          Your request
+                        </span>
+                      )}
+                      <p className="text-sm text-gray-600">
+                        {request.numberOfPeople} people waiting for food
+                      </p>
+                    </div>
+                    <div className="text-right text-xs text-gray-500">
+                      <p>{formatDisplayDate(request.createdAt)}</p>
+                      {request.expectedDelivery && (
+                        <p>
+                          Due{" "}
+                          {formatDisplayDate(request.expectedDelivery)}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                <div className="mt-4 grid gap-4 md:grid-cols-2">
-                  <div className="rounded-2xl bg-[#F8F3EE] p-3 text-sm text-gray-700">
-                    <p className="text-xs uppercase tracking-wide text-[#B86A49]">
-                      Recipient address
-                    </p>
-                    <p className="font-semibold">
-                      {request.recipientAddress || "Not provided"}
-                    </p>
+                  <div className="mt-4 grid gap-4 md:grid-cols-2">
+                    <div className="rounded-2xl bg-[#F8F3EE] p-3 text-sm text-gray-700">
+                      <p className="text-xs uppercase tracking-wide text-[#B86A49]">
+                        Recipient address
+                      </p>
+                      <p className="font-semibold">
+                        {request.recipientAddress || "Not provided"}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl bg-[#F8F3EE] p-3 text-sm text-gray-700">
+                      <p className="text-xs uppercase tracking-wide text-[#B86A49]">
+                        Contact phone
+                      </p>
+                      <p className="font-semibold">
+                        {currentUser?.phone || request.contactPhone || "N/A"}
+                      </p>
+                    </div>
                   </div>
-                  <div className="rounded-2xl bg-[#F8F3EE] p-3 text-sm text-gray-700">
-                    <p className="text-xs uppercase tracking-wide text-[#B86A49]">
-                      Contact phone
-                    </p>
-                    <p className="font-semibold">
-                      {currentUser?.phone || request.contactPhone || "N/A"}
-                    </p>
-                  </div>
-                </div>
 
-                {request.notes && (
-                  <p className="mt-4 text-xs italic text-gray-500">{request.notes}</p>
-                )}
+                  {request.notes && (
+                    <p className="mt-4 text-xs italic text-gray-500">{request.notes}</p>
+                  )}
 
-                {canManageRequest(request) && (
-                  <div className="mt-5 flex gap-3 justify-end">
-                    <button
-                      type="button"
-                      className="rounded-full border-2 border-[#E6B9A2] bg-white px-5 py-2 text-sm font-semibold text-[#8B5B1F] shadow-sm transition-all duration-200 hover:border-[#B86A49] hover:bg-[#F8F3EE] hover:shadow-md active:scale-95"
-                      onClick={() => handleEdit(request)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      className="rounded-full border-2 border-[#F7B0A0] bg-white px-5 py-2 text-sm font-semibold text-[#B42318] shadow-sm transition-all duration-200 hover:border-[#E63946] hover:bg-[#FFF1F0] hover:shadow-md active:scale-95"
-                      onClick={() => handleDelete(request)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
-              </article>
-            ))}
-          </div>
-        )}
+                  {canManageRequest(request) && (
+                    <div className="mt-5 flex gap-3 justify-end">
+                      <button
+                        type="button"
+                        className="rounded-full border-2 border-[#E6B9A2] bg-white px-5 py-2 text-sm font-semibold text-[#8B5B1F] shadow-sm transition-all duration-200 hover:border-[#B86A49] hover:bg-[#F8F3EE] hover:shadow-md active:scale-95"
+                        onClick={() => handleEdit(request)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-full border-2 border-[#F7B0A0] bg-white px-5 py-2 text-sm font-semibold text-[#B42318] shadow-sm transition-all duration-200 hover:border-[#E63946] hover:bg-[#FFF1F0] hover:shadow-md active:scale-95"
+                        onClick={() => handleDelete(request)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
     </div>
   );
 }
@@ -3166,11 +3236,10 @@ function ProfileModal({
                   setRestaurantSelectionMode("existing");
                   setForm((prev) => ({ ...prev, restaurant_name: "", branch: "", restaurant_address: "" }));
                 }}
-                className={`rounded-lg px-2 py-1 text-xs font-semibold transition ${
-                  restaurantSelectionMode === "existing"
-                    ? "bg-[#d48a68] text-white"
-                    : "bg-white text-[#d48a68] border border-[#d48a68]"
-                }`}
+                className={`rounded-lg px-2 py-1 text-xs font-semibold transition ${restaurantSelectionMode === "existing"
+                  ? "bg-[#d48a68] text-white"
+                  : "bg-white text-[#d48a68] border border-[#d48a68]"
+                  }`}
               >
                 Select
               </button>
@@ -3180,11 +3249,10 @@ function ProfileModal({
                   setRestaurantSelectionMode("manual");
                   setForm((prev) => ({ ...prev, restaurant_id: "" }));
                 }}
-                className={`rounded-lg px-2 py-1 text-xs font-semibold transition ${
-                  restaurantSelectionMode === "manual"
-                    ? "bg-[#d48a68] text-white"
-                    : "bg-white text-[#d48a68] border border-[#d48a68]"
-                }`}
+                className={`rounded-lg px-2 py-1 text-xs font-semibold transition ${restaurantSelectionMode === "manual"
+                  ? "bg-[#d48a68] text-white"
+                  : "bg-white text-[#d48a68] border border-[#d48a68]"
+                  }`}
               >
                 Manual
               </button>
@@ -3418,11 +3486,11 @@ function AdminDashboard() {
   );
 }
 
-function StatusSection({ 
+function StatusSection({
   currentUser,
   setShowAuthModal,
   setAuthMode
-}: { 
+}: {
   currentUser: LoggedUser | null;
   setShowAuthModal: (show: boolean) => void;
   setAuthMode: (mode: AuthMode) => void;
@@ -3433,7 +3501,7 @@ function StatusSection({
   const [communities, setCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Filter and sort states
   const [donationStatusFilter, setDonationStatusFilter] = useState<string>("all");
   const [requestCommunityFilter, setRequestCommunityFilter] = useState<string>("all");
@@ -4247,7 +4315,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
       };
     }
     const warehouseName = warehouses[delivery.warehouse_id]?.warehouse_id ?? delivery.warehouse_id;
-    const communityName = delivery.community_id 
+    const communityName = delivery.community_id
       ? (communities[delivery.community_id]?.name ?? delivery.community_id)
       : "Unknown community";
     return {
@@ -5227,8 +5295,8 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
                       <div className="flex-1 min-w-0">
                         <p className="text-[11px] font-medium text-gray-500 leading-tight">Donation</p>
                         <p className="text-xs font-semibold text-gray-900 leading-tight truncate">
-                          {delivery.donation_id && typeof delivery.donation_id === "string" 
-                            ? lookupRestaurantName(delivery.donation_id) 
+                          {delivery.donation_id && typeof delivery.donation_id === "string"
+                            ? lookupRestaurantName(delivery.donation_id)
                             : "N/A"}
                         </p>
                       </div>
@@ -6013,7 +6081,7 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
     // Heuristic: infer from name when category is not provided
     const name = (item.name || "").toLowerCase();
     if (name.includes("vegan")) return "Vegan";
-  if (name.includes("vegetarian")) return "Vegan";
+    if (name.includes("vegetarian")) return "Vegan";
     if (name.includes("halal") || name.includes("islamic") || name.includes("muslim")) return "Islamic";
 
     // Default unspecified items to Islamic per user preference
@@ -6036,9 +6104,9 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
     if (donation) {
       // Prefer the donation-provided restaurant_name if available
       const restaurantId = donation.restaurant;
-  const restaurant = restaurants.find((r: Restaurant) => r.restaurant_id === restaurantId);
-  const restaurantName = donation.restaurant_name || restaurant?.name || restaurant?.restaurant_id || "";
-  const branchName = donation.restaurant_branch || restaurant?.branch_name || "";
+      const restaurant = restaurants.find((r: Restaurant) => r.restaurant_id === restaurantId);
+      const restaurantName = donation.restaurant_name || restaurant?.name || restaurant?.restaurant_id || "";
+      const branchName = donation.restaurant_branch || restaurant?.branch_name || "";
       if (branchName) return `${restaurantName}${restaurantName ? " - " : ""}${branchName}`;
       return restaurantName || donation.donation_id;
     }
@@ -6122,11 +6190,10 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
                     type="button"
                     key={warehouse.warehouse_id}
                     onClick={() => setSelectedWarehouseId(warehouse.warehouse_id)}
-                    className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
-                      isSelected
-                        ? "border-[#2F855A] bg-[#F6FBF7] shadow-md"
-                        : "border-[#D7E6DD] bg-white hover:border-[#2F855A]"
-                    }`}
+                    className={`w-full rounded-2xl border px-4 py-3 text-left transition ${isSelected
+                      ? "border-[#2F855A] bg-[#F6FBF7] shadow-md"
+                      : "border-[#D7E6DD] bg-white hover:border-[#2F855A]"
+                      }`}
                   >
                     <p className="text-sm font-semibold text-gray-900">{warehouse.warehouse_id}</p>
                     <p className="text-xs text-gray-500">{warehouse.address}</p>
@@ -6139,71 +6206,71 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
         </div>
       </div>
 
-  <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-[28px] border border-[#CFE6D8] bg-[#F6FBF7] p-6 shadow-lg shadow-[#B6DEC8]/30">
+      <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-[28px] border border-[#CFE6D8] bg-[#F6FBF7] p-6 shadow-lg shadow-[#B6DEC8]/30">
         {/* header is sticky so controls don't shift when left column content changes */}
         <div className="sticky top-6 z-20 mb-4 bg-[#F6FBF7] py-2">
           <div className="flex flex-shrink-0 flex-col gap-4 md:flex-row md:items-start md:gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-[#2F855A]">
-              Warehouse management
-            </p>
-            <h2 className="text-2xl font-semibold text-gray-900">
-              {selectedWarehouse ? selectedWarehouse.warehouse_id : "Select a warehouse"}
-            </h2>
-            {selectedWarehouse && (
-              <p className="text-sm text-gray-600">{selectedWarehouse.address}</p>
-            )}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#2F855A]">
+                Warehouse management
+              </p>
+              <h2 className="text-2xl font-semibold text-gray-900">
+                {selectedWarehouse ? selectedWarehouse.warehouse_id : "Select a warehouse"}
+              </h2>
+              {selectedWarehouse && (
+                <p className="text-sm text-gray-600">{selectedWarehouse.address}</p>
+              )}
+            </div>
+            <div className="flex w-full md:w-auto md:ml-auto gap-4 flex-wrap">
+              <div className="w-full md:w-40">
+                <label className="mb-1 block text-xs font-semibold text-gray-600">
+                  Filter by status
+                </label>
+                <select
+                  className={INPUT_STYLES}
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                >
+                  <option value="all">All items</option>
+                  <option value="available">Available</option>
+                  <option value="claimed">Claimed</option>
+                  <option value="distributed">Distributed</option>
+                  <option value="expired">Expired</option>
+                </select>
+              </div>
+              <div className="w-full md:w-40">
+                <label className="mb-1 block text-xs font-semibold text-gray-600">Expiry filter</label>
+                <select
+                  className={INPUT_STYLES}
+                  value={expiryFilter}
+                  onChange={(e) => setExpiryFilter(e.target.value)}
+                >
+                  <option value="all">All</option>
+                  <option value="within_3_days">Expiring within 3 days</option>
+                  <option value="this_week">Expiring this week</option>
+                  <option value="this_month">Expiring this month</option>
+                </select>
+              </div>
+
+              <div className="w-full md:w-40">
+                <label className="mb-1 block text-xs font-semibold text-gray-600">Category</label>
+                <select
+                  className={INPUT_STYLES}
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                >
+                  <option value="all">All</option>
+                  <option value="Vegetarian">Vegetarian</option>
+                  <option value="Islamic">Islamic</option>
+                </select>
+              </div>
+            </div>
+
+            {/* grouping UI removed - category selection drives filtering */}
           </div>
-          <div className="flex w-full md:w-auto md:ml-auto gap-4 flex-wrap">
-            <div className="w-full md:w-40">
-              <label className="mb-1 block text-xs font-semibold text-gray-600">
-                Filter by status
-              </label>
-              <select
-                className={INPUT_STYLES}
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-              >
-                <option value="all">All items</option>
-                <option value="available">Available</option>
-                <option value="claimed">Claimed</option>
-                <option value="distributed">Distributed</option>
-                <option value="expired">Expired</option>
-              </select>
-            </div>
-            <div className="w-full md:w-40">
-              <label className="mb-1 block text-xs font-semibold text-gray-600">Expiry filter</label>
-              <select
-                className={INPUT_STYLES}
-                value={expiryFilter}
-                onChange={(e) => setExpiryFilter(e.target.value)}
-              >
-                <option value="all">All</option>
-                <option value="within_3_days">Expiring within 3 days</option>
-                <option value="this_week">Expiring this week</option>
-                <option value="this_month">Expiring this month</option>
-              </select>
-            </div>
+        </div>
 
-            <div className="w-full md:w-40">
-              <label className="mb-1 block text-xs font-semibold text-gray-600">Category</label>
-              <select
-                className={INPUT_STYLES}
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-              >
-                <option value="all">All</option>
-                <option value="Vegetarian">Vegetarian</option>
-                <option value="Islamic">Islamic</option>
-              </select>
-            </div>
-          </div>
-
-          {/* grouping UI removed - category selection drives filtering */}
-  </div>
-  </div>
-
-  {error && <p className="mb-4 flex-shrink-0 text-sm text-red-600">{error}</p>}
+        {error && <p className="mb-4 flex-shrink-0 text-sm text-red-600">{error}</p>}
 
         {loading ? (
           <p className="text-sm text-gray-600">Loading inventory...</p>
@@ -6224,9 +6291,8 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
                   return (
                     <div
                       key={item.food_id}
-                      className={`rounded-2xl p-4 shadow-sm transition hover:shadow-md ${
-                        expired ? 'border-2 border-dashed border-[#F5C6C1] bg-[#FFF5F5]' : 'border border-[#CFE6D8] bg-white'
-                      }`}
+                      className={`rounded-2xl p-4 shadow-sm transition hover:shadow-md ${expired ? 'border-2 border-dashed border-[#F5C6C1] bg-[#FFF5F5]' : 'border border-[#CFE6D8] bg-white'
+                        }`}
                     >
                       <div className="mb-3 flex items-start justify-between gap-2">
                         <div className="flex-1">
@@ -6241,23 +6307,22 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
                           </div>
                         </div>
                         <span
-                          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                            expired
-                              ? "bg-[#FDECEA] text-[#B42318]"
-                              : item.is_distributed
+                          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${expired
+                            ? "bg-[#FDECEA] text-[#B42318]"
+                            : item.is_distributed
                               ? "bg-[#E6F7EE] text-[#1F4D36]"
                               : item.is_claimed
-                              ? "bg-[#E6F4FF] text-[#1D4ED8]"
-                              : "bg-[#FFF1E3] text-[#C46A24]"
-                          }`}
+                                ? "bg-[#E6F4FF] text-[#1D4ED8]"
+                                : "bg-[#FFF1E3] text-[#C46A24]"
+                            }`}
                         >
                           {expired
                             ? "Expired"
                             : item.is_distributed
-                            ? "Distributed"
-                            : item.is_claimed
-                            ? "Claimed"
-                            : "Available"}
+                              ? "Distributed"
+                              : item.is_claimed
+                                ? "Claimed"
+                                : "Available"}
                         </span>
                       </div>
 
@@ -6725,11 +6790,10 @@ function AuthModal({
                       setRestaurantSelectionMode("existing");
                       setSignupData((prev) => ({ ...prev, restaurant_id: "", restaurant_name: "", branch: "", restaurant_address: "" }));
                     }}
-                    className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
-                      restaurantSelectionMode === "existing"
-                        ? "bg-[#d48a68] text-white"
-                        : "bg-white text-[#d48a68] border border-[#d48a68]"
-                    }`}
+                    className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${restaurantSelectionMode === "existing"
+                      ? "bg-[#d48a68] text-white"
+                      : "bg-white text-[#d48a68] border border-[#d48a68]"
+                      }`}
                   >
                     Select Existing
                   </button>
@@ -6739,11 +6803,10 @@ function AuthModal({
                       setRestaurantSelectionMode("manual");
                       setSignupData((prev) => ({ ...prev, restaurant_id: "" }));
                     }}
-                    className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
-                      restaurantSelectionMode === "manual"
-                        ? "bg-[#d48a68] text-white"
-                        : "bg-white text-[#d48a68] border border-[#d48a68]"
-                    }`}
+                    className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${restaurantSelectionMode === "manual"
+                      ? "bg-[#d48a68] text-white"
+                      : "bg-white text-[#d48a68] border border-[#d48a68]"
+                      }`}
                   >
                     Add New
                   </button>
@@ -6913,24 +6976,24 @@ export default function Home() {
 
   const navItems: NavItem[] = currentUser?.isAdmin
     ? [
+      { id: 0, label: "Home", icon: <span aria-hidden>🏠</span> },
+      { id: 3, label: "Dashboard", icon: <span aria-hidden>🛠️</span> },
+      { id: 5, label: "Warehouse", icon: <span aria-hidden>📦</span> },
+      { id: 4, label: "Pickup", icon: <span aria-hidden>📥</span> },
+      { id: 6, label: "Deliver", icon: <span aria-hidden>🚚</span> },
+    ]
+    : currentUser?.isDeliveryStaff
+      ? [
         { id: 0, label: "Home", icon: <span aria-hidden>🏠</span> },
-        { id: 3, label: "Dashboard", icon: <span aria-hidden>🛠️</span> },
-        { id: 5, label: "Warehouse", icon: <span aria-hidden>📦</span> },
         { id: 4, label: "Pickup", icon: <span aria-hidden>📥</span> },
         { id: 6, label: "Deliver", icon: <span aria-hidden>🚚</span> },
       ]
-    : currentUser?.isDeliveryStaff
-      ? [
-          { id: 0, label: "Home", icon: <span aria-hidden>🏠</span> },
-          { id: 4, label: "Pickup", icon: <span aria-hidden>📥</span> },
-          { id: 6, label: "Deliver", icon: <span aria-hidden>🚚</span> },
-        ]
       : [
-          { id: 0, label: "Home", icon: <span aria-hidden>🏠</span> },
-          { id: 1, label: "Donate", icon: <span aria-hidden>💚</span> },
-          { id: 2, label: "Get meals", icon: <span aria-hidden>🍽️</span> },
-          { id: 7, label: "Status", icon: <span aria-hidden>📊</span> },
-        ];
+        { id: 0, label: "Home", icon: <span aria-hidden>🏠</span> },
+        { id: 1, label: "Donate", icon: <span aria-hidden>💚</span> },
+        { id: 2, label: "Get meals", icon: <span aria-hidden>🍽️</span> },
+        { id: 7, label: "Status", icon: <span aria-hidden>📊</span> },
+      ];
 
   const normalizedActiveTab = useMemo(() => {
     // Home page (0) is always accessible
