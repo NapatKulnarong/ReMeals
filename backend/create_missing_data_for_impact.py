@@ -18,7 +18,6 @@ django.setup()
 from donation.models import Donation
 from fooditem.models import FoodItem
 from restaurants.models import Restaurant
-from users.models import User
 from impactrecord.models import ImpactRecord
 
 print("=" * 70)
@@ -54,13 +53,6 @@ if not restaurant:
     sys.exit(1)
 print(f"  Using restaurant: {restaurant.restaurant_id}")
 
-# Get a user (for donation created_by)
-user = User.objects.first()
-if not user:
-    print("✗ No user found. Please load user fixtures first.")
-    sys.exit(1)
-print(f"  Using user: {user.user_id}")
-
 # Create donations as needed (group food items by donation)
 # We'll create one donation per 10 food items to keep it organized
 donations_created = 0
@@ -90,7 +82,6 @@ for i in range(0, len(missing_food_ids), batch_size):
         donation_id=donation_id,
         defaults={
             'restaurant': restaurant,
-            'created_by': user,
             'status': 'completed',
         }
     )

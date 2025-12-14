@@ -3,12 +3,11 @@ from rest_framework import status as drf_status, viewsets
 from rest_framework.response import Response
 import uuid
 
-from donation_request.models import DonationRequest
 from impactrecord.models import ImpactRecord
 from fooditem.models import FoodItem
 from .models import Delivery
 from .serializers import DeliverySerializer
-from users.models import Recipient
+from users.models import Donor, Recipient
 
 
 def _str_to_bool(value):
@@ -39,10 +38,19 @@ class DeliveryViewSet(viewsets.ModelViewSet):
         if is_driver and user_id:
             return qs.filter(user_id__user_id=user_id)
         if user_id:
-            donation_filter = Q(delivery_type="donation") & (
-                Q(donation_id__created_by__user_id=user_id)
-                | Q(donation_id__created_by__isnull=True)
+            donor_restaurant_ids = list(
+                Donor.objects.filter(user__user_id=user_id)
+                .values_list("restaurant_id__restaurant_id", flat=True)
+                .distinct()
             )
+            donation_filter = Q(delivery_type="donation")
+            if donor_restaurant_ids:
+                donation_filter &= Q(
+                    donation_id__restaurant__restaurant_id__in=donor_restaurant_ids
+                )
+            else:
+                donation_filter &= Q(pk__isnull=True)
+
             requested_communities = list(
                 Recipient.objects.filter(
                     user__user_id=user_id,

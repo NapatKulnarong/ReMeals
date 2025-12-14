@@ -31,16 +31,9 @@ if not restaurant:
 # Get or create a donation
 donation = Donation.objects.first()
 if not donation:
-    from users.models import User
-    user = User.objects.first()
-    if not user:
-        print("No user found. Please load user fixtures first.")
-        sys.exit(1)
-    
     donation = Donation.objects.create(
         donation_id="DON_TEST001",
         restaurant=restaurant,
-        created_by=user,
         status="completed"
     )
     print(f"Created test donation: {donation.donation_id}")
