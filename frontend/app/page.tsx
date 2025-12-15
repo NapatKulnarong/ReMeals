@@ -4796,8 +4796,19 @@ function ProfileModal({
   );
 }
 
+type ManageableItem = {
+  id: string;
+  type: "donation" | "request";
+  title: string;
+  subtitle: string;
+  createdAt: string;
+  status: "pending" | "accepted" | "declined";
+};
+
 function AdminDashboard({ currentUser }: { currentUser: LoggedUser }) {
   const [donations, setDonations] = useState<DonationApiRecord[]>([]);
+  const [requests, setRequests] = useState<DonationRequestApiRecord[]>([]);
+  const [requestStatuses, setRequestStatuses] = useState<Record<string, "pending" | "accepted" | "declined">>({});
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -4809,13 +4820,23 @@ function AdminDashboard({ currentUser }: { currentUser: LoggedUser }) {
       setLoading(true);
       setError(null);
       try {
-        const [donationData, restaurantData] = await Promise.all([
+        const [donationData, requestData, restaurantData] = await Promise.all([
           apiFetch<DonationApiRecord[]>("/donations/"),
+          apiFetch<DonationRequestApiRecord[]>("/donation-requests/", {
+            headers: buildAuthHeaders(currentUser),
+          }),
           apiFetch<Restaurant[]>("/restaurants/"),
         ]);
         if (!ignore) {
           setDonations(donationData);
+          setRequests(requestData);
           setRestaurants(restaurantData);
+          // Initialize request statuses as pending
+          const initialStatuses: Record<string, "pending" | "accepted" | "declined"> = {};
+          requestData.forEach((req) => {
+            initialStatuses[req.request_id] = "pending";
+          });
+          setRequestStatuses(initialStatuses);
         }
       } catch (err) {
         if (!ignore) {
@@ -4831,39 +4852,71 @@ function AdminDashboard({ currentUser }: { currentUser: LoggedUser }) {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [currentUser]);
 
   const restaurantName = (id: string) => {
     const match = restaurants.find((r) => r.restaurant_id === id);
     return match ? `${match.name}${match.branch_name ? ` (${match.branch_name})` : ""}` : id;
   };
 
-  const isCompleted = (status: DonationApiRecord["status"]) => status === "accepted";
+  // Convert donations and requests to manageable items
+  const manageableItems: ManageableItem[] = [
+    ...donations.map((donation) => ({
+      id: donation.donation_id,
+      type: "donation" as const,
+      title: restaurantName(donation.restaurant),
+      subtitle: `ID: ${donation.donation_id} • Created ${formatDisplayDate(donation.donated_at)}`,
+      createdAt: donation.donated_at,
+      status: donation.status,
+    })),
+    ...requests.map((request) => ({
+      id: request.request_id,
+      type: "request" as const,
+      title: request.title,
+      subtitle: `ID: ${request.request_id} • ${request.community_name} • Created ${formatDisplayDate(request.created_at)}`,
+      createdAt: request.created_at,
+      status: requestStatuses[request.request_id] || "pending",
+    })),
+  ];
 
-  const toggleStatus = async (
-    donationId: string,
-    nextStatus: DonationApiRecord["status"],
+  // Group items by status
+  const pendingItems = manageableItems.filter((item) => item.status === "pending");
+  const completedItems = manageableItems.filter((item) => item.status === "accepted");
+  const declinedItems = manageableItems.filter((item) => item.status === "declined");
+
+  const updateStatus = async (
+    itemId: string,
+    itemType: "donation" | "request",
+    nextStatus: "pending" | "accepted" | "declined",
   ) => {
-    setUpdatingId(donationId);
+    setUpdatingId(itemId);
     try {
-      await apiFetch(`/donations/${donationId}/`, {
-        method: "PATCH",
-        body: JSON.stringify({ status: nextStatus }),
-        headers: buildAuthHeaders(currentUser),
-      });
-      setDonations((prev) =>
-        prev.map((donation) =>
-          donation.donation_id === donationId ? { ...donation, status: nextStatus } : donation,
-        ),
-      );
+      if (itemType === "donation") {
+        await apiFetch(`/donations/${itemId}/`, {
+          method: "PATCH",
+          body: JSON.stringify({ status: nextStatus }),
+          headers: buildAuthHeaders(currentUser),
+        });
+        setDonations((prev) =>
+          prev.map((donation) =>
+            donation.donation_id === itemId ? { ...donation, status: nextStatus } : donation,
+          ),
+        );
+      } else {
+        // For requests, we only update local state since backend doesn't have status field
+        setRequestStatuses((prev) => ({
+          ...prev,
+          [itemId]: nextStatus,
+        }));
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to update donation status.");
+      setError(err instanceof Error ? err.message : "Unable to update status.");
     } finally {
       setUpdatingId(null);
     }
   };
 
-  const donationStatusPill = (status: DonationApiRecord["status"]) => {
+  const statusPill = (status: "pending" | "accepted" | "declined") => {
     if (status === "accepted") {
       return { text: "Completed", className: "bg-[#E6F7EE] text-[#1F4D36]" };
     }
@@ -4873,6 +4926,45 @@ function AdminDashboard({ currentUser }: { currentUser: LoggedUser }) {
     return { text: "Pending", className: "bg-[#FFF1E3] text-[#C46A24]" };
   };
 
+  const renderItem = (item: ManageableItem) => (
+    <div
+      key={`${item.type}-${item.id}`}
+      className="flex flex-col gap-2 rounded-2xl border border-[#F3C7A0] bg-white px-4 py-3"
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-gray-900">{item.title}</p>
+          <p className="text-xs text-gray-500 mt-1">{item.subtitle}</p>
+        </div>
+        <span
+          className={`rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap ${statusPill(item.status).className}`}
+        >
+          {statusPill(item.status).text}
+        </span>
+      </div>
+      {item.status === "pending" && (
+        <div className="flex gap-2 mt-2">
+          <button
+            type="button"
+            onClick={() => updateStatus(item.id, item.type, "accepted")}
+            disabled={updatingId === item.id}
+            className="flex-1 rounded-full border border-[#1F4D36] bg-[#E6F7EE] px-4 py-2 text-xs font-semibold text-[#1F4D36] transition hover:bg-[#D4F0E0] disabled:opacity-60"
+          >
+            Mark completed
+          </button>
+          <button
+            type="button"
+            onClick={() => updateStatus(item.id, item.type, "declined")}
+            disabled={updatingId === item.id}
+            className="flex-1 rounded-full border border-[#B42318] bg-[#FDECEA] px-4 py-2 text-xs font-semibold text-[#B42318] transition hover:bg-[#FCE0DC] disabled:opacity-60"
+          >
+            Mark declined
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       <div className="rounded-[28px] border border-[#F3C7A0] bg-[#FFF7EF] p-6 shadow-lg shadow-[#F2C08F]/30">
@@ -4881,57 +4973,72 @@ function AdminDashboard({ currentUser }: { currentUser: LoggedUser }) {
             <p className="text-xs font-semibold uppercase tracking-wide text-[#C46A24]">
               Admin console
             </p>
-            <h2 className="text-2xl font-semibold text-gray-900">Manage donations</h2>
+            <h2 className="text-2xl font-semibold text-gray-900">Manage donations & meal requests</h2>
             <p className="text-sm text-gray-600">
-              Mark donations as completed when pickup is finished to keep the queue tidy.
+              Mark items as completed or declined from the pending column to keep the queue tidy.
             </p>
           </div>
           <div className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow">
-            {donations.filter((d) => !isCompleted(d.status)).length} pending / {donations.length} total
+            {pendingItems.length} pending / {manageableItems.length} total
           </div>
         </div>
 
         {loading ? (
-          <p className="mt-4 text-sm text-gray-600">Loading donations...</p>
+          <p className="mt-4 text-sm text-gray-600">Loading donations and meal requests...</p>
         ) : error ? (
           <p className="mt-4 text-sm text-red-600">{error}</p>
         ) : (
-          <div className="mt-4 space-y-3">
-            {donations.map((donation) => (
-              <div
-                key={donation.donation_id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#F3C7A0] bg-white px-4 py-3"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">
-                    {restaurantName(donation.restaurant)}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    ID: {donation.donation_id} • Created {formatDisplayDate(donation.donated_at)}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${donationStatusPill(donation.status).className}`}
-                  >
-                    {donationStatusPill(donation.status).text}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      toggleStatus(
-                        donation.donation_id,
-                        isCompleted(donation.status) ? "pending" : "accepted",
-                      )
-                    }
-                    disabled={updatingId === donation.donation_id}
-                    className="rounded-full border border-[#F3C7A0] px-4 py-2 text-xs font-semibold text-[#8B4C1F] transition hover:bg-[#FFF1E3] disabled:opacity-60"
-                  >
-                    {isCompleted(donation.status) ? "Mark pending" : "Mark completed"}
-                  </button>
-                </div>
+          <div className="mt-6 grid grid-cols-3 gap-4">
+            {/* Pending Column */}
+            <div className="flex flex-col">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">Pending</h3>
+                <span className="rounded-full bg-[#FFF1E3] px-3 py-1 text-xs font-semibold text-[#C46A24]">
+                  {pendingItems.length}
+                </span>
               </div>
-            ))}
+              <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+                {pendingItems.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-8">No pending items</p>
+                ) : (
+                  pendingItems.map(renderItem)
+                )}
+              </div>
+            </div>
+
+            {/* Completed Column */}
+            <div className="flex flex-col">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">Completed</h3>
+                <span className="rounded-full bg-[#E6F7EE] px-3 py-1 text-xs font-semibold text-[#1F4D36]">
+                  {completedItems.length}
+                </span>
+              </div>
+              <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+                {completedItems.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-8">No completed items</p>
+                ) : (
+                  completedItems.map(renderItem)
+                )}
+              </div>
+            </div>
+
+            {/* Declined Column */}
+            <div className="flex flex-col">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">Declined</h3>
+                <span className="rounded-full bg-[#FDECEA] px-3 py-1 text-xs font-semibold text-[#B42318]">
+                  {declinedItems.length}
+                </span>
+              </div>
+              <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+                {declinedItems.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-8">No declined items</p>
+                ) : (
+                  declinedItems.map(renderItem)
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>
