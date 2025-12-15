@@ -93,36 +93,6 @@
   },
   {
     "model": "fooditem.fooditem",
-    "pk": "FOO0000007",
-    "fields": {
-      "name": "Grilled Chicken Salads",
-      "quantity": 28,
-      "unit": "bowl",
-      "expire_date": "2026-01-21",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000004",
-      "chain": "CHA0000003"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000008",
-    "fields": {
-      "name": "Baked Potato Boats",
-      "quantity": 20,
-      "unit": "tray",
-      "expire_date": "2026-01-22",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": true,
-      "donation": "DON0000004",
-      "chain": "CHA0000003"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
     "pk": "FOO0000009",
     "fields": {
       "name": "Hot Wings Party Pieces",
@@ -149,37 +119,6 @@
       "is_claimed": false,
       "is_distributed": true,
       "donation": "DON0000005",
-      "chain": "CHA0000001"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000011",
-    "fields": {
-      "name": "Rice Bowl Sets",
-      "quantity": 32,
-      "unit": "set",
-      "expire_date": "2026-01-25",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000006",
-      "chain": "CHA0000001"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000012",
-    "fields": {
-      "name": "Portuguese Egg Tarts",
-      "quantity": 48,
-      "unit": "piece",
-      "expire_date": "2026-01-26",
-      "category": "Vegan",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000006",
       "chain": "CHA0000001"
     }
   },
@@ -215,36 +154,6 @@
   },
   {
     "model": "fooditem.fooditem",
-    "pk": "FOO0000015",
-    "fields": {
-      "name": "Seafood Extravaganza Pizzas",
-      "quantity": 15,
-      "unit": "box",
-      "expire_date": "2026-01-29",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000008",
-      "chain": "CHA0000002"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000016",
-    "fields": {
-      "name": "Caesar Salad Kits",
-      "quantity": 30,
-      "unit": "kit",
-      "expire_date": "2026-01-30",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000008",
-      "chain": "CHA0000002"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
     "pk": "FOO0000017",
     "fields": {
       "name": "Salad Bar Bowls",
@@ -270,36 +179,6 @@
       "is_claimed": false,
       "is_distributed": true,
       "donation": "DON0000009",
-      "chain": "CHA0000003"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000019",
-    "fields": {
-      "name": "Grilled Salmon Portions",
-      "quantity": 24,
-      "unit": "portion",
-      "expire_date": "2026-02-02",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": true,
-      "donation": "DON0000010",
-      "chain": "CHA0000003"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000020",
-    "fields": {
-      "name": "Garlic Butter Bread Loaves",
-      "quantity": 36,
-      "unit": "loaf",
-      "expire_date": "2026-02-03",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000010",
       "chain": "CHA0000003"
     }
   },
@@ -331,801 +210,6 @@
       "is_distributed": false,
       "donation": "DON0000011",
       "chain": "CHA0000004"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000023",
-    "fields": {
-      "name": "Breakfast McMuffins",
-      "quantity": 30,
-      "unit": "set",
-      "expire_date": "2026-02-06",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000012",
-      "chain": "CHA0000004"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000024",
-    "fields": {
-      "name": "Orange Juice Bottles",
-      "quantity": 35,
-      "unit": "bottle",
-      "expire_date": "2026-02-07",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000012",
-      "chain": "CHA0000004"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000025",
-    "fields": {
-      "name": "Whopper Combo Sets",
-      "quantity": 26,
-      "unit": "set",
-      "expire_date": "2026-02-08",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000013",
-      "chain": "CHA0000005"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000026",
-    "fields": {
-      "name": "Chicken Fries Buckets",
-      "quantity": 30,
-      "unit": "bucket",
-      "expire_date": "2026-02-09",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000013",
-      "chain": "CHA0000005"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000027",
-    "fields": {
-      "name": "Onion Rings Trays",
-      "quantity": 18,
-      "unit": "tray",
-      "expire_date": "2026-02-10",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": true,
-      "donation": "DON0000013",
-      "chain": "CHA0000005"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000028",
-    "fields": {
-      "name": "Bacon King Burgers",
-      "quantity": 20,
-      "unit": "set",
-      "expire_date": "2026-02-11",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000014",
-      "chain": "CHA0000005"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000029",
-    "fields": {
-      "name": "Crispy Chicken Sandwich Packs",
-      "quantity": 24,
-      "unit": "pack",
-      "expire_date": "2026-02-12",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000014",
-      "chain": "CHA0000005"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000030",
-    "fields": {
-      "name": "Soft Serve Dessert Cups",
-      "quantity": 40,
-      "unit": "cup",
-      "expire_date": "2026-01-14",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000014",
-      "chain": "CHA0000005"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000031",
-    "fields": {
-      "name": "Cold Brew Coffee Cambros",
-      "quantity": 10,
-      "unit": "cambro",
-      "expire_date": "2026-02-14",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": true,
-      "donation": "DON0000015",
-      "chain": "CHA0000006"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000032",
-    "fields": {
-      "name": "Blueberry Muffin Trays",
-      "quantity": 16,
-      "unit": "tray",
-      "expire_date": "2026-02-15",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000015",
-      "chain": "CHA0000006"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000033",
-    "fields": {
-      "name": "Matcha Latte Bottles",
-      "quantity": 28,
-      "unit": "bottle",
-      "expire_date": "2026-02-16",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000016",
-      "chain": "CHA0000006"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000034",
-    "fields": {
-      "name": "Spinach Feta Wrap Boxes",
-      "quantity": 22,
-      "unit": "box",
-      "expire_date": "2026-02-17",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": true,
-      "donation": "DON0000016",
-      "chain": "CHA0000006"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000035",
-    "fields": {
-      "name": "Hot Pot Broth Containers",
-      "quantity": 15,
-      "unit": "container",
-      "expire_date": "2026-02-18",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000017",
-      "chain": "CHA0000007"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000036",
-    "fields": {
-      "name": "Fresh Vegetable Platters",
-      "quantity": 25,
-      "unit": "platter",
-      "expire_date": "2026-02-19",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000017",
-      "chain": "CHA0000007"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000037",
-    "fields": {
-      "name": "Premium Meat Platters",
-      "quantity": 18,
-      "unit": "platter",
-      "expire_date": "2026-02-20",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": true,
-      "donation": "DON0000017",
-      "chain": "CHA0000007"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000038",
-    "fields": {
-      "name": "Marinated Pork Grill Sets",
-      "quantity": 27,
-      "unit": "set",
-      "expire_date": "2026-02-21",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000018",
-      "chain": "CHA0000008"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000039",
-    "fields": {
-      "name": "Seafood Combo Platters",
-      "quantity": 20,
-      "unit": "platter",
-      "expire_date": "2026-02-22",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000018",
-      "chain": "CHA0000008"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000040",
-    "fields": {
-      "name": "Soy Garlic Wing Trays",
-      "quantity": 32,
-      "unit": "tray",
-      "expire_date": "2026-02-23",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000019",
-      "chain": "CHA0000010"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000041",
-    "fields": {
-      "name": "Hot Spicy Wing Trays",
-      "quantity": 28,
-      "unit": "tray",
-      "expire_date": "2026-02-24",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000019",
-      "chain": "CHA0000010"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000042",
-    "fields": {
-      "name": "Kimchi Side Dish Tubs",
-      "quantity": 40,
-      "unit": "tub",
-      "expire_date": "2026-01-14",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": true,
-      "donation": "DON0000019",
-      "chain": "CHA0000010"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000043",
-    "fields": {
-      "name": "Footlong Sandwich Packs",
-      "quantity": 24,
-      "unit": "pack",
-      "expire_date": "2026-02-26",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000020",
-      "chain": "CHA0000013"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000044",
-    "fields": {
-      "name": "Cookie Assortment Boxes",
-      "quantity": 30,
-      "unit": "box",
-      "expire_date": "2026-02-27",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000020",
-      "chain": "CHA0000013"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000045",
-    "fields": {
-      "name": "Crispy Chicken Party Buckets",
-      "quantity": 22,
-      "unit": "bucket",
-      "expire_date": "2026-02-28",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000021",
-      "chain": "CHA0000001"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000046",
-    "fields": {
-      "name": "Buttermilk Biscuit Packs",
-      "quantity": 40,
-      "unit": "pack",
-      "expire_date": "2026-03-01",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000021",
-      "chain": "CHA0000001"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000047",
-    "fields": {
-      "name": "Spicy Popcorn Chicken Cups",
-      "quantity": 36,
-      "unit": "cup",
-      "expire_date": "2026-03-02",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": true,
-      "donation": "DON0000021",
-      "chain": "CHA0000001"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000048",
-    "fields": {
-      "name": "Thai Seafood Pizza Slices",
-      "quantity": 48,
-      "unit": "slice",
-      "expire_date": "2026-03-03",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000022",
-      "chain": "CHA0000002"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000049",
-    "fields": {
-      "name": "Stuffed Crust Pizza Boxes",
-      "quantity": 20,
-      "unit": "box",
-      "expire_date": "2026-03-04",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000022",
-      "chain": "CHA0000002"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000050",
-    "fields": {
-      "name": "Garlic Bread Twist Bags",
-      "quantity": 30,
-      "unit": "bag",
-      "expire_date": "2026-03-05",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": true,
-      "donation": "DON0000022",
-      "chain": "CHA0000002"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000051",
-    "fields": {
-      "name": "Grilled Sirloin Portions",
-      "quantity": 26,
-      "unit": "portion",
-      "expire_date": "2026-03-06",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000023",
-      "chain": "CHA0000003"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000052",
-    "fields": {
-      "name": "Roasted Vegetable Medleys",
-      "quantity": 24,
-      "unit": "tray",
-      "expire_date": "2026-03-07",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000023",
-      "chain": "CHA0000003"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000053",
-    "fields": {
-      "name": "Baked Potato Soup Tubs",
-      "quantity": 18,
-      "unit": "tub",
-      "expire_date": "2026-03-08",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": true,
-      "donation": "DON0000023",
-      "chain": "CHA0000003"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000054",
-    "fields": {
-      "name": "Big Mac Combo Kits",
-      "quantity": 34,
-      "unit": "kit",
-      "expire_date": "2026-03-09",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000024",
-      "chain": "CHA0000004"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000055",
-    "fields": {
-      "name": "Apple Slices Snack Packs",
-      "quantity": 42,
-      "unit": "pack",
-      "expire_date": "2026-03-10",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000024",
-      "chain": "CHA0000004"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000056",
-    "fields": {
-      "name": "Chocolate Sundae Cups",
-      "quantity": 28,
-      "unit": "cup",
-      "expire_date": "2026-03-11",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": true,
-      "donation": "DON0000024",
-      "chain": "CHA0000004"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000057",
-    "fields": {
-      "name": "BBQ Bacon King Sets",
-      "quantity": 25,
-      "unit": "set",
-      "expire_date": "2026-03-12",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000025",
-      "chain": "CHA0000005"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000058",
-    "fields": {
-      "name": "French Toast Sticks Boxes",
-      "quantity": 30,
-      "unit": "box",
-      "expire_date": "2026-03-13",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": true,
-      "donation": "DON0000025",
-      "chain": "CHA0000005"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000059",
-    "fields": {
-      "name": "Frozen Cola Mix Bags",
-      "quantity": 16,
-      "unit": "bag",
-      "expire_date": "2026-03-14",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000025",
-      "chain": "CHA0000005"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000060",
-    "fields": {
-      "name": "Loaded Onion Ring Buckets",
-      "quantity": 24,
-      "unit": "bucket",
-      "expire_date": "2026-03-15",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000025",
-      "chain": "CHA0000005"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000061",
-    "fields": {
-      "name": "King Fusion Dessert Packs",
-      "quantity": 18,
-      "unit": "pack",
-      "expire_date": "2026-03-16",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": true,
-      "donation": "DON0000025",
-      "chain": "CHA0000005"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000062",
-    "fields": {
-      "name": "Mocha Shake Syrup Bags",
-      "quantity": 14,
-      "unit": "bag",
-      "expire_date": "2026-03-17",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000025",
-      "chain": "CHA0000005"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000063",
-    "fields": {
-      "name": "Nitro Cold Brew Kegs",
-      "quantity": 6,
-      "unit": "keg",
-      "expire_date": "2026-03-18",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": true,
-      "donation": "DON0000026",
-      "chain": "CHA0000006"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000064",
-    "fields": {
-      "name": "Vegan Sandwich Wrap Cases",
-      "quantity": 18,
-      "unit": "case",
-      "expire_date": "2026-03-19",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000026",
-      "chain": "CHA0000006"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000065",
-    "fields": {
-      "name": "Chocolate Croissant Trays",
-      "quantity": 20,
-      "unit": "tray",
-      "expire_date": "2026-03-20",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": true,
-      "donation": "DON0000026",
-      "chain": "CHA0000006"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000066",
-    "fields": {
-      "name": "Roasted Duck Slice Platters",
-      "quantity": 22,
-      "unit": "platter",
-      "expire_date": "2026-03-21",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000027",
-      "chain": "CHA0000007"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000067",
-    "fields": {
-      "name": "Fresh Noodle Bundles",
-      "quantity": 35,
-      "unit": "bundle",
-      "expire_date": "2026-03-22",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000027",
-      "chain": "CHA0000007"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000068",
-    "fields": {
-      "name": "Herbal Broth Sachet Packs",
-      "quantity": 40,
-      "unit": "pack",
-      "expire_date": "2026-03-23",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": true,
-      "donation": "DON0000027",
-      "chain": "CHA0000007"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000069",
-    "fields": {
-      "name": "Beef Slice Boats",
-      "quantity": 28,
-      "unit": "boat",
-      "expire_date": "2026-03-24",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000028",
-      "chain": "CHA0000008"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000070",
-    "fields": {
-      "name": "Vegetable Basket Refills",
-      "quantity": 32,
-      "unit": "basket",
-      "expire_date": "2026-03-25",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": true,
-      "donation": "DON0000028",
-      "chain": "CHA0000008"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000071",
-    "fields": {
-      "name": "Signature Sauce Gallons",
-      "quantity": 12,
-      "unit": "gallon",
-      "expire_date": "2026-03-26",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": false,
-      "donation": "DON0000028",
-      "chain": "CHA0000008"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000072",
-    "fields": {
-      "name": "Honey Garlic Drumette Trays",
-      "quantity": 30,
-      "unit": "tray",
-      "expire_date": "2026-03-27",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000029",
-      "chain": "CHA0000010"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000073",
-    "fields": {
-      "name": "Pickled Radish Packs",
-      "quantity": 45,
-      "unit": "pack",
-      "expire_date": "2026-03-28",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": true,
-      "donation": "DON0000029",
-      "chain": "CHA0000010"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000074",
-    "fields": {
-      "name": "Whole Wheat Bread Cases",
-      "quantity": 26,
-      "unit": "case",
-      "expire_date": "2026-03-29",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000030",
-      "chain": "CHA0000013"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000075",
-    "fields": {
-      "name": "Chopped Veggie Prep Tubs",
-      "quantity": 20,
-      "unit": "tub",
-      "expire_date": "2026-03-30",
-      "is_expired": false,
-      "is_claimed": true,
-      "is_distributed": true,
-      "donation": "DON0000030",
-      "chain": "CHA0000013"
     }
   },
   {
@@ -1671,54 +755,6 @@
   },
   {
     "model": "fooditem.fooditem",
-    "pk": "FOO0000112",
-    "fields": {
-      "name": "Beef Bowls",
-      "quantity": 30,
-      "unit": "bowl",
-      "expire_date": "2026-01-21",
-      "category": "Halal",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000050",
-      "chain": "CHA0000015"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000113",
-    "fields": {
-      "name": "Sushi Platters",
-      "quantity": 20,
-      "unit": "platter",
-      "expire_date": "2026-01-22",
-      "category": "Seafood",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000051",
-      "chain": "CHA0000016"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000114",
-    "fields": {
-      "name": "Ramen Bowls",
-      "quantity": 28,
-      "unit": "bowl",
-      "expire_date": "2026-01-23",
-      "category": "Vegetarian",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000052",
-      "chain": "CHA0000017"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
     "pk": "FOO0000115",
     "fields": {
       "name": "Shabu Shabu Sets",
@@ -1751,54 +787,6 @@
   },
   {
     "model": "fooditem.fooditem",
-    "pk": "FOO0000117",
-    "fields": {
-      "name": "Chicken Teriyaki",
-      "quantity": 32,
-      "unit": "serving",
-      "expire_date": "2026-01-26",
-      "category": "Meat",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000050",
-      "chain": "CHA0000015"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000118",
-    "fields": {
-      "name": "Tempura Sets",
-      "quantity": 18,
-      "unit": "set",
-      "expire_date": "2026-01-27",
-      "category": "Seafood",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000051",
-      "chain": "CHA0000016"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000119",
-    "fields": {
-      "name": "Udon Noodles",
-      "quantity": 26,
-      "unit": "bowl",
-      "expire_date": "2026-01-28",
-      "category": "Vegetarian",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000052",
-      "chain": "CHA0000017"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
     "pk": "FOO0000120",
     "fields": {
       "name": "Hot Pot Sets",
@@ -1811,22 +799,6 @@
       "is_distributed": false,
       "donation": "DON0000053",
       "chain": "CHA0000018"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000121",
-    "fields": {
-      "name": "Waffle Cones",
-      "quantity": 40,
-      "unit": "cone",
-      "expire_date": "2026-01-30",
-      "category": "Dessert",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000054",
-      "chain": "CHA0000014"
     }
   },
   {
@@ -1847,54 +819,6 @@
   },
   {
     "model": "fooditem.fooditem",
-    "pk": "FOO0000123",
-    "fields": {
-      "name": "Sashimi Platters",
-      "quantity": 16,
-      "unit": "platter",
-      "expire_date": "2026-02-01",
-      "category": "Seafood",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000056",
-      "chain": "CHA0000016"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000124",
-    "fields": {
-      "name": "Miso Soup",
-      "quantity": 38,
-      "unit": "bowl",
-      "expire_date": "2026-02-02",
-      "category": "Vegetarian",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000057",
-      "chain": "CHA0000017"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000125",
-    "fields": {
-      "name": "Sukiyaki Sets",
-      "quantity": 21,
-      "unit": "set",
-      "expire_date": "2026-02-03",
-      "category": "Meat",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000058",
-      "chain": "CHA0000018"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
     "pk": "FOO0000126",
     "fields": {
       "name": "Banana Splits",
@@ -1911,54 +835,6 @@
   },
   {
     "model": "fooditem.fooditem",
-    "pk": "FOO0000127",
-    "fields": {
-      "name": "Curry Rice Bowls",
-      "quantity": 33,
-      "unit": "bowl",
-      "expire_date": "2026-02-05",
-      "category": "Halal",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000050",
-      "chain": "CHA0000015"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000128",
-    "fields": {
-      "name": "Bento Boxes",
-      "quantity": 19,
-      "unit": "box",
-      "expire_date": "2026-02-06",
-      "category": "Seafood",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000051",
-      "chain": "CHA0000016"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
-    "pk": "FOO0000129",
-    "fields": {
-      "name": "Soba Noodles",
-      "quantity": 31,
-      "unit": "bowl",
-      "expire_date": "2026-02-07",
-      "category": "Vegetarian",
-      "is_expired": false,
-      "is_claimed": false,
-      "is_distributed": false,
-      "donation": "DON0000052",
-      "chain": "CHA0000017"
-    }
-  },
-  {
-    "model": "fooditem.fooditem",
     "pk": "FOO0000130",
     "fields": {
       "name": "Yakiniku Sets",
@@ -1971,6 +847,86 @@
       "is_distributed": false,
       "donation": "DON0000053",
       "chain": "CHA0000018"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000131",
+    "fields": {
+      "name": "Fried Chicken",
+      "quantity": 25,
+      "unit": "piece",
+      "expire_date": "2025-01-26",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000063",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000132",
+    "fields": {
+      "name": "Chicken Wings",
+      "quantity": 30,
+      "unit": "piece",
+      "expire_date": "2025-01-27",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000062",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000133",
+    "fields": {
+      "name": "French Fries",
+      "quantity": 20,
+      "unit": "portion",
+      "expire_date": "2025-01-28",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000061",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000134",
+    "fields": {
+      "name": "Coleslaw",
+      "quantity": 15,
+      "unit": "portion",
+      "expire_date": "2025-01-29",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000060",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000135",
+    "fields": {
+      "name": "Chicken Burger",
+      "quantity": 18,
+      "unit": "piece",
+      "expire_date": "2025-01-30",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000059",
+      "chain": "CHA0000001"
     }
   }
 ]

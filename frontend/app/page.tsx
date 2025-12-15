@@ -4049,8 +4049,9 @@ function DonationSection(props: {
   const filteredDonations = useMemo(() => {
     let filtered = [...unassignedDonations];
 
-    // Filter by "My restaurant only" toggle
-    if (myRestaurantOnly && currentUser?.restaurantId) {
+    // IMPORTANT: Always filter by current user's restaurant
+    // Each donor should only see donations from their own restaurant
+    if (currentUser?.restaurantId) {
       filtered = filtered.filter(
         (donation) => donation.restaurantId === currentUser.restaurantId
       );
@@ -4081,7 +4082,7 @@ function DonationSection(props: {
     }
 
     return filtered;
-  }, [unassignedDonations, searchQuery, myRestaurantOnly, currentUser?.restaurantId]);
+  }, [unassignedDonations, searchQuery, currentUser?.restaurantId]);
 
   const handleEdit = (donation: DonationRecord) => {
     if (!canManageDonation(donation)) {
@@ -4443,9 +4444,9 @@ function DonationSection(props: {
             <h3 className="text-2xl font-semibold text-gray-800">Donation log</h3>
           </div>
           <span className="text-xs font-semibold text-gray-500">
-            {searchQuery || myRestaurantOnly
+            {searchQuery
               ? `${filteredDonations.length}/${unassignedDonations.length} total`
-              : `${unassignedDonations.length} total`}
+              : `${filteredDonations.length} total`}
           </span>
         </div>
 
@@ -4497,20 +4498,6 @@ function DonationSection(props: {
             )}
           </div>
 
-          {/* My Restaurant Only Toggle */}
-          {currentUser?.restaurantId && (
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={myRestaurantOnly}
-                onChange={(e) => setMyRestaurantOnly(e.target.checked)}
-                className="h-4 w-4 rounded border-[#D7DCC7] text-[#7ba061] focus:ring-2 focus:ring-[#7ba061]/20"
-              />
-              <span className="text-sm font-medium text-gray-700">
-                My restaurant only
-              </span>
-            </label>
-          )}
         </div>
 
         {currentUser && !currentUser.isAdmin && (
@@ -4532,7 +4519,7 @@ function DonationSection(props: {
             </p>
           ) : filteredDonations.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-gray-300 bg-white/70 p-6 text-sm text-gray-500">
-              {searchQuery || myRestaurantOnly
+              {searchQuery
                 ? "No donations match your search criteria."
                 : "Once you save a donation, it shows up here for editing or delivery planning."}
             </p>

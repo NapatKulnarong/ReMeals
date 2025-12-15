@@ -73,23 +73,6 @@
   },
   {
     "model": "delivery.delivery",
-    "pk": "DLV0000005",
-    "fields": {
-      "delivery_type": "donation",
-      "pickup_time": "2025-01-08T10:30:00Z",
-      "dropoff_time": "2025-01-08T12:15:00Z",
-      "pickup_location_type": "restaurant",
-      "dropoff_location_type": "warehouse",
-      "status": "pending",
-      "notes": "Breakfast surplus pickup - awaiting confirmation",
-      "warehouse_id": "WAH0000002",
-      "user_id": "DEL0000003",
-      "donation_id": "DON0000004",
-      "community_id": "COM0000002"
-    }
-  },
-  {
-    "model": "delivery.delivery",
     "pk": "DLV0000006",
     "fields": {
       "delivery_type": "distribution",
@@ -109,42 +92,6 @@
   },
   {
     "model": "delivery.delivery",
-    "pk": "DLV0000007",
-    "fields": {
-      "delivery_type": "donation",
-      "pickup_time": "2025-01-09T12:15:00Z",
-      "dropoff_time": "2025-01-09T13:35:00Z",
-      "pickup_location_type": "restaurant",
-      "dropoff_location_type": "warehouse",
-      "status": "delivered",
-      "notes": "Hotel buffet surplus",
-      "warehouse_id": "WAH0000004",
-      "user_id": "DEL0000001",
-      "donation_id": "DON0000006",
-      "community_id": "COM0000005"
-    }
-  },
-  {
-    "model": "delivery.delivery",
-    "pk": "DLV0000008",
-    "fields": {
-      "delivery_type": "distribution",
-      "pickup_time": "2025-01-09T17:00:00Z",
-      "dropoff_time": "2025-01-09T19:15:00Z",
-      "pickup_location_type": "warehouse",
-      "dropoff_location_type": "community",
-      "status": "delivered",
-      "notes": "Night shelter distribution",
-      "warehouse_id": "WAH0000004",
-      "user_id": "DEL0000005",
-      "donation_id": "DON0000006",
-      "community_id": "COM0000001",
-      "food_item": "FOO0000007",
-      "delivery_quantity": "20 bowl"
-    }
-  },
-  {
-    "model": "delivery.delivery",
     "pk": "DLV0000009",
     "fields": {
       "delivery_type": "donation",
@@ -158,25 +105,6 @@
       "user_id": "DEL0000003",
       "donation_id": "DON0000007",
       "community_id": "COM0000007"
-    }
-  },
-  {
-    "model": "delivery.delivery",
-    "pk": "DLV0000010",
-    "fields": {
-      "delivery_type": "distribution",
-      "pickup_time": "2025-01-10T13:30:00Z",
-      "dropoff_time": "2025-01-10T16:15:00Z",
-      "pickup_location_type": "warehouse",
-      "dropoff_location_type": "community",
-      "status": "delivered",
-      "notes": "Heavy traffic on highway",
-      "warehouse_id": "WAH0000006",
-      "user_id": "DEL0000006",
-      "donation_id": "DON0000008",
-      "community_id": "COM0000009",
-      "food_item": "FOO0000009",
-      "delivery_quantity": "10 piece"
     }
   },
   {
@@ -211,25 +139,8 @@
       "user_id": "DEL0000005",
       "donation_id": "DON0000009",
       "community_id": "COM0000008",
-      "food_item": "FOO0000011",
+      "food_item": null,
       "delivery_quantity": "25 box"
-    }
-  },
-  {
-    "model": "delivery.delivery",
-    "pk": "DLV0000013",
-    "fields": {
-      "delivery_type": "donation",
-      "pickup_time": "2025-01-12T10:00:00Z",
-      "dropoff_time": "2025-01-12T11:30:00Z",
-      "pickup_location_type": "restaurant",
-      "dropoff_location_type": "warehouse",
-      "status": "pending",
-      "notes": "Scheduled weekend pickup - confirmed with restaurant",
-      "warehouse_id": "WAH0000006",
-      "user_id": "DEL0000005",
-      "donation_id": "DON0000010",
-      "community_id": "COM0000022"
     }
   },
   {
@@ -249,25 +160,6 @@
       "community_id": "COM0000030",
       "food_item": "FOO0000013",
       "delivery_quantity": "18 kg"
-    }
-  },
-  {
-    "model": "delivery.delivery",
-    "pk": "DLV0000015",
-    "fields": {
-      "delivery_type": "distribution",
-      "pickup_time": "2025-01-13T08:00:00Z",
-      "dropoff_time": "2025-01-13T10:20:00Z",
-      "pickup_location_type": "warehouse",
-      "dropoff_location_type": "community",
-      "status": "delivered",
-      "notes": "Morning delivery for elderly community",
-      "warehouse_id": "WAH0000001",
-      "user_id": "DEL0000001",
-      "donation_id": "DON0000012",
-      "community_id": "COM0000001",
-      "food_item": "FOO0000002",
-      "delivery_quantity": "30 box"
     }
   },
   {
@@ -306,23 +198,6 @@
   },
   {
     "model": "delivery.delivery",
-    "pk": "DLV0000018",
-    "fields": {
-      "delivery_type": "donation",
-      "pickup_time": "2025-01-04T12:30:00Z",
-      "dropoff_time": "2025-01-04T10:15:00Z",
-      "pickup_location_type": "restaurant",
-      "dropoff_location_type": "warehouse",
-      "status": "delivered",
-      "notes": "Seeded donation drop-off",
-      "warehouse_id": "WAH0000001",
-      "user_id": "DEL0000001",
-      "donation_id": "DON0000008",
-      "community_id": "COM0000009"
-    }
-  },
-  {
-    "model": "delivery.delivery",
     "pk": "DLV0000019",
     "fields": {
       "delivery_type": "donation",
@@ -336,23 +211,6 @@
       "user_id": "DEL0000005",
       "donation_id": "DON0000011",
       "community_id": "COM0000008"
-    }
-  },
-  {
-    "model": "delivery.delivery",
-    "pk": "DLV0000020",
-    "fields": {
-      "delivery_type": "donation",
-      "pickup_time": "2025-01-04T12:30:00Z",
-      "dropoff_time": "2025-01-04T10:15:00Z",
-      "pickup_location_type": "restaurant",
-      "dropoff_location_type": "warehouse",
-      "status": "delivered",
-      "notes": "Seeded donation drop-off",
-      "warehouse_id": "WAH0000001",
-      "user_id": "DEL0000005",
-      "donation_id": "DON0000012",
-      "community_id": "COM0000001"
     }
   },
   {
@@ -1073,23 +931,6 @@
   },
   {
     "model": "delivery.delivery",
-    "pk": "DLV0000063",
-    "fields": {
-      "delivery_type": "donation",
-      "pickup_time": "2025-01-18T10:30:00Z",
-      "dropoff_time": "2025-01-18T12:30:00Z",
-      "pickup_location_type": "restaurant",
-      "dropoff_location_type": "warehouse",
-      "status": "pending",
-      "notes": "Pickup from Yoshinoya Terminal 21",
-      "warehouse_id": "WAH0000014",
-      "user_id": "DEL0000009",
-      "donation_id": "DON0000051",
-      "community_id": null
-    }
-  },
-  {
-    "model": "delivery.delivery",
     "pk": "DLV0000064",
     "fields": {
       "delivery_type": "distribution",
@@ -1103,7 +944,7 @@
       "user_id": "DEL0000010",
       "donation_id": null,
       "community_id": "COM0000032",
-      "food_item": "FOO0000112",
+      "food_item": null,
       "delivery_quantity": "25 bowl"
     }
   },
@@ -1175,25 +1016,8 @@
       "user_id": "DEL0000010",
       "donation_id": null,
       "community_id": "COM0000034",
-      "food_item": "FOO0000118",
+      "food_item": null,
       "delivery_quantity": "15 set"
-    }
-  },
-  {
-    "model": "delivery.delivery",
-    "pk": "DLV0000069",
-    "fields": {
-      "delivery_type": "donation",
-      "pickup_time": "2025-01-24T10:00:00Z",
-      "dropoff_time": "2025-01-24T12:00:00Z",
-      "pickup_location_type": "restaurant",
-      "dropoff_location_type": "warehouse",
-      "status": "delivered",
-      "notes": "Pickup from Shabushi Seacon Square",
-      "warehouse_id": "WAH0000014",
-      "user_id": "DEL0000007",
-      "donation_id": "DON0000057",
-      "community_id": null
     }
   },
   {

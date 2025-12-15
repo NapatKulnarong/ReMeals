@@ -19,7 +19,7 @@
     "pk": 2,
     "fields": {
       "user": "DON0000002",
-      "restaurant_id": "RES0000001"
+      "restaurant_id": "RES0000008"
     }
   },
   {
@@ -35,7 +35,7 @@
     "pk": 4,
     "fields": {
       "user": "DON0000004",
-      "restaurant_id": "RES0000002"
+      "restaurant_id": "RES0000009"
     }
   },
   {
@@ -51,7 +51,7 @@
     "pk": 6,
     "fields": {
       "user": "DON0000006",
-      "restaurant_id": "RES0000003"
+      "restaurant_id": "RES0000010"
     }
   },
   {
@@ -75,7 +75,7 @@
     "pk": 9,
     "fields": {
       "user": "DON0000009",
-      "restaurant_id": "RES0000005"
+      "restaurant_id": "RES0000011"
     }
   },
   {
@@ -91,7 +91,7 @@
     "pk": 11,
     "fields": {
       "user": "DON0000011",
-      "restaurant_id": "RES0000006"
+      "restaurant_id": "RES0000012"
     }
   },
   {
