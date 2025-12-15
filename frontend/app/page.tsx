@@ -5716,12 +5716,25 @@ function ProfileModal({
   );
 }
 
+type ManageableItem = {
+  id: string;
+  type: "donation" | "request";
+  title: string;
+  subtitle: string;
+  createdAt: string;
+  status: "pending" | "accepted" | "declined";
+};
+
 function AdminDashboard({ currentUser }: { currentUser: LoggedUser }) {
   const [donations, setDonations] = useState<DonationApiRecord[]>([]);
+  const [requests, setRequests] = useState<DonationRequestApiRecord[]>([]);
+  const [requestStatuses, setRequestStatuses] = useState<Record<string, "pending" | "accepted" | "declined">>({});
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [filterType, setFilterType] = useState<"all" | "donation" | "request">("all");
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "az" | "za">("newest");
 
   useEffect(() => {
     let ignore = false;
@@ -5729,13 +5742,23 @@ function AdminDashboard({ currentUser }: { currentUser: LoggedUser }) {
       setLoading(true);
       setError(null);
       try {
-        const [donationData, restaurantData] = await Promise.all([
+        const [donationData, requestData, restaurantData] = await Promise.all([
           apiFetch<DonationApiRecord[]>("/donations/"),
+          apiFetch<DonationRequestApiRecord[]>("/donation-requests/", {
+            headers: buildAuthHeaders(currentUser),
+          }),
           apiFetch<Restaurant[]>("/restaurants/"),
         ]);
         if (!ignore) {
           setDonations(donationData);
+          setRequests(requestData);
           setRestaurants(restaurantData);
+          // Initialize request statuses as pending
+          const initialStatuses: Record<string, "pending" | "accepted" | "declined"> = {};
+          requestData.forEach((req) => {
+            initialStatuses[req.request_id] = "pending";
+          });
+          setRequestStatuses(initialStatuses);
         }
       } catch (err) {
         if (!ignore) {
@@ -5751,39 +5774,100 @@ function AdminDashboard({ currentUser }: { currentUser: LoggedUser }) {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [currentUser]);
 
   const restaurantName = (id: string) => {
     const match = restaurants.find((r) => r.restaurant_id === id);
     return match ? `${match.name}${match.branch_name ? ` (${match.branch_name})` : ""}` : id;
   };
 
-  const isCompleted = (status: DonationApiRecord["status"]) => status === "accepted";
+  // Convert donations and requests to manageable items
+  const manageableItems: ManageableItem[] = [
+    ...donations.map((donation) => ({
+      id: donation.donation_id,
+      type: "donation" as const,
+      title: restaurantName(donation.restaurant),
+      subtitle: `ID: ${donation.donation_id}`,
+      createdAt: donation.donated_at,
+      status: donation.status,
+    })),
+    ...requests.map((request) => ({
+      id: request.request_id,
+      type: "request" as const,
+      title: request.title,
+      subtitle: `ID: ${request.request_id} • ${request.community_name}`,
+      createdAt: request.created_at,
+      status: requestStatuses[request.request_id] || "pending",
+    })),
+  ];
 
-  const toggleStatus = async (
-    donationId: string,
-    nextStatus: DonationApiRecord["status"],
+  // Apply type filter
+  const filteredItems = manageableItems.filter((item) => {
+    if (filterType === "all") return true;
+    return item.type === filterType;
+  });
+
+  // Sort function based on selected order
+  const sortItems = (a: ManageableItem, b: ManageableItem) => {
+    if (sortOrder === "newest") {
+      const aTime = new Date(a.createdAt).getTime();
+      const bTime = new Date(b.createdAt).getTime();
+      return bTime - aTime; // Newest first
+    } else if (sortOrder === "oldest") {
+      const aTime = new Date(a.createdAt).getTime();
+      const bTime = new Date(b.createdAt).getTime();
+      return aTime - bTime; // Oldest first
+    } else if (sortOrder === "az") {
+      return a.title.localeCompare(b.title); // A-Z
+    } else {
+      return b.title.localeCompare(a.title); // Z-A
+    }
+  };
+
+  // Group items by status and sort
+  const pendingItems = filteredItems
+    .filter((item) => item.status === "pending")
+    .sort(sortItems);
+  const completedItems = filteredItems
+    .filter((item) => item.status === "accepted")
+    .sort(sortItems);
+  const declinedItems = filteredItems
+    .filter((item) => item.status === "declined")
+    .sort(sortItems);
+
+  const updateStatus = async (
+    itemId: string,
+    itemType: "donation" | "request",
+    nextStatus: "pending" | "accepted" | "declined",
   ) => {
-    setUpdatingId(donationId);
+    setUpdatingId(itemId);
     try {
-      await apiFetch(`/donations/${donationId}/`, {
-        method: "PATCH",
-        body: JSON.stringify({ status: nextStatus }),
-        headers: buildAuthHeaders(currentUser),
-      });
-      setDonations((prev) =>
-        prev.map((donation) =>
-          donation.donation_id === donationId ? { ...donation, status: nextStatus } : donation,
-        ),
-      );
+      if (itemType === "donation") {
+        await apiFetch(`/donations/${itemId}/`, {
+          method: "PATCH",
+          body: JSON.stringify({ status: nextStatus }),
+          headers: buildAuthHeaders(currentUser),
+        });
+        setDonations((prev) =>
+          prev.map((donation) =>
+            donation.donation_id === itemId ? { ...donation, status: nextStatus } : donation,
+          ),
+        );
+      } else {
+        // For requests, we only update local state since backend doesn't have status field
+        setRequestStatuses((prev) => ({
+          ...prev,
+          [itemId]: nextStatus,
+        }));
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to update donation status.");
+      setError(err instanceof Error ? err.message : "Unable to update status.");
     } finally {
       setUpdatingId(null);
     }
   };
 
-  const donationStatusPill = (status: DonationApiRecord["status"]) => {
+  const statusPill = (status: "pending" | "accepted" | "declined") => {
     if (status === "accepted") {
       return { text: "Completed", className: "bg-[#E6F7EE] text-[#1F4D36]" };
     }
@@ -5793,67 +5877,155 @@ function AdminDashboard({ currentUser }: { currentUser: LoggedUser }) {
     return { text: "Pending", className: "bg-[#FFF1E3] text-[#C46A24]" };
   };
 
+  const renderItem = (item: ManageableItem) => (
+    <div
+      key={`${item.type}-${item.id}`}
+      className="flex flex-col gap-2 rounded-xl border border-white/50 bg-white/70 backdrop-blur-sm px-4 py-3 shadow-sm"
+    >
+      <div>
+        <p className="text-sm font-semibold text-gray-900">{item.title}</p>
+        <p className="text-xs text-gray-500 mt-1">{item.subtitle}</p>
+        <p className="text-xs font-semibold text-gray-700 mt-2 pt-1.5 border-t border-gray-200/50">
+          Created: {formatDisplayDate(item.createdAt)}
+        </p>
+      </div>
+      {item.status === "pending" && (
+        <div className="flex gap-2 mt-2">
+          <button
+            type="button"
+            onClick={() => updateStatus(item.id, item.type, "accepted")}
+            disabled={updatingId === item.id}
+            className="flex-1 rounded-full border border-[#1F4D36] bg-[#E6F7EE] px-4 py-2 text-xs font-semibold text-[#1F4D36] transition hover:bg-[#D4F0E0] disabled:opacity-60"
+          >
+            Complete
+          </button>
+          <button
+            type="button"
+            onClick={() => updateStatus(item.id, item.type, "declined")}
+            disabled={updatingId === item.id}
+            className="flex-1 rounded-full border border-[#B42318] bg-[#FDECEA] px-4 py-2 text-xs font-semibold text-[#B42318] transition hover:bg-[#FCE0DC] disabled:opacity-60"
+          >
+            Decline
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <p className="text-sm text-gray-600">Loading donations and meal requests...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <p className="text-sm text-red-600">{error}</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
-      <div className="rounded-[28px] border border-[#F3C7A0] bg-[#FFF7EF] p-6 shadow-lg shadow-[#F2C08F]/30">
-        <div className="flex items-center justify-between">
+    <div className="flex flex-col h-full">
+      <div className="flex-shrink-0 mb-4 flex items-start justify-between gap-4">
+        <div className="flex-1">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#C46A24] mb-2">
+            Admin console
+          </p>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-1">Manage donations & meal requests</h2>
+          <p className="text-sm text-gray-600">
+            Mark items as completed or declined from the pending column to keep the queue tidy.
+          </p>
+        </div>
+        <div className="flex-shrink-0 flex gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-[#C46A24]">
-              Admin console
-            </p>
-            <h2 className="text-2xl font-semibold text-gray-900">Manage donations</h2>
-            <p className="text-sm text-gray-600">
-              Mark donations as completed when pickup is finished to keep the queue tidy.
-            </p>
+            <label htmlFor="filter-type" className="block text-xs font-semibold text-gray-700 mb-1">
+              Filter
+            </label>
+            <select
+              id="filter-type"
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value as "all" | "donation" | "request")}
+              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 shadow-sm transition hover:border-gray-400 focus:border-[#C46A24] focus:outline-none focus:ring-2 focus:ring-[#C46A24]/20"
+            >
+              <option value="all">All Items</option>
+              <option value="donation">Donations Only</option>
+              <option value="request">Meal Requests Only</option>
+            </select>
           </div>
-          <div className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow">
-            {donations.filter((d) => !isCompleted(d.status)).length} pending / {donations.length} total
+          <div>
+            <label htmlFor="sort-order" className="block text-xs font-semibold text-gray-700 mb-1">
+              Sort
+            </label>
+            <select
+              id="sort-order"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value as "newest" | "oldest" | "az" | "za")}
+              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 shadow-sm transition hover:border-gray-400 focus:border-[#C46A24] focus:outline-none focus:ring-2 focus:ring-[#C46A24]/20"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="az">A-Z</option>
+              <option value="za">Z-A</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 grid grid-cols-3 gap-4 min-h-0">
+        {/* Pending Column */}
+        <div className="flex flex-col rounded-2xl border border-[#F3C7A0] bg-[#FFF7EF] p-4 shadow-md min-h-0">
+          <div className="mb-4 flex items-center justify-between flex-shrink-0">
+            <h3 className="text-lg font-semibold text-gray-900">Pending</h3>
+            <span className="rounded-full bg-[#FFF1E3] px-3 py-1 text-xs font-semibold text-[#C46A24]">
+              {pendingItems.length}
+            </span>
+          </div>
+          <div className="flex-1 space-y-3 overflow-y-auto pr-2 min-h-0">
+            {pendingItems.length === 0 ? (
+              <p className="text-sm text-gray-500 text-center py-8">No pending items</p>
+            ) : (
+              pendingItems.map(renderItem)
+            )}
           </div>
         </div>
 
-        {loading ? (
-          <p className="mt-4 text-sm text-gray-600">Loading donations...</p>
-        ) : error ? (
-          <p className="mt-4 text-sm text-red-600">{error}</p>
-        ) : (
-          <div className="mt-4 space-y-3">
-            {donations.map((donation) => (
-              <div
-                key={donation.donation_id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#F3C7A0] bg-white px-4 py-3"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">
-                    {restaurantName(donation.restaurant)}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    ID: {donation.donation_id} • Created {formatDisplayDate(donation.donated_at)}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${donationStatusPill(donation.status).className}`}
-                  >
-                    {donationStatusPill(donation.status).text}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      toggleStatus(
-                        donation.donation_id,
-                        isCompleted(donation.status) ? "pending" : "accepted",
-                      )
-                    }
-                    disabled={updatingId === donation.donation_id}
-                    className="rounded-full border border-[#F3C7A0] px-4 py-2 text-xs font-semibold text-[#8B4C1F] transition hover:bg-[#FFF1E3] disabled:opacity-60"
-                  >
-                    {isCompleted(donation.status) ? "Mark pending" : "Mark completed"}
-                  </button>
-                </div>
-              </div>
-            ))}
+        {/* Completed Column */}
+        <div className="flex flex-col rounded-2xl border border-[#A8E6CF] bg-[#E6F7EE] p-4 shadow-md min-h-0">
+          <div className="mb-4 flex items-center justify-between flex-shrink-0">
+            <h3 className="text-lg font-semibold text-gray-900">Completed</h3>
+            <span className="rounded-full bg-[#C8F0DD] px-3 py-1 text-xs font-semibold text-[#1F4D36]">
+              {completedItems.length}
+            </span>
           </div>
-        )}
+          <div className="flex-1 space-y-3 overflow-y-auto pr-2 min-h-0">
+            {completedItems.length === 0 ? (
+              <p className="text-sm text-gray-500 text-center py-8">No completed items</p>
+            ) : (
+              completedItems.map(renderItem)
+            )}
+          </div>
+        </div>
+
+        {/* Declined Column */}
+        <div className="flex flex-col rounded-2xl border border-[#F5C2C2] bg-[#FDECEA] p-4 shadow-md min-h-0">
+          <div className="mb-4 flex items-center justify-between flex-shrink-0">
+            <h3 className="text-lg font-semibold text-gray-900">Declined</h3>
+            <span className="rounded-full bg-[#FCE0DC] px-3 py-1 text-xs font-semibold text-[#B42318]">
+              {declinedItems.length}
+            </span>
+          </div>
+          <div className="flex-1 space-y-3 overflow-y-auto pr-2 min-h-0">
+            {declinedItems.length === 0 ? (
+              <p className="text-sm text-gray-500 text-center py-8">No declined items</p>
+            ) : (
+              declinedItems.map(renderItem)
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
