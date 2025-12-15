@@ -13,7 +13,7 @@
     "model": "warehouse.warehouse",
     "pk": "WAH0000002",
     "fields": {
-      "address": "456 Bang Phli Distribution Center, Bang Phli, Samut Prakan 10540",
+      "address": "456 Bang Na Distribution Center, Bang Na, Bangkok 10260",
       "capacity": 3000.0,
       "stored_date": "2025-01-01",
       "exp_date": "2025-12-31"
@@ -23,7 +23,7 @@
     "model": "warehouse.warehouse",
     "pk": "WAH0000003",
     "fields": {
-      "address": "789 Chaeng Watthana Storage, Pak Kret, Nonthaburi 11120",
+      "address": "789 Chatuchak Storage Facility, Chatuchak, Bangkok 10900",
       "capacity": 4000.0,
       "stored_date": "2025-01-01",
       "exp_date": "2025-12-31"
@@ -43,7 +43,7 @@
     "model": "warehouse.warehouse",
     "pk": "WAH0000005",
     "fields": {
-      "address": "22 Rangsit Food Depot, Thanyaburi, Pathum Thani 12110",
+      "address": "22 Min Buri Food Depot, Min Buri, Bangkok 10510",
       "capacity": 4500.0,
       "stored_date": "2025-01-15",
       "exp_date": "2025-10-31"
@@ -53,7 +53,7 @@
     "model": "warehouse.warehouse",
     "pk": "WAH0000006",
     "fields": {
-      "address": "88 Mahachai Cold Chain, Mueang Samut Sakhon, Samut Sakhon 74000",
+      "address": "88 Huai Khwang Cold Chain, Huai Khwang, Bangkok 10310",
       "capacity": 8000.0,
       "stored_date": "2025-03-01",
       "exp_date": "2026-02-28"
@@ -63,7 +63,7 @@
     "model": "warehouse.warehouse",
     "pk": "WAH0000007",
     "fields": {
-      "address": "55 Salaya Regional Hub, Phutthamonthon, Nakhon Pathom 73170",
+      "address": "55 Bang Kapi Regional Hub, Bang Kapi, Bangkok 10240",
       "capacity": 3500.0,
       "stored_date": "2025-01-10",
       "exp_date": "2025-09-30"
@@ -73,7 +73,7 @@
     "model": "warehouse.warehouse",
     "pk": "WAH0000008",
     "fields": {
-      "address": "999 Bang Pa-In Community Warehouse, Bang Pa-In, Ayutthaya 13160",
+      "address": "999 Bang Kae Community Warehouse, Bang Kae, Bangkok 10160",
       "capacity": 7000.0,
       "stored_date": "2025-02-20",
       "exp_date": "2026-01-31"
@@ -93,7 +93,7 @@
     "model": "warehouse.warehouse",
     "pk": "WAH0000010",
     "fields": {
-      "address": "77 Mega Bangna Storage, Bang Phli, Samut Prakan 10540",
+      "address": "77 Din Daeng Storage Facility, Din Daeng, Bangkok 10400",
       "capacity": 5200.0,
       "stored_date": "2025-02-01",
       "exp_date": "2025-12-01"
@@ -103,7 +103,7 @@
     "model": "warehouse.warehouse",
     "pk": "WAH0000011",
     "fields": {
-      "address": "199 Western Corridor Depot, Nakhon Chai Si, Nakhon Pathom 73120",
+      "address": "199 Watthana Distribution Center, Watthana, Bangkok 10110",
       "capacity": 4800.0,
       "stored_date": "2025-01-20",
       "exp_date": "2025-10-20"
@@ -113,7 +113,7 @@
     "model": "warehouse.warehouse",
     "pk": "WAH0000012",
     "fields": {
-      "address": "66 Ayutthaya Industrial Warehouse, Wang Noi, Ayutthaya 13170",
+      "address": "66 Pathumwan Industrial Warehouse, Pathumwan, Bangkok 10330",
       "capacity": 6500.0,
       "stored_date": "2025-03-01",
       "exp_date": "2026-02-28"

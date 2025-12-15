@@ -301,6 +301,96 @@
     }
   },
   {
+    "model": "users.deliverystaff",
+    "pk": 7,
+    "fields": {
+      "user": "DEL0000007",
+      "assigned_area": "Lat Krabang",
+      "is_available": true
+    }
+  },
+  {
+    "model": "users.deliverystaff",
+    "pk": 8,
+    "fields": {
+      "user": "DEL0000008",
+      "assigned_area": "Bang Na",
+      "is_available": true
+    }
+  },
+  {
+    "model": "users.deliverystaff",
+    "pk": 9,
+    "fields": {
+      "user": "DEL0000009",
+      "assigned_area": "Chatuchak",
+      "is_available": true
+    }
+  },
+  {
+    "model": "users.deliverystaff",
+    "pk": 10,
+    "fields": {
+      "user": "DEL0000010",
+      "assigned_area": "Min Buri",
+      "is_available": true
+    }
+  },
+  {
+    "model": "users.deliverystaff",
+    "pk": 11,
+    "fields": {
+      "user": "DEL0000011",
+      "assigned_area": "Huai Khwang",
+      "is_available": true
+    }
+  },
+  {
+    "model": "users.deliverystaff",
+    "pk": 12,
+    "fields": {
+      "user": "DEL0000012",
+      "assigned_area": "Bang Kapi",
+      "is_available": true
+    }
+  },
+  {
+    "model": "users.deliverystaff",
+    "pk": 13,
+    "fields": {
+      "user": "DEL0000013",
+      "assigned_area": "Bang Kae",
+      "is_available": true
+    }
+  },
+  {
+    "model": "users.deliverystaff",
+    "pk": 14,
+    "fields": {
+      "user": "DEL0000014",
+      "assigned_area": "Din Daeng",
+      "is_available": true
+    }
+  },
+  {
+    "model": "users.deliverystaff",
+    "pk": 15,
+    "fields": {
+      "user": "DEL0000015",
+      "assigned_area": "Watthana",
+      "is_available": true
+    }
+  },
+  {
+    "model": "users.deliverystaff",
+    "pk": 16,
+    "fields": {
+      "user": "DEL0000016",
+      "assigned_area": "Pathumwan",
+      "is_available": true
+    }
+  },
+  {
     "model": "users.recipient",
     "pk": 1,
     "fields": {
