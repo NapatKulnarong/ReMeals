@@ -5,6 +5,7 @@ import uuid
 
 from impactrecord.models import ImpactRecord
 from fooditem.models import FoodItem
+from donation.models import Donation
 from .models import Delivery
 from .serializers import DeliverySerializer
 from users.models import Donor, Recipient
@@ -125,6 +126,12 @@ class DeliveryViewSet(viewsets.ModelViewSet):
         updated = serializer.instance
         if updated.status == "delivered":
             self._create_impact_records(updated)
+            # Automatically update donation status to "accepted" when delivery is marked as "delivered"
+            if updated.delivery_type == "donation" and updated.donation_id:
+                donation = updated.donation_id
+                if donation.status == "pending":
+                    donation.status = "accepted"
+                    donation.save(update_fields=["status"])
 
         return Response(serializer.data)
 

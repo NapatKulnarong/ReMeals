@@ -9,7 +9,6 @@ import {
   ArchiveBoxIcon,
   ShoppingBagIcon,
   HomeIcon,
-  DevicePhoneMobileIcon,
   WrenchScrewdriverIcon,
   InboxIcon,
   TruckIcon,
@@ -92,6 +91,7 @@ type DonationRecord = {
   items: FoodItemForm[];
   createdAt: string;
   ownerUserId?: string | null;
+  status: "pending" | "accepted" | "declined";
 };
 
 type DonationFormState = {
@@ -914,13 +914,13 @@ function AnimatedNumber({
   const prevValueRef = useRef(value);
 
   useEffect(() => {
-    // If value is 0, reset displayValue asynchronously to avoid setState in effect
+    // If value is 0, reset displayValue using requestAnimationFrame to avoid setState in effect
     if (value === 0) {
-      // Initialize display value
-      if (displayValue !== 0) {
+      // Initialize display value asynchronously
+      const frameId = requestAnimationFrame(() => {
         setDisplayValue(0);
-      }
-      return;
+      });
+      return () => cancelAnimationFrame(frameId);
     }
 
     prevValueRef.current = value;
@@ -968,13 +968,11 @@ function AnimatedNumber({
 // Community Impact Heat Map Component
 function CommunityImpactHeatMap({
   impactRecords,
-  foodItems,
   deliveries,
   communities,
   loading
 }: {
   impactRecords: ImpactRecord[];
-  foodItems: FoodItemApiRecord[];
   deliveries: DeliveryRecordApi[];
   communities: Community[];
   loading: boolean;
@@ -1763,7 +1761,6 @@ function HomePage({
             </div>
             <CommunityImpactHeatMap
               impactRecords={impactRecords}
-              foodItems={foodItems}
               deliveries={deliveries}
               communities={communities}
               loading={heatMapLoading || impactLoading}
@@ -1940,6 +1937,447 @@ function HomePage({
   );
 }
 
+// Your Stats Section Component
+function YourStatsSection({
+  currentUser,
+  setShowAuthModal,
+  setAuthMode
+}: {
+  currentUser: LoggedUser | null;
+  setShowAuthModal: (show: boolean) => void;
+  setAuthMode: (mode: AuthMode) => void;
+}) {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [donations, setDonations] = useState<DonationRecord[]>([]);
+  const [foodItems, setFoodItems] = useState<FoodItemApiRecord[]>([]);
+
+  useEffect(() => {
+    if (!currentUser) {
+      setShowAuthModal(true);
+      setAuthMode("login");
+      return;
+    }
+
+    let ignore = false;
+    async function loadUserData() {
+      if (!currentUser) return;
+      setLoading(true);
+      setError(null);
+      try {
+        // Fetch all donations and filter by user
+        const donationData = await apiFetch<DonationApiRecord[]>("/donations/");
+        const userDonations = donationData.filter(
+          (d) => d.created_by_user_id === currentUser.userId
+        );
+
+        // Fetch food items for user's donations
+        const donationsWithItems = await Promise.all(
+          userDonations.map(async (donation) => {
+            const items = await apiFetch<FoodItemApiRecord[]>(
+              `/fooditems/?donation=${donation.donation_id}`
+            );
+            return { donation, items };
+          })
+        );
+
+        const mappedDonations: DonationRecord[] = donationsWithItems.map(
+          ({ donation, items }) => ({
+            id: donation.donation_id,
+            restaurantId: donation.restaurant,
+            restaurantName: donation.restaurant_name ?? "",
+            restaurantAddress: donation.restaurant_address ?? "",
+            branch: donation.restaurant_branch ?? "",
+            note: "",
+            items: items.map((item) => ({
+              id: item.food_id,
+              name: item.name,
+              quantity: item.quantity.toString(),
+              unit: item.unit,
+              expiredDate: item.expire_date,
+            })),
+            createdAt: donation.donated_at,
+            ownerUserId: donation.created_by_user_id ?? null,
+            status: donation.status,
+          })
+        );
+
+        if (!ignore) {
+          setDonations(mappedDonations);
+          setFoodItems(
+            donationsWithItems.flatMap(({ items }) => items)
+          );
+        }
+      } catch (err) {
+        if (!ignore) {
+          setError(
+            err instanceof Error ? err.message : "Unable to load your stats"
+          );
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadUserData();
+    return () => {
+      ignore = true;
+    };
+  }, [currentUser, setShowAuthModal, setAuthMode]);
+
+  // Calculate statistics
+  const stats = useMemo(() => {
+    const totalDonations = donations.length;
+    const totalItems = foodItems.length;
+    const totalQuantity = foodItems.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    );
+
+    // Group by month for time series
+    const donationsByMonth = new Map<string, number>();
+
+    donations.forEach((donation) => {
+      const date = new Date(donation.createdAt);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      donationsByMonth.set(
+        monthKey,
+        (donationsByMonth.get(monthKey) || 0) + 1
+      );
+    });
+
+    // Get all unique months and sort them
+    const allMonths = Array.from(donationsByMonth.keys()).sort();
+
+    const timeSeriesData = allMonths.map((monthKey) => {
+      const [year, month] = monthKey.split("-");
+      return {
+        monthKey,
+        month: new Date(parseInt(year), parseInt(month) - 1),
+        donations: donationsByMonth.get(monthKey) || 0,
+      };
+    });
+
+    return {
+      totalDonations,
+      totalItems,
+      totalQuantity,
+      timeSeriesData,
+    };
+  }, [donations, foodItems]);
+
+  if (!currentUser) {
+    return (
+      <div className="rounded-xl bg-white p-10 shadow text-center">
+        <p className="text-gray-600 mb-4">
+          Please log in to view your statistics.
+        </p>
+        <button
+          onClick={() => {
+            setAuthMode("login");
+            setShowAuthModal(true);
+          }}
+          className="rounded-lg bg-[#d48a68] px-6 py-2 text-sm font-semibold text-white transition hover:bg-[#c47958]"
+        >
+          Log in
+        </button>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="rounded-xl bg-white p-10 shadow text-center">
+        <p className="text-gray-600">Loading your statistics...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-xl bg-white p-10 shadow text-center">
+        <p className="text-red-600">{error}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-xl bg-white p-6 shadow">
+        <h2 className="text-2xl font-bold text-[#4B2415] mb-6">
+          Donation Stats
+        </h2>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          <div className="rounded-lg bg-gradient-to-br from-[#F1CBB5] to-[#E9B79C] p-5 shadow-sm">
+            <div className="text-sm font-medium text-[#70402B] mb-1">
+              Total Donations
+            </div>
+            <div className="text-3xl font-bold text-[#4B2415]">
+              {stats.totalDonations}
+            </div>
+          </div>
+          <div className="rounded-lg bg-gradient-to-br from-[#E9B79C] to-[#F1CBB5] p-5 shadow-sm">
+            <div className="text-sm font-medium text-[#70402B] mb-1">
+              Food Items
+            </div>
+            <div className="text-3xl font-bold text-[#4B2415]">
+              {stats.totalItems}
+            </div>
+          </div>
+          <div className="rounded-lg bg-gradient-to-br from-[#F1CBB5] to-[#E9B79C] p-5 shadow-sm">
+            <div className="text-sm font-medium text-[#70402B] mb-1">
+              Total Quantity
+            </div>
+            <div className="text-3xl font-bold text-[#4B2415]">
+              {stats.totalQuantity}
+            </div>
+          </div>
+        </div>
+
+        {/* Time Series Chart */}
+        {stats.timeSeriesData.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold text-[#4B2415] mb-4">
+              Donations Over Time
+            </h3>
+            <DonationTimeSeriesChart data={stats.timeSeriesData} />
+          </div>
+        )}
+
+        {/* Recent Activity */}
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold text-[#4B2415] mb-4">
+            Recent Donations
+          </h3>
+          <div className="space-y-3">
+            {donations.slice(0, 5).map((donation) => (
+              <div
+                key={donation.id}
+                className="rounded-lg border border-[#E6B9A2] bg-white p-4"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <div className="font-semibold text-[#4B2415]">
+                    {donation.restaurantName}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {new Date(donation.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
+                <div className="text-sm text-gray-600">
+                  {donation.items.length} item(s)
+                </div>
+              </div>
+            ))}
+            {donations.length === 0 && (
+              <p className="text-gray-500 text-sm">No donations yet</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Time Series Chart Component for Donations
+function DonationTimeSeriesChart({
+  data,
+}: {
+  data: Array<{
+    monthKey: string;
+    month: Date;
+    donations: number;
+  }>;
+}) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [tooltip, setTooltip] = useState<{
+    x: number;
+    y: number;
+    month: string;
+    donations: number;
+  } | null>(null);
+
+  const maxValue = Math.max(...data.map((d) => d.donations), 1);
+  const chartHeight = 280;
+  const chartPadding = { top: 20, right: 20, bottom: 40, left: 60 };
+  const barSpacing = 8;
+  const availableWidth = 800;
+  const barWidth = Math.max(
+    30,
+    Math.min(
+      60,
+      (availableWidth -
+        chartPadding.left -
+        chartPadding.right -
+        (data.length - 1) * barSpacing) /
+        data.length
+    )
+  );
+  const chartWidth =
+    data.length * (barWidth + barSpacing) +
+    chartPadding.left +
+    chartPadding.right;
+
+  const formatMonthLabel = (date: Date) => {
+    return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+  };
+
+  const handleBarHover = (
+    e: React.MouseEvent<SVGRectElement>,
+    index: number,
+    month: string,
+    donations: number
+  ) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setHoveredIndex(index);
+    setTooltip({
+      x: rect.left + rect.width / 2,
+      y: rect.top - 15,
+      month,
+      donations,
+    });
+  };
+
+  const handleBarLeave = () => {
+    setHoveredIndex(null);
+    setTooltip(null);
+  };
+
+  return (
+    <div className="relative">
+      {tooltip && (
+        <div
+          className="fixed z-50 rounded-lg bg-white px-3 py-2 text-xs shadow-lg pointer-events-none border border-gray-200"
+          style={{
+            left: `${tooltip.x}px`,
+            top: `${tooltip.y}px`,
+            transform: "translate(-50%, -100%)",
+            marginTop: "-8px",
+          }}
+        >
+          <div className="font-semibold mb-1 text-[#d48a68] text-sm">
+            {tooltip.month}
+          </div>
+          <div className="text-[#d48a68] opacity-75 text-xs">
+            {tooltip.donations} donation{tooltip.donations !== 1 ? "s" : ""}
+          </div>
+        </div>
+      )}
+
+      <div className="overflow-x-auto">
+        <svg
+          viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+          className="w-full h-[280px]"
+          preserveAspectRatio="none"
+        >
+          <defs>
+            <linearGradient id="donationGradient" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stopColor="#d48a68" stopOpacity="1" />
+              <stop offset="100%" stopColor="#B86A49" stopOpacity="1" />
+            </linearGradient>
+          </defs>
+
+          {/* Y-axis grid lines */}
+          {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+            const y =
+              chartHeight -
+              chartPadding.bottom -
+              (chartHeight - chartPadding.top - chartPadding.bottom) * ratio;
+            const value = Math.round(maxValue * ratio);
+            return (
+              <g key={ratio}>
+                <line
+                  x1={chartPadding.left}
+                  y1={y}
+                  x2={chartWidth - chartPadding.right}
+                  y2={y}
+                  stroke="#E5E7EB"
+                  strokeWidth="0.5"
+                  strokeDasharray="2,2"
+                />
+                <text
+                  x={chartPadding.left - 10}
+                  y={y + 4}
+                  fontSize="12"
+                  fill="#6B7280"
+                  textAnchor="end"
+                >
+                  {value}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Bars */}
+          {data.map((item, index) => {
+            const donationBarHeight =
+              (item.donations / maxValue) *
+              (chartHeight - chartPadding.top - chartPadding.bottom);
+            const x =
+              chartPadding.left + index * (barWidth + barSpacing);
+            const donationY = chartHeight - chartPadding.bottom - donationBarHeight;
+            const isHovered = hoveredIndex === index;
+
+            return (
+              <g key={item.monthKey}>
+                {/* Donation bar */}
+                <rect
+                  x={x}
+                  y={donationY}
+                  width={barWidth}
+                  height={donationBarHeight}
+                  fill="url(#donationGradient)"
+                  rx="4"
+                  ry="4"
+                  className="transition-all duration-200 cursor-pointer"
+                  style={{
+                    opacity: isHovered ? 1 : 0.9,
+                  }}
+                  onMouseEnter={(e) =>
+                    handleBarHover(
+                      e,
+                      index,
+                      formatMonthLabel(item.month),
+                      item.donations
+                    )
+                  }
+                  onMouseLeave={handleBarLeave}
+                />
+                {/* Month label */}
+                {index % Math.ceil(data.length / 6) === 0 && (
+                  <text
+                    x={x + barWidth / 2}
+                    y={chartHeight - chartPadding.bottom + 20}
+                    fontSize="10"
+                    fill="#6B7280"
+                    textAnchor="middle"
+                  >
+                    {formatMonthLabel(item.month)}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+
+          {/* X-axis line */}
+          <line
+            x1={chartPadding.left}
+            y1={chartHeight - chartPadding.bottom}
+            x2={chartWidth - chartPadding.right}
+            y2={chartHeight - chartPadding.bottom}
+            stroke="#D1D5DB"
+            strokeWidth="1"
+          />
+        </svg>
+      </div>
+
+    </div>
+  );
+}
+
 // Content of each tab
 function TabContent({
   tab,
@@ -1963,7 +2401,7 @@ function TabContent({
   }
   if (tab === 3) {
     if (currentUser?.isAdmin) {
-      return <AdminDashboard />;
+      return <AdminDashboard currentUser={currentUser} />;
     }
     return <AccessDenied message="Admin access required." />;
   }
@@ -1977,6 +2415,7 @@ function TabContent({
     return <AccessDenied message="Delivery team access required." />;
   }
   if (tab === 6) {
+    // For delivery staff (non-admin), redirect to combined dashboard (tab 4)
     if (currentUser?.isDeliveryStaff && !currentUser?.isAdmin) {
       return <DeliveryStaffDashboard currentUser={currentUser} />;
     }
@@ -1993,6 +2432,9 @@ function TabContent({
   }
   if (tab === 7) {
     return <StatusSection currentUser={currentUser} setShowAuthModal={setShowAuthModal} setAuthMode={setAuthMode} />;
+  }
+  if (tab === 8) {
+    return <YourStatsSection currentUser={currentUser} setShowAuthModal={setShowAuthModal} setAuthMode={setAuthMode} />;
   }
 
   return (
@@ -2020,19 +2462,30 @@ function DonationSection(props: {
 
   const [deliveries, setDeliveries] = useState<DeliveryRecordApi[]>([]);
   const [deletingDonationId, setDeletingDonationId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [myRestaurantOnly, setMyRestaurantOnly] = useState<boolean>(false);
 
   const prioritizeDonations = useCallback(
     (list: DonationRecord[]) => {
       const userId = currentUser?.userId;
+      const userRestaurantId = currentUser?.restaurantId;
       if (!list.length) {
         return list;
       }
       return [...list].sort((a, b) => {
+        // First priority: donations from user's restaurant
+        const aMatchesRestaurant = Boolean(userRestaurantId && a.restaurantId === userRestaurantId);
+        const bMatchesRestaurant = Boolean(userRestaurantId && b.restaurantId === userRestaurantId);
+        if (aMatchesRestaurant !== bMatchesRestaurant) {
+          return aMatchesRestaurant ? -1 : 1;
+        }
+        // Second priority: user-owned donations
         const aOwned = Boolean(userId && a.ownerUserId === userId);
         const bOwned = Boolean(userId && b.ownerUserId === userId);
         if (aOwned !== bOwned) {
           return aOwned ? -1 : 1;
         }
+        // Third priority: sort by date (newest first)
         const aTime = new Date(a.createdAt).getTime();
         const bTime = new Date(b.createdAt).getTime();
         const safeATime = Number.isNaN(aTime) ? 0 : aTime;
@@ -2040,7 +2493,7 @@ function DonationSection(props: {
         return safeBTime - safeATime;
       });
     },
-    [currentUser?.userId]
+    [currentUser?.userId, currentUser?.restaurantId]
   );
 
   const updateDonations = useCallback(
@@ -2096,6 +2549,7 @@ function DonationSection(props: {
             })),
             createdAt: donation.donated_at,
             ownerUserId: donation.created_by_user_id ?? null,
+            status: donation.status,
           }))
         )
       );
@@ -2389,6 +2843,7 @@ function DonationSection(props: {
         items: normalizedItems,
         createdAt: existingRecord?.createdAt ?? timestamp,
         ownerUserId: currentUser?.userId ?? existingRecord?.ownerUserId ?? null,
+        status: existingRecord?.status ?? "pending",
       };
 
       if (manualEntry) {
@@ -2461,42 +2916,74 @@ function DonationSection(props: {
     if (isDonationAssigned(donation.id)) {
       return false;
     }
-    // If ownerUserId is not set, allow management for logged-in users (for legacy donations)
-    if (!donation.ownerUserId) {
-      return true;
+    // Check if donation's restaurant matches user's restaurant
+    // User must have restaurant information set
+    if (!currentUser.restaurantId) {
+      return false;
     }
-    // Must own the donation
-    if (donation.ownerUserId !== currentUser.userId) {
+    // Donation's restaurant must match user's restaurant
+    if (donation.restaurantId !== currentUser.restaurantId) {
       return false;
     }
     return true;
   };
 
-  const canShowEditDeleteButtons = () => {
-    // Show buttons if user is logged in
-    // The buttons will be disabled if canManageDonation returns false
-    return Boolean(currentUser);
+  const canShowEditDeleteButtons = (donation: DonationRecord) => {
+    // Only show buttons if user can manage the donation (owns it and it's not assigned)
+    return canManageDonation(donation);
   };
 
   // Filter donations: exclude assigned ones from the log (they'll show in Status section)
-  // Also filter to only show current user's donations (unless admin)
+  // Show only pending donations that are not assigned
   const unassignedDonations = donations.filter((donation) => {
+    // Only show pending donations
+    if (donation.status !== "pending") {
+      return false;
+    }
     // Exclude if already assigned
     if (isDonationAssigned(donation.id)) {
       return false;
     }
-    // Admin can see all donations
-    if (currentUser?.isAdmin) {
-      return true;
-    }
-    // For non-admin users, only show their own donations
-    // If ownerUserId is not set (legacy donations), show them for logged-in users
-    if (!donation.ownerUserId) {
-      return Boolean(currentUser);
-    }
-    // Must be the owner
-    return donation.ownerUserId === currentUser?.userId;
+    return true;
   });
+
+  // Apply search and restaurant filter
+  const filteredDonations = useMemo(() => {
+    let filtered = [...unassignedDonations];
+
+    // Filter by "My restaurant only" toggle
+    if (myRestaurantOnly && currentUser?.restaurantId) {
+      filtered = filtered.filter(
+        (donation) => donation.restaurantId === currentUser.restaurantId
+      );
+    }
+
+    // Filter by search query (restaurant name, branch, or food items)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((donation) => {
+        // Check restaurant name
+        if (donation.restaurantName.toLowerCase().includes(query)) {
+          return true;
+        }
+        // Check branch
+        if (donation.branch?.toLowerCase().includes(query)) {
+          return true;
+        }
+        // Check food items
+        if (
+          donation.items.some((item) =>
+            item.name.toLowerCase().includes(query)
+          )
+        ) {
+          return true;
+        }
+        return false;
+      });
+    }
+
+    return filtered;
+  }, [unassignedDonations, searchQuery, myRestaurantOnly, currentUser?.restaurantId]);
 
   const handleEdit = (donation: DonationRecord) => {
     if (!canManageDonation(donation)) {
@@ -2858,8 +3345,74 @@ function DonationSection(props: {
             <h3 className="text-2xl font-semibold text-gray-800">Donation log</h3>
           </div>
           <span className="text-xs font-semibold text-gray-500">
-            {unassignedDonations.length} total
+            {searchQuery || myRestaurantOnly
+              ? `${filteredDonations.length}/${unassignedDonations.length} total`
+              : `${unassignedDonations.length} total`}
           </span>
+        </div>
+
+        {/* Search and Filter Controls */}
+        <div className="mb-4 flex flex-col gap-3 flex-shrink-0">
+          {/* Search Bar */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by restaurant, branch, or food item..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-lg border border-[#D7DCC7] bg-white px-4 py-2.5 pl-10 text-sm text-gray-700 placeholder-gray-400 outline-none focus:border-[#7ba061] focus:ring-2 focus:ring-[#7ba061]/20"
+            />
+            <svg
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                title="Clear search"
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* My Restaurant Only Toggle */}
+          {currentUser?.restaurantId && (
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={myRestaurantOnly}
+                onChange={(e) => setMyRestaurantOnly(e.target.checked)}
+                className="h-4 w-4 rounded border-[#D7DCC7] text-[#7ba061] focus:ring-2 focus:ring-[#7ba061]/20"
+              />
+              <span className="text-sm font-medium text-gray-700">
+                My restaurant only
+              </span>
+            </label>
+          )}
         </div>
 
         {currentUser && !currentUser.isAdmin && (
@@ -2879,13 +3432,15 @@ function DonationSection(props: {
             <p className="rounded-2xl border border-dashed border-gray-300 bg-white/70 p-6 text-sm text-gray-500">
               Loading donations...
             </p>
-          ) : unassignedDonations.length === 0 ? (
+          ) : filteredDonations.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-gray-300 bg-white/70 p-6 text-sm text-gray-500">
-              Once you save a donation, it shows up here for editing or delivery planning.
+              {searchQuery || myRestaurantOnly
+                ? "No donations match your search criteria."
+                : "Once you save a donation, it shows up here for editing or delivery planning."}
             </p>
           ) : (
             <div className="space-y-4">
-              {unassignedDonations.map((donation) => (
+              {filteredDonations.map((donation) => (
                 <article
                   key={donation.id}
                   className="rounded-2xl border border-dashed border-[#4d673f] bg-white/90 p-5 "
@@ -2903,11 +3458,11 @@ function DonationSection(props: {
                       )}
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      {canShowEditDeleteButtons() && (
+                      {canShowEditDeleteButtons(donation) && (
                         <div className="flex gap-2">
                           <button
                             type="button"
-                            disabled={!canManageDonation(donation)}
+                            disabled={deletingDonationId === donation.id}
                             className="rounded-lg bg-[#E6F4FF] p-2 text-[#1D4ED8] hover:bg-[#D0E7FF] disabled:opacity-60 disabled:cursor-not-allowed transition"
                             title="Edit donation"
                             onClick={() => handleEdit(donation)}
@@ -2928,7 +3483,7 @@ function DonationSection(props: {
                           </button>
                           <button
                             type="button"
-                            disabled={!canManageDonation(donation) || deletingDonationId === donation.id}
+                            disabled={deletingDonationId === donation.id}
                             className="rounded-lg bg-[#FDECEA] p-2 text-[#B42318] hover:bg-[#FCD7D2] disabled:opacity-60 disabled:cursor-not-allowed transition"
                             title="Delete donation"
                             onClick={() => handleDelete(donation.id)}
@@ -3882,7 +4437,7 @@ function ProfileModal({
   );
 }
 
-function AdminDashboard() {
+function AdminDashboard({ currentUser }: { currentUser: LoggedUser }) {
   const [donations, setDonations] = useState<DonationApiRecord[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -3935,6 +4490,7 @@ function AdminDashboard() {
       await apiFetch(`/donations/${donationId}/`, {
         method: "PATCH",
         body: JSON.stringify({ status: nextStatus }),
+        headers: buildAuthHeaders(currentUser),
       });
       setDonations((prev) =>
         prev.map((donation) =>
@@ -4079,6 +4635,7 @@ function StatusSection({
           })),
           createdAt: donation.donated_at,
           ownerUserId: donation.created_by_user_id ?? null,
+          status: donation.status,
         }));
 
         // Load requests
@@ -4749,7 +5306,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
   };
 
   // Get area for a delivery
-  const getDeliveryArea = (delivery: DeliveryRecordApi): string => {
+  const getDeliveryArea = useCallback((delivery: DeliveryRecordApi): string => {
     if (delivery.community_id && communities[delivery.community_id]) {
       return extractArea(communities[delivery.community_id].address);
     }
@@ -4757,7 +5314,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
       return extractArea(warehouses[delivery.warehouse_id].address);
     }
     return "Other";
-  };
+  }, [communities, warehouses]);
 
   // Get unique areas from deliveries
   const uniqueAreas = useMemo(() => {
@@ -4766,10 +5323,10 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
       areas.add(getDeliveryArea(d));
     });
     return Array.from(areas).sort();
-  }, [deliveries, communities, warehouses]);
+  }, [deliveries, getDeliveryArea]);
 
   // Filter function
-  const applyFilters = (delivery: DeliveryRecordApi): boolean => {
+  const applyFilters = useCallback((delivery: DeliveryRecordApi): boolean => {
     // Status filter
     if (statusFilter !== "all" && delivery.status !== statusFilter) return false;
 
@@ -4804,7 +5361,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
     }
 
     return true;
-  };
+  }, [statusFilter, staffFilter, areaFilter, dateFilter, getDeliveryArea]);
 
   const pickupTasks = useMemo(
     () =>
@@ -4812,7 +5369,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
         .filter((d) => d.delivery_type === "donation")
         .filter(applyFilters)
         .sort((a, b) => new Date(a.pickup_time).getTime() - new Date(b.pickup_time).getTime()),
-    [deliveries, statusFilter, staffFilter, areaFilter, dateFilter, communities, warehouses]
+    [deliveries, applyFilters]
   );
   const distributionTasks = useMemo(
     () =>
@@ -4820,7 +5377,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
         .filter((d) => d.delivery_type === "distribution")
         .filter(applyFilters)
         .sort((a, b) => new Date(a.pickup_time).getTime() - new Date(b.pickup_time).getTime()),
-    [deliveries, statusFilter, staffFilter, areaFilter, dateFilter, communities, warehouses]
+    [deliveries, applyFilters]
   );
 
   const formatFoodAmount = (donationId?: string | null) => {
@@ -5302,6 +5859,7 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
     userId: "",
     pickupTime: "",
   });
+  const [statusFilter, setStatusFilter] = useState<DeliveryRecordApi["status"] | "all">("all");
 
   const canEdit = currentUser?.isAdmin ?? false;
   const currentUserId = currentUser?.userId ?? "";
@@ -5387,21 +5945,102 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
   }, []);
 
   // Helper to parse time string (HH:MM:SS) to milliseconds
-  const parseTimeToMs = useCallback((timeStr: string): number => {
-    const parts = timeStr.split(':').map(Number);
-    return (parts[0] * 60 * 60 + parts[1] * 60 + (parts[2] || 0)) * 1000;
+  // Helper to format date in Asia/Bangkok timezone
+  const formatBangkokDateTime = useCallback((dateStr: string): string => {
+    const date = new Date(dateStr);
+    return date.toLocaleString('en-US', {
+      timeZone: 'Asia/Bangkok',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
   }, []);
 
   // Check if driver is available - only checks is_available field
   // Drivers can accept multiple deliveries at the same time (like Grab)
-  const isDriverAvailable = useCallback((driverId: string): boolean => {
+  const isDriverAvailable = useCallback<(driverId: string, pickupTime: string) => { available: boolean; reason?: string }>((driverId: string, pickupTime: string) => {
     const selectedStaff = staff.find(s => s.user_id === driverId);
     if (!selectedStaff) {
-      return false;
+      return { available: false, reason: "Driver not found" };
     }
-    // Only check is_available field - if true, driver can accept all deliveries
-    return selectedStaff.is_available === true;
-  }, [staff]);
+
+    // Check is_available field
+    if (!selectedStaff.is_available) {
+      return { available: false, reason: "Driver is not available" };
+    }
+
+    // Check for overlapping deliveries
+    // Convert pickup time to Date object
+    // datetime-local inputs (YYYY-MM-DDTHH:mm) are interpreted as local time by JavaScript
+    // ISO strings with Z are UTC
+    let pickupDateTime: Date;
+    if (pickupTime.includes('T') && !pickupTime.includes('Z') && !pickupTime.includes('+')) {
+      // This is a datetime-local format (YYYY-MM-DDTHH:mm) - treat as Bangkok time
+      // Convert to UTC by creating date in Bangkok timezone
+      const [datePart, timePart] = pickupTime.split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hour, minute] = timePart.split(':').map(Number);
+      // Create date in UTC but interpret the values as Bangkok time (UTC+7)
+      // So we subtract 7 hours to get UTC
+      pickupDateTime = new Date(Date.UTC(year, month - 1, day, hour, minute) - 7 * 60 * 60 * 1000);
+    } else {
+      pickupDateTime = new Date(pickupTime);
+    }
+    
+    if (isNaN(pickupDateTime.getTime())) {
+      return { available: false, reason: "Invalid pickup time" };
+    }
+
+    // Calculate dropoff time - use default 2 hours for pickup deliveries
+    const dropoffDateTime = new Date(pickupDateTime.getTime() + 2 * 60 * 60 * 1000);
+
+    const conflictingDelivery = deliveries.find(d => {
+      if (d.user_id !== driverId || d.delivery_id === editingDeliveryId) return false;
+      
+      const existingPickup = new Date(d.pickup_time);
+      if (isNaN(existingPickup.getTime())) return false;
+
+      // Use actual dropoff_time if it's a datetime string, otherwise calculate
+      let existingDropoff: Date;
+      if (d.dropoff_time && d.dropoff_time.includes('T')) {
+        // dropoff_time is a full datetime string
+        existingDropoff = new Date(d.dropoff_time);
+      } else {
+        // Fallback to default 2 hours
+        existingDropoff = new Date(existingPickup.getTime() + 2 * 60 * 60 * 1000);
+      }
+
+      if (isNaN(existingDropoff.getTime())) return false;
+
+      // Quick check: if dates are clearly on different days (more than 24 hours apart), no conflict
+      const timeDiff = Math.abs(pickupDateTime.getTime() - existingPickup.getTime());
+      if (timeDiff > 24 * 60 * 60 * 1000) {
+        // More than 24 hours apart, definitely no conflict
+        return false;
+      }
+
+      // Check if times overlap (all dates are now in UTC milliseconds)
+      // Times overlap if: new pickup is between existing pickup/dropoff OR
+      //                    new dropoff is between existing pickup/dropoff OR
+      //                    new time range completely contains existing range
+      const timesOverlap = !(dropoffDateTime <= existingPickup || pickupDateTime >= existingDropoff);
+      
+      return timesOverlap;
+    });
+
+    if (conflictingDelivery) {
+      return { 
+        available: false, 
+        reason: `Driver has a conflicting delivery at ${formatBangkokDateTime(conflictingDelivery.pickup_time)}` 
+      };
+    }
+
+    return { available: true };
+  }, [staff, deliveries, editingDeliveryId, formatBangkokDateTime]);
 
   useEffect(() => {
     const next: Record<string, { notes: string }> = {};
@@ -5526,6 +6165,7 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
     : deliveries.filter((delivery) => delivery.user_id === currentUserId)
   )
     .filter((delivery) => delivery.delivery_type === "donation")
+    .filter((delivery) => statusFilter === "all" || delivery.status === statusFilter)
     .sort((a, b) => {
       const timeA = new Date(a.pickup_time).getTime();
       const timeB = new Date(b.pickup_time).getTime();
@@ -5795,18 +6435,35 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
 
       {/* Right side: Queue */}
       <div className="col-span-2 flex h-full min-h-0 flex-col overflow-hidden rounded-[32px] border border-[#CFE6D8]/40 bg-[#F6FBF7] p-7 shadow-2xl shadow-[#B6DEC8]/30">
-        <div className="mb-5 flex flex-shrink-0 items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-[#2F855A]">
-              Pickup queue
-            </p>
-            <h3 className="text-2xl font-semibold text-gray-800">
-              {canEdit ? "All pickup tasks" : "My assigned pickups"}
-            </h3>
+        <div className="mb-5 flex flex-shrink-0 flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-[#2F855A]">
+                Pickup queue
+              </p>
+              <h3 className="text-2xl font-semibold text-gray-800">
+                {canEdit ? "All pickup tasks" : "My assigned pickups"}
+              </h3>
+            </div>
+            <span className="text-xs font-semibold text-gray-500">
+              {visibleDeliveries.length} total
+            </span>
           </div>
-          <span className="text-xs font-semibold text-gray-500">
-            {visibleDeliveries.length} total
-          </span>
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-semibold text-gray-700 whitespace-nowrap">
+              Filter by status:
+            </label>
+            <select
+              className="rounded-lg border border-[#CFE6D8] bg-white px-3 py-1.5 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2F855A] focus:border-transparent"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as DeliveryRecordApi["status"] | "all")}
+            >
+              <option value="all">All</option>
+              <option value="pending">Pending</option>
+              <option value="in_transit">In Transit</option>
+              <option value="delivered">Delivered</option>
+            </select>
+          </div>
         </div>
 
         <div className="overflow-y-auto flex-1 min-h-0 pr-2">
@@ -6086,6 +6743,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
   const [selectedFoodItem, setSelectedFoodItem] = useState<string>(""); // food_id
   const [deliveryQuantity, setDeliveryQuantity] = useState<string>(""); // e.g., "15 kg", "8 bucket"
   const [foodItems, setFoodItems] = useState<FoodItemApiRecord[]>([]);
+  const [statusFilter, setStatusFilter] = useState<DeliveryRecordApi["status"] | "all">("all");
 
   const canEdit = currentUser?.isAdmin ?? false;
   const currentUserId = currentUser?.userId ?? "";
@@ -6170,21 +6828,102 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
   }, []);
 
   // Helper to parse time string (HH:MM:SS) to milliseconds
-  const parseTimeToMs = useCallback((timeStr: string): number => {
-    const parts = timeStr.split(':').map(Number);
-    return (parts[0] * 60 * 60 + parts[1] * 60 + (parts[2] || 0)) * 1000;
+  // Helper to format date in Asia/Bangkok timezone
+  const formatBangkokDateTime = useCallback((dateStr: string): string => {
+    const date = new Date(dateStr);
+    return date.toLocaleString('en-US', {
+      timeZone: 'Asia/Bangkok',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
   }, []);
 
   // Check if driver is available - only checks is_available field
   // Drivers can accept multiple deliveries at the same time (like Grab)
-  const isDriverAvailable = useCallback((driverId: string): boolean => {
+  const isDriverAvailable = useCallback<(driverId: string, pickupTime: string) => { available: boolean; reason?: string }>((driverId: string, pickupTime: string) => {
     const selectedStaff = staff.find(s => s.user_id === driverId);
     if (!selectedStaff) {
-      return false;
+      return { available: false, reason: "Driver not found" };
     }
-    // Only check is_available field - if true, driver can accept all deliveries
-    return selectedStaff.is_available === true;
-  }, [staff]);
+
+    // Check is_available field
+    if (!selectedStaff.is_available) {
+      return { available: false, reason: "Driver is not available" };
+    }
+
+    // Check for overlapping deliveries
+    // Convert pickup time to Date object
+    // datetime-local inputs (YYYY-MM-DDTHH:mm) are interpreted as local time by JavaScript
+    // ISO strings with Z are UTC
+    let pickupDateTime: Date;
+    if (pickupTime.includes('T') && !pickupTime.includes('Z') && !pickupTime.includes('+')) {
+      // This is a datetime-local format (YYYY-MM-DDTHH:mm) - treat as Bangkok time
+      // Convert to UTC by creating date in Bangkok timezone
+      const [datePart, timePart] = pickupTime.split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hour, minute] = timePart.split(':').map(Number);
+      // Create date in UTC but interpret the values as Bangkok time (UTC+7)
+      // So we subtract 7 hours to get UTC
+      pickupDateTime = new Date(Date.UTC(year, month - 1, day, hour, minute) - 7 * 60 * 60 * 1000);
+    } else {
+      pickupDateTime = new Date(pickupTime);
+    }
+    
+    if (isNaN(pickupDateTime.getTime())) {
+      return { available: false, reason: "Invalid pickup time" };
+    }
+
+    // Calculate dropoff time - use default 3 hours for distribution deliveries
+    const dropoffDateTime = new Date(pickupDateTime.getTime() + 3 * 60 * 60 * 1000);
+
+    const conflictingDelivery = deliveries.find(d => {
+      if (d.user_id !== driverId) return false;
+      
+      const existingPickup = new Date(d.pickup_time);
+      if (isNaN(existingPickup.getTime())) return false;
+
+      // Use actual dropoff_time if it's a datetime string, otherwise calculate
+      let existingDropoff: Date;
+      if (d.dropoff_time && d.dropoff_time.includes('T')) {
+        // dropoff_time is a full datetime string
+        existingDropoff = new Date(d.dropoff_time);
+      } else {
+        // Fallback to default 3 hours
+        existingDropoff = new Date(existingPickup.getTime() + 3 * 60 * 60 * 1000);
+      }
+
+      if (isNaN(existingDropoff.getTime())) return false;
+
+      // Quick check: if dates are clearly on different days (more than 24 hours apart), no conflict
+      const timeDiff = Math.abs(pickupDateTime.getTime() - existingPickup.getTime());
+      if (timeDiff > 24 * 60 * 60 * 1000) {
+        // More than 24 hours apart, definitely no conflict
+        return false;
+      }
+
+      // Check if times overlap (all dates are now in UTC milliseconds)
+      // Times overlap if: new pickup is between existing pickup/dropoff OR
+      //                    new dropoff is between existing pickup/dropoff OR
+      //                    new time range completely contains existing range
+      const timesOverlap = !(dropoffDateTime <= existingPickup || pickupDateTime >= existingDropoff);
+      
+      return timesOverlap;
+    });
+
+    if (conflictingDelivery) {
+      return { 
+        available: false, 
+        reason: `Driver has a conflicting delivery at ${formatBangkokDateTime(conflictingDelivery.pickup_time)}` 
+      };
+    }
+
+    return { available: true };
+  }, [staff, deliveries, formatBangkokDateTime]);
 
   const handleSubmitDistribution = async () => {
     setSubmitting(true);
@@ -6273,6 +7012,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
     : deliveries.filter((delivery) => delivery.user_id === currentUserId)
   )
     .filter((delivery) => delivery.delivery_type === "distribution")
+    .filter((delivery) => statusFilter === "all" || delivery.status === statusFilter)
     .sort((a, b) => {
       const timeA = new Date(a.pickup_time).getTime();
       const timeB = new Date(b.pickup_time).getTime();
@@ -6321,6 +7061,36 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
     const warehouse = warehouses.find((w) => w.warehouse_id === warehouseId);
     if (!warehouse) return warehouseId;
     return removePostalCode(warehouse.address);
+  };
+
+  // Helper to normalize food ID for matching (handles both F0000014 and FOO0000014 formats)
+  const normalizeFoodId = (foodId: string): string => {
+    if (!foodId) return foodId;
+    // If it starts with FOO, return as is
+    if (foodId.startsWith("FOO")) return foodId;
+    // If it starts with F but not FOO, convert F0000014 -> FOO0000014
+    if (foodId.startsWith("F") && !foodId.startsWith("FOO")) {
+      const digits = foodId.substring(1);
+      return `FOO${digits.padStart(7, "0")}`;
+    }
+    return foodId;
+  };
+
+  // Helper to find food item by ID (handles both formats)
+  const lookupFoodItem = (foodId: string | null | undefined): FoodItemApiRecord | null => {
+    if (!foodId) return null;
+    // Try direct match first
+    let foodItem = foodItems.find(f => f.food_id === foodId);
+    if (foodItem) return foodItem;
+    
+    // Try normalized match
+    const normalizedId = normalizeFoodId(foodId);
+    foodItem = foodItems.find(f => {
+      const normalizedFoodId = normalizeFoodId(f.food_id);
+      return normalizedFoodId === normalizedId;
+    });
+    
+    return foodItem || null;
   };
 
   const statusLabel = (status: DeliveryRecordApi["status"]) => {
@@ -6622,18 +7392,35 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
 
       {/* Right side: Queue */}
       <div className="col-span-2 flex h-full min-h-0 flex-col overflow-hidden rounded-[32px] border border-[#CFE6D8]/40 bg-[#F6FBF7] p-7 shadow-2xl shadow-[#B6DEC8]/30">
-        <div className="mb-5 flex flex-shrink-0 items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-[#2F855A]">
-              Delivery queue
-            </p>
-            <h3 className="text-2xl font-semibold text-gray-800">
-              {canEdit ? "All delivery tasks" : "My assigned deliveries"}
-            </h3>
+        <div className="mb-5 flex flex-shrink-0 flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-[#2F855A]">
+                Delivery queue
+              </p>
+              <h3 className="text-2xl font-semibold text-gray-800">
+                {canEdit ? "All delivery tasks" : "My assigned deliveries"}
+              </h3>
+            </div>
+            <span className="text-xs font-semibold text-gray-500">
+              {visibleDeliveries.length} total
+            </span>
           </div>
-          <span className="text-xs font-semibold text-gray-500">
-            {visibleDeliveries.length} total
-          </span>
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-semibold text-gray-700 whitespace-nowrap">
+              Filter by status:
+            </label>
+            <select
+              className="rounded-lg border border-[#CFE6D8] bg-white px-3 py-1.5 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2F855A] focus:border-transparent"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as DeliveryRecordApi["status"] | "all")}
+            >
+              <option value="all">All</option>
+              <option value="pending">Pending</option>
+              <option value="in_transit">In Transit</option>
+              <option value="delivered">Delivered</option>
+            </select>
+          </div>
         </div>
 
         <div className="overflow-y-auto flex-1 min-h-0 pr-2">
@@ -6735,11 +7522,11 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
                           <p className="text-xs font-medium text-gray-500">Food Item</p>
                           <p className="text-sm font-semibold text-gray-900">
                             {(() => {
-                              const foodItem = foodItems.find(f => f.food_id === delivery.food_item);
+                              const foodItem = lookupFoodItem(delivery.food_item);
                               if (foodItem) {
                                 return `${foodItem.name} - ${delivery.delivery_quantity}`;
                               }
-                              return `${delivery.food_item} - ${delivery.delivery_quantity}`;
+                              return `${delivery.delivery_quantity}`;
                             })()}
                           </p>
                         </div>
@@ -6919,20 +7706,22 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
   );
 
   const filterItems = (items: FoodItemApiRecord[]) => {
-    let result = items.slice();
+    // Separate expired items - they should always be shown
+    const expiredItems = items.filter((item) => isItemExpired(item));
+    const nonExpiredItems = items.filter((item) => !isItemExpired(item));
 
-    // status filter
+    let result = nonExpiredItems.slice();
+
+    // status filter (only applies to non-expired items)
     if (filterStatus === "available") {
-      result = result.filter((item) => !item.is_claimed && !item.is_distributed && !isItemExpired(item));
+      result = result.filter((item) => !item.is_claimed && !item.is_distributed);
     } else if (filterStatus === "claimed") {
-      result = result.filter((item) => item.is_claimed && !item.is_distributed && !isItemExpired(item));
+      result = result.filter((item) => item.is_claimed && !item.is_distributed);
     } else if (filterStatus === "distributed") {
       result = result.filter((item) => item.is_distributed);
-    } else if (filterStatus === "expired") {
-      result = result.filter((item) => isItemExpired(item));
     }
 
-    // expiry filter
+    // expiry filter (only applies to non-expired items)
     if (expiryFilter === "within_3_days") {
       result = result.filter((item) => isExpiringWithinDays(item, 3));
     } else if (expiryFilter === "this_week") {
@@ -6946,7 +7735,8 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
       result = result.filter((item) => displayCategoryLabel(getCategory(item)) === categoryFilter);
     }
 
-    return result;
+    // Always include expired items at the end, regardless of filters
+    return [...result, ...expiredItems];
   };
 
   const handleRemoveItem = async (foodId: string) => {
@@ -7164,7 +7954,6 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
                   <option value="available">Available</option>
                   <option value="claimed">Claimed</option>
                   <option value="distributed">Distributed</option>
-                  <option value="expired">Expired</option>
                 </select>
               </div>
               <div className="w-full md:w-40">
@@ -7468,6 +8257,9 @@ function AuthModal({
           username: payload.username,
           email: payload.email,
           userId: payload.user_id ?? "",
+          fname: payload.fname ?? undefined,
+          lname: payload.lname ?? undefined,
+          phone: payload.phone ?? undefined,
           isAdmin: Boolean(payload.is_admin),
           isDeliveryStaff: Boolean(payload.is_delivery_staff),
           restaurantId: payload.restaurant_id ?? undefined,
@@ -7520,6 +8312,9 @@ function AuthModal({
           username: payload.username,
           email: payload.email,
           userId: payload.user_id ?? "",
+          fname: payload.fname ?? undefined,
+          lname: payload.lname ?? undefined,
+          phone: payload.phone ?? undefined,
           isAdmin: Boolean(payload.is_admin),
           isDeliveryStaff: Boolean(payload.is_delivery_staff),
           restaurantId: payload.restaurant_id ?? undefined,
@@ -7919,14 +8714,14 @@ export default function Home() {
     : currentUser?.isDeliveryStaff
       ? [
         { id: 0, label: "Home", icon: <HomeIcon className="w-5 h-5" aria-hidden="true" /> },
-        { id: 4, label: "Pickup", icon: <InboxIcon className="w-5 h-5" aria-hidden="true" /> },
-        { id: 6, label: "Deliver", icon: <TruckIcon className="w-5 h-5" aria-hidden="true" /> },
+        { id: 4, label: "Deliveries", icon: <TruckIcon className="w-5 h-5" aria-hidden="true" /> },
       ]
       : [
         { id: 0, label: "Home", icon: <HomeIcon className="w-5 h-5" aria-hidden="true" /> },
         { id: 1, label: "Donate", icon: <HeartIcon className="w-5 h-5" aria-hidden="true" /> },
         { id: 2, label: "Get meals", icon: <ShoppingBagIcon className="w-5 h-5" aria-hidden="true" /> },
         { id: 7, label: "Status", icon: <ChartBarIcon className="w-5 h-5" aria-hidden="true" /> },
+        { id: 8, label: "Donation Stats", icon: <ChartBarIcon className="w-5 h-5" aria-hidden="true" /> },
       ];
 
   const normalizedActiveTab = useMemo(() => {
@@ -7938,8 +8733,19 @@ export default function Home() {
     if (activeTab === 7) {
       return 7;
     }
+    // Your stats tab (8) requires login
+    if (activeTab === 8) {
+      if (!currentUser) {
+        return 0; // Redirect to home if not logged in
+      }
+      return 8;
+    }
     if (!currentUser && activeTab > 2) {
       return 0; // Redirect to home if not logged in
+    }
+    // For delivery staff (non-admin), redirect tab 6 to tab 4 (combined deliveries view)
+    if (currentUser?.isDeliveryStaff && !currentUser?.isAdmin && activeTab === 6) {
+      return 4;
     }
     if (currentUser?.isAdmin && activeTab > 0 && activeTab < 3) {
       return 3;

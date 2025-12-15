@@ -21,6 +21,15 @@ class Donation(models.Model):
         on_delete=models.CASCADE,
         related_name="donations",
     )
+    
+    created_by = models.ForeignKey(
+        'users.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='created_by',
+        related_name='donations',
+    )
 
     class Meta:
         db_table = "donation"

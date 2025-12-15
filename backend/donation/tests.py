@@ -394,6 +394,7 @@ class DonationTests(APITestCase):
             "restaurant_name",
             "restaurant_branch",
             "restaurant_address",
+            "created_by_user_id",
         }
         self.assertEqual(set(response.data.keys()), expected_keys)
 

@@ -25,7 +25,7 @@
       "dropoff_time": "2025-01-06T12:00:00Z",
       "pickup_location_type": "warehouse",
       "dropoff_location_type": "community",
-      "status": "in_transit",
+      "status": "delivered",
       "notes": "Cold-chain truck assigned",
       "warehouse_id": "WAH0000002",
       "user_id": "DEL0000002",
@@ -61,7 +61,7 @@
       "dropoff_time": "2025-01-07T17:00:00Z",
       "pickup_location_type": "warehouse",
       "dropoff_location_type": "community",
-      "status": "delivered",
+      "status": "in_transit",
       "notes": "Evening distribution completed",
       "warehouse_id": "WAH0000001",
       "user_id": "DEL0000001",
@@ -97,7 +97,7 @@
       "dropoff_time": "2025-01-08T16:30:00Z",
       "pickup_location_type": "warehouse",
       "dropoff_location_type": "community",
-      "status": "in_transit",
+      "status": "delivered",
       "notes": "Rural route, long distance",
       "warehouse_id": "WAH0000003",
       "user_id": "DEL0000004",
@@ -169,7 +169,7 @@
       "dropoff_time": "2025-01-10T16:15:00Z",
       "pickup_location_type": "warehouse",
       "dropoff_location_type": "community",
-      "status": "in_transit",
+      "status": "delivered",
       "notes": "Heavy traffic on highway",
       "warehouse_id": "WAH0000006",
       "user_id": "DEL0000006",
@@ -205,7 +205,7 @@
       "dropoff_time": "2025-01-11T18:00:00Z",
       "pickup_location_type": "warehouse",
       "dropoff_location_type": "community",
-      "status": "delivered",
+      "status": "in_transit",
       "notes": "School meal distribution",
       "warehouse_id": "WAH0000012",
       "user_id": "DEL0000005",
@@ -241,7 +241,7 @@
       "dropoff_time": "2025-01-12T18:30:00Z",
       "pickup_location_type": "warehouse",
       "dropoff_location_type": "community",
-      "status": "in_transit",
+      "status": "delivered",
       "notes": "Long-distance southern route",
       "warehouse_id": "WAH0000009",
       "user_id": "DEL0000001",
@@ -352,6 +352,686 @@
       "warehouse_id": "WAH0000001",
       "user_id": "DEL0000005",
       "donation_id": "DON0000012",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000021",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-01-10T02:00:00Z",
+      "dropoff_time": "2025-01-10T05:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "delivered",
+      "notes": "Distribution from WAH0000003",
+      "warehouse_id": "WAH0000003",
+      "user_id": "DEL0000002",
+      "donation_id": "DON0000031",
+      "community_id": "COM0000002"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000022",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-12-18T00:00:00Z",
+      "dropoff_time": "2025-12-18T03:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "delivered",
+      "notes": "Distribution from WAH0000003",
+      "warehouse_id": "WAH0000003",
+      "user_id": "DEL0000003",
+      "donation_id": "DON0000031",
+      "community_id": "COM0000003"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000023",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-01-11T02:00:00Z",
+      "dropoff_time": "2025-01-11T05:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "delivered",
+      "notes": "Distribution from WAH0000006",
+      "warehouse_id": "WAH0000006",
+      "user_id": "DEL0000003",
+      "donation_id": "DON0000032",
+      "community_id": "COM0000005"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000024",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-12-18T00:00:00Z",
+      "dropoff_time": "2025-12-18T03:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "delivered",
+      "notes": "Distribution from WAH0000006",
+      "warehouse_id": "WAH0000006",
+      "user_id": "DEL0000004",
+      "donation_id": "DON0000032",
+      "community_id": "COM0000006"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000025",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-01-12T02:00:00Z",
+      "dropoff_time": "2025-01-12T05:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "delivered",
+      "notes": "Distribution from WAH0000007",
+      "warehouse_id": "WAH0000007",
+      "user_id": "DEL0000004",
+      "donation_id": "DON0000033",
+      "community_id": "COM0000008"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000026",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-12-18T00:00:00Z",
+      "dropoff_time": "2025-12-18T03:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "delivered",
+      "notes": "Distribution from WAH0000007",
+      "warehouse_id": "WAH0000007",
+      "user_id": "DEL0000005",
+      "donation_id": "DON0000033",
+      "community_id": "COM0000009"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000027",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-01-13T02:00:00Z",
+      "dropoff_time": "2025-01-13T05:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "delivered",
+      "notes": "Distribution from WAH0000008",
+      "warehouse_id": "WAH0000008",
+      "user_id": "DEL0000005",
+      "donation_id": "DON0000034",
+      "community_id": "COM0000011"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000028",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-12-18T00:00:00Z",
+      "dropoff_time": "2025-12-18T03:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "delivered",
+      "notes": "Distribution from WAH0000008",
+      "warehouse_id": "WAH0000008",
+      "user_id": "DEL0000006",
+      "donation_id": "DON0000034",
+      "community_id": "COM0000012"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000029",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-01-14T02:00:00Z",
+      "dropoff_time": "2025-01-14T05:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "delivered",
+      "notes": "Distribution from WAH0000009",
+      "warehouse_id": "WAH0000009",
+      "user_id": "DEL0000006",
+      "donation_id": "DON0000035",
+      "community_id": "COM0000010"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000030",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-01-15T02:00:00Z",
+      "dropoff_time": "2025-01-15T05:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "delivered",
+      "notes": "Distribution from WAH0000010",
+      "warehouse_id": "WAH0000010",
+      "user_id": "DEL0000001",
+      "donation_id": "DON0000036",
+      "community_id": "COM0000012"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000031",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-01-16T02:00:00Z",
+      "dropoff_time": "2025-01-16T05:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "delivered",
+      "notes": "Distribution from WAH0000011",
+      "warehouse_id": "WAH0000011",
+      "user_id": "DEL0000002",
+      "donation_id": "DON0000037",
+      "community_id": "COM0000014"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000032",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-01-17T02:00:00Z",
+      "dropoff_time": "2025-01-17T05:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "delivered",
+      "notes": "Distribution from WAH0000012",
+      "warehouse_id": "WAH0000012",
+      "user_id": "DEL0000003",
+      "donation_id": "DON0000038",
+      "community_id": "COM0000016"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000033",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-01-05T00:00:00Z",
+      "dropoff_time": "2025-01-05T02:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Initial food delivery to WAH0000003",
+      "warehouse_id": "WAH0000003",
+      "user_id": "DEL0000001",
+      "donation_id": "DON0000031",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000034",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-01-06T00:00:00Z",
+      "dropoff_time": "2025-01-06T02:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Initial food delivery to WAH0000006",
+      "warehouse_id": "WAH0000006",
+      "user_id": "DEL0000002",
+      "donation_id": "DON0000032",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000035",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-01-07T00:00:00Z",
+      "dropoff_time": "2025-01-07T02:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Initial food delivery to WAH0000007",
+      "warehouse_id": "WAH0000007",
+      "user_id": "DEL0000003",
+      "donation_id": "DON0000033",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000036",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-01-08T00:00:00Z",
+      "dropoff_time": "2025-01-08T02:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Initial food delivery to WAH0000008",
+      "warehouse_id": "WAH0000008",
+      "user_id": "DEL0000004",
+      "donation_id": "DON0000034",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000037",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-01-09T00:00:00Z",
+      "dropoff_time": "2025-01-09T02:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Initial food delivery to WAH0000009",
+      "warehouse_id": "WAH0000009",
+      "user_id": "DEL0000005",
+      "donation_id": "DON0000035",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000038",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-01-10T00:00:00Z",
+      "dropoff_time": "2025-01-10T02:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Initial food delivery to WAH0000010",
+      "warehouse_id": "WAH0000010",
+      "user_id": "DEL0000006",
+      "donation_id": "DON0000036",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000039",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-01-11T00:00:00Z",
+      "dropoff_time": "2025-01-11T02:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Initial food delivery to WAH0000011",
+      "warehouse_id": "WAH0000011",
+      "user_id": "DEL0000001",
+      "donation_id": "DON0000037",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000040",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-01-12T00:00:00Z",
+      "dropoff_time": "2025-01-12T02:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Initial food delivery to WAH0000012",
+      "warehouse_id": "WAH0000012",
+      "user_id": "DEL0000002",
+      "donation_id": "DON0000038",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000041",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-12-16T00:00:00Z",
+      "dropoff_time": "2025-12-16T03:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "in_transit",
+      "notes": "Distribution for distributed items from DON0000002",
+      "warehouse_id": "WAH0000002",
+      "user_id": "DEL0000002",
+      "donation_id": "DON0000002",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000042",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-12-17T00:00:00Z",
+      "dropoff_time": "2025-12-17T03:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "in_transit",
+      "notes": "Distribution for distributed items from DON0000005",
+      "warehouse_id": "WAH0000003",
+      "user_id": "DEL0000004",
+      "donation_id": "DON0000005",
+      "community_id": "COM0000002"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000043",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-12-18T00:00:00Z",
+      "dropoff_time": "2025-12-18T03:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "in_transit",
+      "notes": "Distribution for distributed items from DON0000000031",
+      "warehouse_id": "WAH0000003",
+      "user_id": "DEL0000002",
+      "donation_id": "DON0000031",
+      "community_id": "COM0000003"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000044",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-12-19T00:00:00Z",
+      "dropoff_time": "2025-12-19T03:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "in_transit",
+      "notes": "Distribution for distributed items from DON0000000031",
+      "warehouse_id": "WAH0000003",
+      "user_id": "DEL0000003",
+      "donation_id": "DON0000031",
+      "community_id": "COM0000004"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000045",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-12-20T00:00:00Z",
+      "dropoff_time": "2025-12-20T03:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "in_transit",
+      "notes": "Distribution for distributed items from DON0000000032",
+      "warehouse_id": "WAH0000006",
+      "user_id": "DEL0000003",
+      "donation_id": "DON0000032",
+      "community_id": "COM0000005"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000046",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-12-21T00:00:00Z",
+      "dropoff_time": "2025-12-21T03:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "in_transit",
+      "notes": "Distribution for distributed items from DON0000000032",
+      "warehouse_id": "WAH0000006",
+      "user_id": "DEL0000004",
+      "donation_id": "DON0000032",
+      "community_id": "COM0000006"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000047",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-12-22T00:00:00Z",
+      "dropoff_time": "2025-12-22T03:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "in_transit",
+      "notes": "Distribution for distributed items from DON0000000033",
+      "warehouse_id": "WAH0000007",
+      "user_id": "DEL0000004",
+      "donation_id": "DON0000033",
+      "community_id": "COM0000007"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000048",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-12-23T00:00:00Z",
+      "dropoff_time": "2025-12-23T03:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "in_transit",
+      "notes": "Distribution for distributed items from DON0000000033",
+      "warehouse_id": "WAH0000007",
+      "user_id": "DEL0000005",
+      "donation_id": "DON0000033",
+      "community_id": "COM0000008"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000049",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-12-24T00:00:00Z",
+      "dropoff_time": "2025-12-24T03:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "in_transit",
+      "notes": "Distribution for distributed items from DON0000000034",
+      "warehouse_id": "WAH0000008",
+      "user_id": "DEL0000005",
+      "donation_id": "DON0000034",
+      "community_id": "COM0000009"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000050",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-12-25T00:00:00Z",
+      "dropoff_time": "2025-12-25T03:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "in_transit",
+      "notes": "Distribution for distributed items from DON0000000034",
+      "warehouse_id": "WAH0000008",
+      "user_id": "DEL0000006",
+      "donation_id": "DON0000034",
+      "community_id": "COM0000010"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000051",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-12-05T00:00:00Z",
+      "dropoff_time": "2025-12-05T02:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Food delivery to WAH0000002 - expired",
+      "warehouse_id": "WAH0000002",
+      "user_id": "DEL0000001",
+      "donation_id": "DON0000039",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000052",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-12-04T00:00:00Z",
+      "dropoff_time": "2025-12-04T02:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Food delivery to WAH0000002 - expired",
+      "warehouse_id": "WAH0000002",
+      "user_id": "DEL0000002",
+      "donation_id": "DON0000040",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000053",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-12-03T00:00:00Z",
+      "dropoff_time": "2025-12-03T02:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Food delivery to WAH0000002 - expiring_3_days",
+      "warehouse_id": "WAH0000002",
+      "user_id": "DEL0000003",
+      "donation_id": "DON0000041",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000054",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-12-02T00:00:00Z",
+      "dropoff_time": "2025-12-02T02:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Food delivery to WAH0000002 - expiring_3_days",
+      "warehouse_id": "WAH0000002",
+      "user_id": "DEL0000004",
+      "donation_id": "DON0000042",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000055",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-12-01T00:00:00Z",
+      "dropoff_time": "2025-12-01T02:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Food delivery to WAH0000002 - expiring_3_days",
+      "warehouse_id": "WAH0000002",
+      "user_id": "DEL0000005",
+      "donation_id": "DON0000043",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000056",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-11-30T00:00:00Z",
+      "dropoff_time": "2025-11-30T02:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Food delivery to WAH0000002 - expiring_week",
+      "warehouse_id": "WAH0000002",
+      "user_id": "DEL0000006",
+      "donation_id": "DON0000044",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000057",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-11-29T00:00:00Z",
+      "dropoff_time": "2025-11-29T02:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Food delivery to WAH0000002 - expiring_week",
+      "warehouse_id": "WAH0000002",
+      "user_id": "DEL0000001",
+      "donation_id": "DON0000045",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000058",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-11-28T00:00:00Z",
+      "dropoff_time": "2025-11-28T02:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Food delivery to WAH0000002 - expiring_month",
+      "warehouse_id": "WAH0000002",
+      "user_id": "DEL0000002",
+      "donation_id": "DON0000046",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000059",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-11-27T00:00:00Z",
+      "dropoff_time": "2025-11-27T02:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Food delivery to WAH0000002 - expiring_month",
+      "warehouse_id": "WAH0000002",
+      "user_id": "DEL0000003",
+      "donation_id": "DON0000047",
+      "community_id": "COM0000001"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000060",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-11-26T00:00:00Z",
+      "dropoff_time": "2025-11-26T02:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Food delivery to WAH0000002 - expiring_month",
+      "warehouse_id": "WAH0000002",
+      "user_id": "DEL0000004",
+      "donation_id": "DON0000048",
       "community_id": "COM0000001"
     }
   }

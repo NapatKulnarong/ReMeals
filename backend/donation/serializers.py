@@ -10,9 +10,14 @@ class DonationSerializer(serializers.ModelSerializer):
     restaurant_name = serializers.CharField(source="restaurant.name", read_only=True)
     restaurant_branch = serializers.CharField(source="restaurant.branch_name", read_only=True)
     restaurant_address = serializers.CharField(source="restaurant.address", read_only=True)
+    created_by_user_id = serializers.SerializerMethodField()
     manual_restaurant_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
     manual_branch_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
     manual_restaurant_address = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    
+    def get_created_by_user_id(self, obj):
+        return obj.created_by.user_id if obj.created_by else None
+    
     class Meta:
         model = Donation
         fields = [
@@ -23,6 +28,7 @@ class DonationSerializer(serializers.ModelSerializer):
             "restaurant_name",
             "restaurant_branch",
             "restaurant_address",
+            "created_by_user_id",
             "manual_restaurant_name",
             "manual_branch_name",
             "manual_restaurant_address",
