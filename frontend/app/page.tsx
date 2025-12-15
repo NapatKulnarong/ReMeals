@@ -10872,7 +10872,12 @@ export default function Home() {
   const [showAuthModal, setShowAuthModal] = useState(false); // whether popup is visible
   const [authMode, setAuthMode] = useState<AuthMode>("signup"); // current auth tab
   // Initialize currentUser from localStorage using lazy initializer
+  // Check for browser environment to avoid SSR issues
   const [currentUser, setCurrentUser] = useState<LoggedUser | null>(() => {
+    // Only access localStorage in browser environment
+    if (typeof window === "undefined") {
+      return null;
+    }
     try {
       const storedUser = localStorage.getItem(USER_STORAGE_KEY);
       if (storedUser) {
@@ -10880,7 +10885,9 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Failed to load user from localStorage:", error);
-      localStorage.removeItem(USER_STORAGE_KEY);
+      if (typeof window !== "undefined") {
+        localStorage.removeItem(USER_STORAGE_KEY);
+      }
     }
     return null;
   });
@@ -10888,6 +10895,10 @@ export default function Home() {
 
   // Save user to localStorage whenever it changes
   useEffect(() => {
+    // Only access localStorage in browser environment
+    if (typeof window === "undefined") {
+      return;
+    }
     if (currentUser) {
       try {
         localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(currentUser));
@@ -10895,7 +10906,11 @@ export default function Home() {
         console.error("Failed to save user to localStorage:", error);
       }
     } else {
-      localStorage.removeItem(USER_STORAGE_KEY);
+      try {
+        localStorage.removeItem(USER_STORAGE_KEY);
+      } catch (error) {
+        console.error("Failed to remove user from localStorage:", error);
+      }
     }
   }, [currentUser]);
 

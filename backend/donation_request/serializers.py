@@ -40,16 +40,21 @@ class DonationRequestSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         community_name = validated_data.get("community_name", "").strip()
+        # Check if community_id was provided in the original data (before validation)
+        initial_data = getattr(self, 'initial_data', {})
+        community_id_provided = "community_id" in initial_data
         community_id = validated_data.get("community")
         
-        # If community_id is provided, use it
+        # If community_id is provided and valid, use it
         if community_id:
             community = community_id
-        elif community_name:
-            # Try to find existing community by name
+        elif not community_id_provided and community_name:
+            # Auto-creation: Only if community_id was NOT in the request at all
+            # This allows auto-creation when the field is completely omitted
+            # Try to find existing community by name first
             community = Community.objects.filter(name__iexact=community_name).first()
             
-            # If not found, create a new community
+            # If not found, create a new community (auto-creation feature)
             if not community:
                 # Get or create a default warehouse (use first available or create one)
                 warehouse = Warehouse.objects.first()
@@ -72,7 +77,12 @@ class DonationRequestSerializer(serializers.ModelSerializer):
                     warehouse_id=warehouse,
                 )
         else:
-            raise serializers.ValidationError({"community_name": "Community name is required."})
+            # community_id was in the request but is None/invalid, or missing when required
+            # For backward compatibility: require community_id when it was explicitly provided as None
+            # or when it's missing and we can't auto-create
+            raise serializers.ValidationError({
+                "community_id": "This field is required."
+            })
         
         validated_data["community"] = community
         # Set created_by from request context if available
