@@ -283,6 +283,7 @@ We follow conventional commits:
 ## 📈 Roadmap
 
 - [x] Database schema design
+- [x] UML diagram documentation
 - [x] ER diagram documentation
 - [x] User authentication system
 - [x] Donation management interface
@@ -290,7 +291,6 @@ We follow conventional commits:
 - [x] Delivery coordination system
 - [x] Impact analytics dashboard
 
-See the [open issues](https://github.com/yourusername/remeals/issues) for a full list of proposed features.
 
 ## 📝 License
 
