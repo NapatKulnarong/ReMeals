@@ -5962,7 +5962,7 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
 
   // Check if driver is available - only checks is_available field
   // Drivers can accept multiple deliveries at the same time (like Grab)
-  const isDriverAvailable = useCallback((driverId: string): boolean => {
+  const isDriverAvailable = useCallback<(driverId: string, pickupTime: string) => { available: boolean; reason?: string }>((driverId: string, pickupTime: string) => {
     const selectedStaff = staff.find(s => s.user_id === driverId);
     if (!selectedStaff) {
       return { available: false, reason: "Driver not found" };
@@ -6845,7 +6845,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
 
   // Check if driver is available - only checks is_available field
   // Drivers can accept multiple deliveries at the same time (like Grab)
-  const isDriverAvailable = useCallback((driverId: string): boolean => {
+  const isDriverAvailable = useCallback<(driverId: string, pickupTime: string) => { available: boolean; reason?: string }>((driverId: string, pickupTime: string) => {
     const selectedStaff = staff.find(s => s.user_id === driverId);
     if (!selectedStaff) {
       return { available: false, reason: "Driver not found" };
