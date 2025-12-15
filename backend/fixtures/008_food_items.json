@@ -928,5 +928,1605 @@
       "donation": "DON0000059",
       "chain": "CHA0000001"
     }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000136",
+    "fields": {
+      "name": "Fried Chicken",
+      "quantity": 150,
+      "unit": "portion",
+      "expire_date": "2025-01-12",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000137",
+    "fields": {
+      "name": "Chicken Wings",
+      "quantity": 150,
+      "unit": "portion",
+      "expire_date": "2025-01-14",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000138",
+    "fields": {
+      "name": "French Fries",
+      "quantity": 150,
+      "unit": "portion",
+      "expire_date": "2025-01-16",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000139",
+    "fields": {
+      "name": "Coleslaw",
+      "quantity": 150,
+      "unit": "portion",
+      "expire_date": "2025-01-18",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000140",
+    "fields": {
+      "name": "Chicken Burger",
+      "quantity": 150,
+      "unit": "portion",
+      "expire_date": "2025-01-19",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000031",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000141",
+    "fields": {
+      "name": "Grilled Chicken",
+      "quantity": 150,
+      "unit": "portion",
+      "expire_date": "2025-01-21",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000031",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000142",
+    "fields": {
+      "name": "Chicken Nuggets",
+      "quantity": 150,
+      "unit": "portion",
+      "expire_date": "2025-01-23",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000031",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000143",
+    "fields": {
+      "name": "Chicken Tenders",
+      "quantity": 150,
+      "unit": "portion",
+      "expire_date": "2025-01-25",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000031",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000144",
+    "fields": {
+      "name": "Mashed Potatoes",
+      "quantity": 150,
+      "unit": "portion",
+      "expire_date": "2025-01-26",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000039",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000145",
+    "fields": {
+      "name": "Corn on the Cob",
+      "quantity": 150,
+      "unit": "portion",
+      "expire_date": "2025-01-28",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000039",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000146",
+    "fields": {
+      "name": "Biscuits",
+      "quantity": 150,
+      "unit": "portion",
+      "expire_date": "2025-01-30",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000039",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000147",
+    "fields": {
+      "name": "Chicken Sandwich",
+      "quantity": 150,
+      "unit": "portion",
+      "expire_date": "2025-02-01",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000039",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000148",
+    "fields": {
+      "name": "Chicken Wrap",
+      "quantity": 150,
+      "unit": "portion",
+      "expire_date": "2025-02-02",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000049",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000149",
+    "fields": {
+      "name": "Salad",
+      "quantity": 150,
+      "unit": "portion",
+      "expire_date": "2025-02-04",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000049",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000150",
+    "fields": {
+      "name": "Chicken Rice",
+      "quantity": 150,
+      "unit": "portion",
+      "expire_date": "2025-02-06",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000049",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000151",
+    "fields": {
+      "name": "Chicken Curry",
+      "quantity": 150,
+      "unit": "portion",
+      "expire_date": "2025-02-08",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000049",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000152",
+    "fields": {
+      "name": "Chicken Soup",
+      "quantity": 150,
+      "unit": "portion",
+      "expire_date": "2025-02-09",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000059",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000153",
+    "fields": {
+      "name": "Chicken Salad",
+      "quantity": 150,
+      "unit": "portion",
+      "expire_date": "2025-02-11",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000059",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000154",
+    "fields": {
+      "name": "Chicken Pasta",
+      "quantity": 150,
+      "unit": "portion",
+      "expire_date": "2025-02-13",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000059",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000155",
+    "fields": {
+      "name": "Roasted Chicken",
+      "quantity": 150,
+      "unit": "portion",
+      "expire_date": "2025-02-15",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000059",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000156",
+    "fields": {
+      "name": "BBQ Chicken",
+      "quantity": 100,
+      "unit": "portion",
+      "expire_date": "2025-01-12",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000157",
+    "fields": {
+      "name": "Spicy Chicken",
+      "quantity": 100,
+      "unit": "portion",
+      "expire_date": "2025-01-13",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000158",
+    "fields": {
+      "name": "Honey Chicken",
+      "quantity": 100,
+      "unit": "portion",
+      "expire_date": "2025-01-14",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000159",
+    "fields": {
+      "name": "Lemon Chicken",
+      "quantity": 100,
+      "unit": "portion",
+      "expire_date": "2025-01-15",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000160",
+    "fields": {
+      "name": "Teriyaki Chicken",
+      "quantity": 100,
+      "unit": "portion",
+      "expire_date": "2025-01-16",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000161",
+    "fields": {
+      "name": "Orange Chicken",
+      "quantity": 100,
+      "unit": "portion",
+      "expire_date": "2025-01-17",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000162",
+    "fields": {
+      "name": "Sweet & Sour Chicken",
+      "quantity": 91,
+      "unit": "portion",
+      "expire_date": "2025-01-19",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000031",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000163",
+    "fields": {
+      "name": "Chicken Katsu",
+      "quantity": 91,
+      "unit": "portion",
+      "expire_date": "2025-01-20",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000031",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000164",
+    "fields": {
+      "name": "Chicken Satay",
+      "quantity": 91,
+      "unit": "portion",
+      "expire_date": "2025-01-21",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000031",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000165",
+    "fields": {
+      "name": "Chicken Skewers",
+      "quantity": 91,
+      "unit": "portion",
+      "expire_date": "2025-01-22",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000031",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000166",
+    "fields": {
+      "name": "Chicken Tacos",
+      "quantity": 91,
+      "unit": "portion",
+      "expire_date": "2025-01-23",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000031",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000167",
+    "fields": {
+      "name": "Chicken Quesadilla",
+      "quantity": 91,
+      "unit": "portion",
+      "expire_date": "2025-01-24",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000031",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000168",
+    "fields": {
+      "name": "Chicken Burrito",
+      "quantity": 108,
+      "unit": "portion",
+      "expire_date": "2025-01-26",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000039",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000169",
+    "fields": {
+      "name": "Chicken Fajitas",
+      "quantity": 108,
+      "unit": "portion",
+      "expire_date": "2025-01-27",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000039",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000170",
+    "fields": {
+      "name": "Chicken Enchiladas",
+      "quantity": 108,
+      "unit": "portion",
+      "expire_date": "2025-01-28",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000039",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000171",
+    "fields": {
+      "name": "Chicken Nachos",
+      "quantity": 108,
+      "unit": "portion",
+      "expire_date": "2025-01-29",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000039",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000172",
+    "fields": {
+      "name": "Chicken Pizza",
+      "quantity": 108,
+      "unit": "portion",
+      "expire_date": "2025-01-30",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000039",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000173",
+    "fields": {
+      "name": "Chicken Calzone",
+      "quantity": 108,
+      "unit": "portion",
+      "expire_date": "2025-01-31",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000039",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000174",
+    "fields": {
+      "name": "Chicken Panini",
+      "quantity": 95,
+      "unit": "portion",
+      "expire_date": "2025-02-02",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000049",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000175",
+    "fields": {
+      "name": "Chicken Sub",
+      "quantity": 95,
+      "unit": "portion",
+      "expire_date": "2025-02-03",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000049",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000176",
+    "fields": {
+      "name": "Chicken Wrap",
+      "quantity": 95,
+      "unit": "portion",
+      "expire_date": "2025-02-04",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000049",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000177",
+    "fields": {
+      "name": "Chicken Bowl",
+      "quantity": 95,
+      "unit": "portion",
+      "expire_date": "2025-02-05",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000049",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000178",
+    "fields": {
+      "name": "Chicken Platter",
+      "quantity": 95,
+      "unit": "portion",
+      "expire_date": "2025-02-06",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000049",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000179",
+    "fields": {
+      "name": "Chicken Combo",
+      "quantity": 95,
+      "unit": "portion",
+      "expire_date": "2025-02-07",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000049",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000180",
+    "fields": {
+      "name": "Chicken Meal",
+      "quantity": 104,
+      "unit": "portion",
+      "expire_date": "2025-02-09",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000059",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000181",
+    "fields": {
+      "name": "Chicken Box",
+      "quantity": 104,
+      "unit": "portion",
+      "expire_date": "2025-02-10",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000059",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000182",
+    "fields": {
+      "name": "Chicken Bucket",
+      "quantity": 104,
+      "unit": "portion",
+      "expire_date": "2025-02-11",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000059",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000183",
+    "fields": {
+      "name": "Chicken Family Pack",
+      "quantity": 104,
+      "unit": "portion",
+      "expire_date": "2025-02-12",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000059",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000184",
+    "fields": {
+      "name": "Fried Chicken",
+      "quantity": 104,
+      "unit": "portion",
+      "expire_date": "2025-02-13",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000059",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000185",
+    "fields": {
+      "name": "Chicken Wings",
+      "quantity": 104,
+      "unit": "portion",
+      "expire_date": "2025-02-14",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000059",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000186",
+    "fields": {
+      "name": "French Fries",
+      "quantity": 120,
+      "unit": "portion",
+      "expire_date": "2025-01-12",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000187",
+    "fields": {
+      "name": "Coleslaw",
+      "quantity": 120,
+      "unit": "portion",
+      "expire_date": "2025-01-13",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000188",
+    "fields": {
+      "name": "Chicken Burger",
+      "quantity": 120,
+      "unit": "portion",
+      "expire_date": "2025-01-14",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000189",
+    "fields": {
+      "name": "Grilled Chicken",
+      "quantity": 120,
+      "unit": "portion",
+      "expire_date": "2025-01-15",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000190",
+    "fields": {
+      "name": "Chicken Nuggets",
+      "quantity": 120,
+      "unit": "portion",
+      "expire_date": "2025-01-16",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000191",
+    "fields": {
+      "name": "Chicken Tenders",
+      "quantity": 110,
+      "unit": "portion",
+      "expire_date": "2025-01-19",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000031",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000192",
+    "fields": {
+      "name": "Mashed Potatoes",
+      "quantity": 110,
+      "unit": "portion",
+      "expire_date": "2025-01-20",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000031",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000193",
+    "fields": {
+      "name": "Corn on the Cob",
+      "quantity": 110,
+      "unit": "portion",
+      "expire_date": "2025-01-21",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000031",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000194",
+    "fields": {
+      "name": "Biscuits",
+      "quantity": 110,
+      "unit": "portion",
+      "expire_date": "2025-01-22",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000031",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000195",
+    "fields": {
+      "name": "Chicken Sandwich",
+      "quantity": 110,
+      "unit": "portion",
+      "expire_date": "2025-01-23",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000031",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000196",
+    "fields": {
+      "name": "Chicken Wrap",
+      "quantity": 130,
+      "unit": "portion",
+      "expire_date": "2025-01-26",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000039",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000197",
+    "fields": {
+      "name": "Salad",
+      "quantity": 130,
+      "unit": "portion",
+      "expire_date": "2025-01-27",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000039",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000198",
+    "fields": {
+      "name": "Chicken Rice",
+      "quantity": 130,
+      "unit": "portion",
+      "expire_date": "2025-01-28",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000039",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000199",
+    "fields": {
+      "name": "Chicken Curry",
+      "quantity": 130,
+      "unit": "portion",
+      "expire_date": "2025-01-29",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000039",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000200",
+    "fields": {
+      "name": "Chicken Soup",
+      "quantity": 130,
+      "unit": "portion",
+      "expire_date": "2025-01-30",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000039",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000201",
+    "fields": {
+      "name": "Chicken Salad",
+      "quantity": 115,
+      "unit": "portion",
+      "expire_date": "2025-02-02",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000049",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000202",
+    "fields": {
+      "name": "Chicken Pasta",
+      "quantity": 115,
+      "unit": "portion",
+      "expire_date": "2025-02-03",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000049",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000203",
+    "fields": {
+      "name": "Roasted Chicken",
+      "quantity": 115,
+      "unit": "portion",
+      "expire_date": "2025-02-04",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000049",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000204",
+    "fields": {
+      "name": "BBQ Chicken",
+      "quantity": 115,
+      "unit": "portion",
+      "expire_date": "2025-02-05",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000049",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000205",
+    "fields": {
+      "name": "Spicy Chicken",
+      "quantity": 115,
+      "unit": "portion",
+      "expire_date": "2025-02-06",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000049",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000206",
+    "fields": {
+      "name": "Honey Chicken",
+      "quantity": 125,
+      "unit": "portion",
+      "expire_date": "2025-02-09",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000059",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000207",
+    "fields": {
+      "name": "Lemon Chicken",
+      "quantity": 125,
+      "unit": "portion",
+      "expire_date": "2025-02-10",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000059",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000208",
+    "fields": {
+      "name": "Teriyaki Chicken",
+      "quantity": 125,
+      "unit": "portion",
+      "expire_date": "2025-02-11",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000059",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000209",
+    "fields": {
+      "name": "Orange Chicken",
+      "quantity": 125,
+      "unit": "portion",
+      "expire_date": "2025-02-12",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000059",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000210",
+    "fields": {
+      "name": "Sweet & Sour Chicken",
+      "quantity": 125,
+      "unit": "portion",
+      "expire_date": "2025-02-13",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000059",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000211",
+    "fields": {
+      "name": "Chicken Katsu",
+      "quantity": 105,
+      "unit": "portion",
+      "expire_date": "2025-02-16",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000060",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000212",
+    "fields": {
+      "name": "Chicken Satay",
+      "quantity": 105,
+      "unit": "portion",
+      "expire_date": "2025-02-17",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000060",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000213",
+    "fields": {
+      "name": "Chicken Skewers",
+      "quantity": 105,
+      "unit": "portion",
+      "expire_date": "2025-02-18",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000060",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000214",
+    "fields": {
+      "name": "Chicken Tacos",
+      "quantity": 105,
+      "unit": "portion",
+      "expire_date": "2025-02-19",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000060",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000215",
+    "fields": {
+      "name": "Chicken Quesadilla",
+      "quantity": 105,
+      "unit": "portion",
+      "expire_date": "2025-02-20",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000060",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000216",
+    "fields": {
+      "name": "Chicken Burrito",
+      "quantity": 140,
+      "unit": "portion",
+      "expire_date": "2025-02-23",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000061",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000217",
+    "fields": {
+      "name": "Chicken Fajitas",
+      "quantity": 140,
+      "unit": "portion",
+      "expire_date": "2025-02-24",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000061",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000218",
+    "fields": {
+      "name": "Chicken Enchiladas",
+      "quantity": 140,
+      "unit": "portion",
+      "expire_date": "2025-02-25",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000061",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000219",
+    "fields": {
+      "name": "Chicken Nachos",
+      "quantity": 140,
+      "unit": "portion",
+      "expire_date": "2025-02-26",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000061",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000220",
+    "fields": {
+      "name": "Chicken Pizza",
+      "quantity": 140,
+      "unit": "portion",
+      "expire_date": "2025-02-27",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000061",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000221",
+    "fields": {
+      "name": "Chicken Calzone",
+      "quantity": 118,
+      "unit": "portion",
+      "expire_date": "2025-03-02",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000062",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000222",
+    "fields": {
+      "name": "Chicken Panini",
+      "quantity": 118,
+      "unit": "portion",
+      "expire_date": "2025-03-03",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000062",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000223",
+    "fields": {
+      "name": "Chicken Sub",
+      "quantity": 118,
+      "unit": "portion",
+      "expire_date": "2025-03-04",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000062",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000224",
+    "fields": {
+      "name": "Chicken Wrap",
+      "quantity": 118,
+      "unit": "portion",
+      "expire_date": "2025-03-05",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000062",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000225",
+    "fields": {
+      "name": "Chicken Bowl",
+      "quantity": 118,
+      "unit": "portion",
+      "expire_date": "2025-03-06",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000062",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000226",
+    "fields": {
+      "name": "Chicken Platter",
+      "quantity": 132,
+      "unit": "portion",
+      "expire_date": "2025-03-09",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000063",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000227",
+    "fields": {
+      "name": "Chicken Combo",
+      "quantity": 132,
+      "unit": "portion",
+      "expire_date": "2025-03-10",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000063",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000228",
+    "fields": {
+      "name": "Chicken Meal",
+      "quantity": 132,
+      "unit": "portion",
+      "expire_date": "2025-03-11",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000063",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000229",
+    "fields": {
+      "name": "Chicken Box",
+      "quantity": 132,
+      "unit": "portion",
+      "expire_date": "2025-03-12",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000063",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000230",
+    "fields": {
+      "name": "Chicken Bucket",
+      "quantity": 132,
+      "unit": "portion",
+      "expire_date": "2025-03-13",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000063",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000231",
+    "fields": {
+      "name": "Chicken Family Pack",
+      "quantity": 110,
+      "unit": "portion",
+      "expire_date": "2025-03-16",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000232",
+    "fields": {
+      "name": "Fried Chicken",
+      "quantity": 110,
+      "unit": "portion",
+      "expire_date": "2025-03-17",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000233",
+    "fields": {
+      "name": "Chicken Wings",
+      "quantity": 110,
+      "unit": "portion",
+      "expire_date": "2025-03-18",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000234",
+    "fields": {
+      "name": "French Fries",
+      "quantity": 110,
+      "unit": "portion",
+      "expire_date": "2025-03-19",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000235",
+    "fields": {
+      "name": "Coleslaw",
+      "quantity": 110,
+      "unit": "portion",
+      "expire_date": "2025-03-20",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000001",
+      "chain": "CHA0000001"
+    }
   }
 ]

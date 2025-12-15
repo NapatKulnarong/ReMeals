@@ -11326,27 +11326,30 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState(0); // Start with home page
   const [showAuthModal, setShowAuthModal] = useState(false); // whether popup is visible
   const [authMode, setAuthMode] = useState<AuthMode>("signup"); // current auth tab
-  // Initialize currentUser from localStorage using lazy initializer
-  // Check for browser environment to avoid SSR issues
-  const [currentUser, setCurrentUser] = useState<LoggedUser | null>(() => {
-    // Only access localStorage in browser environment
-    if (typeof window === "undefined") {
-      return null;
-    }
+  // Initialize currentUser as null to avoid hydration mismatch
+  // Will be loaded from localStorage in useEffect after hydration
+  const [currentUser, setCurrentUser] = useState<LoggedUser | null>(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Load user from localStorage after hydration (client-side only)
+  useEffect(() => {
+    setIsHydrated(true);
     try {
       const storedUser = localStorage.getItem(USER_STORAGE_KEY);
       if (storedUser) {
-        return JSON.parse(storedUser) as LoggedUser;
+        setCurrentUser(JSON.parse(storedUser) as LoggedUser);
       }
     } catch (error) {
       console.error("Failed to load user from localStorage:", error);
-      if (typeof window !== "undefined") {
+      try {
         localStorage.removeItem(USER_STORAGE_KEY);
+      } catch {
+        // Ignore cleanup errors
       }
     }
-    return null;
-  });
-  const [showProfileModal, setShowProfileModal] = useState(false);
+  }, []);
+  
   const [hasInitializedAdminTab, setHasInitializedAdminTab] = useState(false);
 
   // Set default tab to donate page (1) for admin users on initial load only
@@ -11357,12 +11360,10 @@ export default function Home() {
     }
   }, [currentUser, activeTab, hasInitializedAdminTab]);
 
-  // Save user to localStorage whenever it changes
+  // Save user to localStorage whenever it changes (only after hydration)
   useEffect(() => {
-    // Only access localStorage in browser environment
-    if (typeof window === "undefined") {
-      return;
-    }
+    if (!isHydrated) return;
+    
     if (currentUser) {
       try {
         localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(currentUser));
@@ -11376,7 +11377,7 @@ export default function Home() {
         console.error("Failed to remove user from localStorage:", error);
       }
     }
-  }, [currentUser]);
+  }, [currentUser, isHydrated]);
 
   const navItems: NavItem[] = currentUser?.isAdmin
     ? [
