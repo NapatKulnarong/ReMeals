@@ -9,7 +9,6 @@ import {
   ArchiveBoxIcon,
   ShoppingBagIcon,
   HomeIcon,
-  DevicePhoneMobileIcon,
   WrenchScrewdriverIcon,
   InboxIcon,
   TruckIcon,
@@ -915,13 +914,13 @@ function AnimatedNumber({
   const prevValueRef = useRef(value);
 
   useEffect(() => {
-    // If value is 0, reset displayValue asynchronously to avoid setState in effect
+    // If value is 0, reset displayValue using requestAnimationFrame to avoid setState in effect
     if (value === 0) {
-      // Initialize display value
-      if (displayValue !== 0) {
+      // Initialize display value asynchronously
+      const frameId = requestAnimationFrame(() => {
         setDisplayValue(0);
-      }
-      return;
+      });
+      return () => cancelAnimationFrame(frameId);
     }
 
     prevValueRef.current = value;
@@ -969,13 +968,11 @@ function AnimatedNumber({
 // Community Impact Heat Map Component
 function CommunityImpactHeatMap({
   impactRecords,
-  foodItems,
   deliveries,
   communities,
   loading
 }: {
   impactRecords: ImpactRecord[];
-  foodItems: FoodItemApiRecord[];
   deliveries: DeliveryRecordApi[];
   communities: Community[];
   loading: boolean;
@@ -1764,7 +1761,6 @@ function HomePage({
             </div>
             <CommunityImpactHeatMap
               impactRecords={impactRecords}
-              foodItems={foodItems}
               deliveries={deliveries}
               communities={communities}
               loading={heatMapLoading || impactLoading}
@@ -2002,6 +1998,7 @@ function YourStatsSection({
             })),
             createdAt: donation.donated_at,
             ownerUserId: donation.created_by_user_id ?? null,
+            status: donation.status,
           })
         );
 
@@ -5309,7 +5306,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
   };
 
   // Get area for a delivery
-  const getDeliveryArea = (delivery: DeliveryRecordApi): string => {
+  const getDeliveryArea = useCallback((delivery: DeliveryRecordApi): string => {
     if (delivery.community_id && communities[delivery.community_id]) {
       return extractArea(communities[delivery.community_id].address);
     }
@@ -5317,7 +5314,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
       return extractArea(warehouses[delivery.warehouse_id].address);
     }
     return "Other";
-  };
+  }, [communities, warehouses]);
 
   // Get unique areas from deliveries
   const uniqueAreas = useMemo(() => {
@@ -5326,10 +5323,10 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
       areas.add(getDeliveryArea(d));
     });
     return Array.from(areas).sort();
-  }, [deliveries, communities, warehouses]);
+  }, [deliveries, getDeliveryArea]);
 
   // Filter function
-  const applyFilters = (delivery: DeliveryRecordApi): boolean => {
+  const applyFilters = useCallback((delivery: DeliveryRecordApi): boolean => {
     // Status filter
     if (statusFilter !== "all" && delivery.status !== statusFilter) return false;
 
@@ -5364,7 +5361,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
     }
 
     return true;
-  };
+  }, [statusFilter, staffFilter, areaFilter, dateFilter, getDeliveryArea]);
 
   const pickupTasks = useMemo(
     () =>
@@ -5372,7 +5369,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
         .filter((d) => d.delivery_type === "donation")
         .filter(applyFilters)
         .sort((a, b) => new Date(a.pickup_time).getTime() - new Date(b.pickup_time).getTime()),
-    [deliveries, statusFilter, staffFilter, areaFilter, dateFilter, communities, warehouses]
+    [deliveries, applyFilters]
   );
   const distributionTasks = useMemo(
     () =>
@@ -5380,7 +5377,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
         .filter((d) => d.delivery_type === "distribution")
         .filter(applyFilters)
         .sort((a, b) => new Date(a.pickup_time).getTime() - new Date(b.pickup_time).getTime()),
-    [deliveries, statusFilter, staffFilter, areaFilter, dateFilter, communities, warehouses]
+    [deliveries, applyFilters]
   );
 
   const formatFoodAmount = (donationId?: string | null) => {
