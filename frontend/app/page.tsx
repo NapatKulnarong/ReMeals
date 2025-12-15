@@ -1,6 +1,7 @@
 "use client";
 
-import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import Sidebar from "@/components/Sidebar";
 import {
   HeartIcon,
@@ -472,7 +473,7 @@ function CO2TrendChart({ data }: { data: Array<{ weekKey: string; co2: number; s
       return;
     }
 
-    const pointDelay = 200; // Time between each point in ms
+    // const pointDelay = 200; // Time between each point in ms (unused)
     const pointShowDuration = 150; // Show point for 150ms
     const pointHideDuration = 50; // Hide point for 50ms before next
 
@@ -532,13 +533,13 @@ function CO2TrendChart({ data }: { data: Array<{ weekKey: string; co2: number; s
     ? `M ${points.slice(0, animatedIndex + 1).map(p => `${p.x},${p.y}`).join(' L ')}`
     : '';
 
-  const pathData = points.length > 1
-    ? `M ${points.map(p => `${p.x},${p.y}`).join(' L ')}`
-    : '';
+  // const pathData = points.length > 1
+  //   ? `M ${points.map(p => `${p.x},${p.y}`).join(' L ')}`
+  //   : ''; // unused
 
-  const areaPath = points.length > 1
-    ? `M ${points[0].x} ${chartHeight - chartPadding.bottom} L ${pathData.replace('M ', '')} L ${points[points.length - 1].x} ${chartHeight - chartPadding.bottom} Z`
-    : '';
+  // const areaPath = points.length > 1
+  //   ? `M ${points[0].x} ${chartHeight - chartPadding.bottom} L ${pathData.replace('M ', '')} L ${points[points.length - 1].x} ${chartHeight - chartPadding.bottom} Z`
+  //   : ''; // unused
 
   const animatedAreaPath = points.length > 1 && animatedIndex >= 0 && animatedPathData
     ? `M ${points[0].x} ${chartHeight - chartPadding.bottom} L ${animatedPathData.replace('M ', '')} L ${points[Math.min(animatedIndex, points.length - 1)].x} ${chartHeight - chartPadding.bottom} Z`
@@ -640,8 +641,8 @@ function CO2TrendChart({ data }: { data: Array<{ weekKey: string; co2: number; s
 
           {points.map((point, idx) => {
             const isHovered = hoveredIndex === point.index;
-            const isVisible = !isAnimating || (visiblePoint === idx) || (idx <= animatedIndex && !isAnimating);
-            const shouldShow = idx <= animatedIndex && (visiblePoint === idx || !isAnimating);
+            // const isVisible = !isAnimating || (visiblePoint === idx) || (idx <= animatedIndex && !isAnimating); // unused
+            // const shouldShow = idx <= animatedIndex && (visiblePoint === idx || !isAnimating); // unused
 
             return (
               <g key={point.weekKey}>
@@ -910,8 +911,10 @@ function AnimatedNumber({
   decimals?: number;
 }) {
   const [displayValue, setDisplayValue] = useState(0);
+  const prevValueRef = useRef(value);
 
   useEffect(() => {
+    // If value is 0, reset displayValue asynchronously to avoid setState in effect
     if (value === 0) {
       // Initialize display value
       if (displayValue !== 0) {
@@ -919,6 +922,8 @@ function AnimatedNumber({
       }
       return;
     }
+
+    prevValueRef.current = value;
 
     let startTime: number | null = null;
     let animationFrameId: number;
@@ -1542,9 +1547,11 @@ function HomePage({
           <div className="relative flex items-center gap-5">
             {/* Spinning Logo in front of the text */}
             <div className="flex-shrink-0">
-              <img
+              <Image
                 src="/elements/logo_re-meals_2.png"
                 alt="Re-Meals Logo"
+                width={96}
+                height={96}
                 className="h-20 w-20 sm:h-24 sm:w-24 object-contain opacity-90"
                 style={{
                   animation: 'spin 5s linear infinite',
@@ -4945,10 +4952,30 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
               {formatFoodAmount(delivery.donation_id ?? undefined)}
             </p>
           </div>
-          {donation?.restaurant_address && (
+          {/* Pickup Address */}
+          {isPickup && donation?.restaurant_address && (
             <div className="col-span-2">
               <p className="text-[11px] uppercase tracking-wide text-gray-500">Pickup address</p>
               <p className="font-medium text-gray-800">{donation.restaurant_address}</p>
+            </div>
+          )}
+          {!isPickup && delivery.warehouse_id && warehouses[delivery.warehouse_id] && (
+            <div className="col-span-2">
+              <p className="text-[11px] uppercase tracking-wide text-gray-500">Pickup address</p>
+              <p className="font-medium text-gray-800">{warehouses[delivery.warehouse_id].address}</p>
+            </div>
+          )}
+          {/* Dropoff Address */}
+          {isPickup && delivery.warehouse_id && warehouses[delivery.warehouse_id] && (
+            <div className="col-span-2">
+              <p className="text-[11px] uppercase tracking-wide text-gray-500">Dropoff address</p>
+              <p className="font-medium text-gray-800">{warehouses[delivery.warehouse_id].address}</p>
+            </div>
+          )}
+          {!isPickup && delivery.community_id && communities[delivery.community_id] && (
+            <div className="col-span-2">
+              <p className="text-[11px] uppercase tracking-wide text-gray-500">Dropoff address</p>
+              <p className="font-medium text-gray-800">{communities[delivery.community_id].address}</p>
             </div>
           )}
           {isPickup && items.length > 0 && (
@@ -5346,6 +5373,65 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
     [foodItems, isPickupItemExpired]
   );
 
+  // Helper function to extract province from address
+  const extractProvince = useCallback((address: string): string => {
+    const lowerAddress = address.toLowerCase();
+    if (lowerAddress.includes("phra nakhon si ayutthaya") || lowerAddress.includes("ayutthaya")) return "Phra Nakhon Si Ayutthaya";
+    if (lowerAddress.includes("nakhon pathom")) return "Nakhon Pathom";
+    if (lowerAddress.includes("samut sakhon")) return "Samut Sakhon";
+    if (lowerAddress.includes("samut prakan")) return "Samut Prakan";
+    if (lowerAddress.includes("pathum thani")) return "Pathum Thani";
+    if (lowerAddress.includes("nonthaburi")) return "Nonthaburi";
+    if (lowerAddress.includes("bangkok")) return "Bangkok";
+    return "Other";
+  }, []);
+
+  // Helper to parse time string (HH:MM:SS) to milliseconds
+  const parseTimeToMs = useCallback((timeStr: string): number => {
+    const parts = timeStr.split(':').map(Number);
+    return (parts[0] * 60 * 60 + parts[1] * 60 + (parts[2] || 0)) * 1000;
+  }, []);
+
+  // Check if driver is available at the given pickup time
+  const isDriverAvailable = useCallback((driverId: string, pickupTime: string): { available: boolean; reason?: string } => {
+    const selectedStaff = staff.find(s => s.user_id === driverId);
+    if (!selectedStaff) {
+      return { available: false, reason: "Driver not found" };
+    }
+
+    // Check is_available field
+    if (!selectedStaff.is_available) {
+      return { available: false, reason: "Driver is not available" };
+    }
+
+    // Check for overlapping deliveries
+    const pickupDateTime = new Date(pickupTime);
+    const dropoffDuration = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
+    const dropoffDateTime = new Date(pickupDateTime.getTime() + dropoffDuration);
+
+    const conflictingDelivery = deliveries.find(d => {
+      if (d.user_id !== driverId || d.delivery_id === editingDeliveryId) return false;
+      
+      const existingPickup = new Date(d.pickup_time);
+      const existingDropoffDuration = d.dropoff_time 
+        ? parseTimeToMs(d.dropoff_time)
+        : 2 * 60 * 60 * 1000; // Default 2 hours
+      const existingDropoff = new Date(existingPickup.getTime() + existingDropoffDuration);
+
+      // Check if times overlap
+      return !(dropoffDateTime <= existingPickup || pickupDateTime >= existingDropoff);
+    });
+
+    if (conflictingDelivery) {
+      return { 
+        available: false, 
+        reason: `Driver has a conflicting delivery at ${new Date(conflictingDelivery.pickup_time).toLocaleString()}` 
+      };
+    }
+
+    return { available: true };
+  }, [staff, deliveries, editingDeliveryId, parseTimeToMs]);
+
   useEffect(() => {
     const next: Record<string, { notes: string }> = {};
     deliveries.forEach((d) => {
@@ -5411,6 +5497,39 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
       }
       if (!pickupForm.pickupTime) {
         throw new Error("Pickup time is required.");
+      }
+
+      // Check driver availability
+      const availability = isDriverAvailable(pickupForm.userId, pickupForm.pickupTime);
+      if (!availability.available) {
+        throw new Error(`Driver is not available: ${availability.reason}`);
+      }
+
+      // Check province match for donation type
+      const selectedDonation = donations.find(d => d.donation_id === pickupForm.donationId);
+      const selectedWarehouse = warehouses.find(w => w.warehouse_id === pickupForm.warehouseId);
+      const selectedStaff = staff.find(s => s.user_id === pickupForm.userId);
+      
+      if (selectedDonation && selectedWarehouse && selectedStaff) {
+        const restaurant = restaurants.find(r => r.restaurant_id === selectedDonation.restaurant);
+        if (restaurant) {
+          const pickupProvince = extractProvince(restaurant.address);
+          const dropoffProvince = extractProvince(selectedWarehouse.address);
+          
+          // Check if provinces match
+          if (pickupProvince !== dropoffProvince) {
+            throw new Error(`Pickup and dropoff must be in the same province. Pickup: ${pickupProvince}, Dropoff: ${dropoffProvince}`);
+          }
+
+          // Check if driver's assigned area matches
+          const driverProvince = selectedStaff.assigned_area;
+          if (driverProvince && driverProvince !== pickupProvince && driverProvince !== "Bangkok" && pickupProvince !== "Bangkok") {
+            // Allow DEL0000005 to handle both Bangkok and Ayutthaya
+            if (!(selectedStaff.user_id === "DEL0000005" && (pickupProvince === "Bangkok" || pickupProvince === "Ayutthaya"))) {
+              throw new Error(`Driver is assigned to ${driverProvince}, but delivery is in ${pickupProvince}`);
+            }
+          }
+        }
       }
       const payload: Record<string, unknown> = {
         delivery_type: "donation",
@@ -5668,7 +5787,7 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
                       <option value="">Assign delivery staff</option>
                       {staff.map((member) => (
                         <option key={member.user_id} value={member.user_id}>
-                          {member.name || member.username} ({member.assigned_area || "area n/a"})
+                          {member.name || member.username} {member.assigned_area ? `(${member.assigned_area})` : ''}
                         </option>
                       ))}
                     </select>
@@ -6084,6 +6203,65 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
     setStaffInputs(next);
   }, [deliveries]);
 
+  // Helper function to extract province from address
+  const extractProvince = useCallback((address: string): string => {
+    const lowerAddress = address.toLowerCase();
+    if (lowerAddress.includes("phra nakhon si ayutthaya") || lowerAddress.includes("ayutthaya")) return "Phra Nakhon Si Ayutthaya";
+    if (lowerAddress.includes("nakhon pathom")) return "Nakhon Pathom";
+    if (lowerAddress.includes("samut sakhon")) return "Samut Sakhon";
+    if (lowerAddress.includes("samut prakan")) return "Samut Prakan";
+    if (lowerAddress.includes("pathum thani")) return "Pathum Thani";
+    if (lowerAddress.includes("nonthaburi")) return "Nonthaburi";
+    if (lowerAddress.includes("bangkok")) return "Bangkok";
+    return "Other";
+  }, []);
+
+  // Helper to parse time string (HH:MM:SS) to milliseconds
+  const parseTimeToMs = useCallback((timeStr: string): number => {
+    const parts = timeStr.split(':').map(Number);
+    return (parts[0] * 60 * 60 + parts[1] * 60 + (parts[2] || 0)) * 1000;
+  }, []);
+
+  // Check if driver is available at the given pickup time
+  const isDriverAvailable = useCallback((driverId: string, pickupTime: string): { available: boolean; reason?: string } => {
+    const selectedStaff = staff.find(s => s.user_id === driverId);
+    if (!selectedStaff) {
+      return { available: false, reason: "Driver not found" };
+    }
+
+    // Check is_available field
+    if (!selectedStaff.is_available) {
+      return { available: false, reason: "Driver is not available" };
+    }
+
+    // Check for overlapping deliveries
+    const pickupDateTime = new Date(pickupTime);
+    const dropoffDuration = 3 * 60 * 60 * 1000; // 3 hours in milliseconds (distribution default)
+    const dropoffDateTime = new Date(pickupDateTime.getTime() + dropoffDuration);
+
+    const conflictingDelivery = deliveries.find(d => {
+      if (d.user_id !== driverId) return false;
+      
+      const existingPickup = new Date(d.pickup_time);
+      const existingDropoffDuration = d.dropoff_time 
+        ? parseTimeToMs(d.dropoff_time)
+        : 3 * 60 * 60 * 1000; // Default 3 hours
+      const existingDropoff = new Date(existingPickup.getTime() + existingDropoffDuration);
+
+      // Check if times overlap
+      return !(dropoffDateTime <= existingPickup || pickupDateTime >= existingDropoff);
+    });
+
+    if (conflictingDelivery) {
+      return { 
+        available: false, 
+        reason: `Driver has a conflicting delivery at ${new Date(conflictingDelivery.pickup_time).toLocaleString()}` 
+      };
+    }
+
+    return { available: true };
+  }, [staff, deliveries, parseTimeToMs]);
+
   const handleSubmitDistribution = async () => {
     setSubmitting(true);
     setNotice(null);
@@ -6124,6 +6302,36 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
         foodIdForBackend = `FOO${digits.padStart(7, "0")}`;
       }
       
+
+      // Check driver availability
+      const availability = isDriverAvailable(distributionForm.userId, distributionForm.pickupTime);
+      if (!availability.available) {
+        throw new Error(`Driver is not available: ${availability.reason}`);
+      }
+
+      // Check province match for distribution type
+      const selectedWarehouse = warehouses.find(w => w.warehouse_id === distributionForm.warehouseId);
+      const selectedCommunity = communities.find(c => c.community_id === distributionForm.communityId);
+      const selectedStaff = staff.find(s => s.user_id === distributionForm.userId);
+      
+      if (selectedWarehouse && selectedCommunity && selectedStaff) {
+        const pickupProvince = extractProvince(selectedWarehouse.address);
+        const dropoffProvince = extractProvince(selectedCommunity.address);
+        
+        // Check if provinces match
+        if (pickupProvince !== dropoffProvince) {
+          throw new Error(`Pickup and dropoff must be in the same province. Pickup: ${pickupProvince}, Dropoff: ${dropoffProvince}`);
+        }
+
+        // Check if driver's assigned area matches
+        const driverProvince = selectedStaff.assigned_area;
+        if (driverProvince && driverProvince !== pickupProvince && driverProvince !== "Bangkok" && pickupProvince !== "Bangkok") {
+          // Allow DEL0000005 to handle both Bangkok and Ayutthaya
+          if (!(selectedStaff.user_id === "DEL0000005" && (pickupProvince === "Bangkok" || pickupProvince === "Ayutthaya"))) {
+            throw new Error(`Driver is assigned to ${driverProvince}, but delivery is in ${pickupProvince}`);
+          }
+        }
+      }
       const payload: Record<string, unknown> = {
         delivery_type: "distribution",
         pickup_time: pickupDate.toISOString(),
@@ -6359,7 +6567,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
                       <option value="">Assign delivery staff</option>
                       {staff.map((member) => (
                         <option key={member.user_id} value={member.user_id}>
-                          {member.name || member.username} ({member.assigned_area || "area n/a"})
+                          {member.name || member.username} {member.assigned_area ? `(${member.assigned_area})` : ''}
                         </option>
                       ))}
                     </select>
@@ -6477,7 +6685,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
                               </span>
                             </div>
                             <p className="text-xs text-gray-500 mt-1">
-                              Available: {selectedItem.quantity} {selectedItem.unit} | Example: "15.5" or "25.67" (unit will be added automatically)
+                              Available: {selectedItem.quantity} {selectedItem.unit} | Example: &quot;15.5&quot; or &quot;25.67&quot; (unit will be added automatically)
                             </p>
                           </div>
                         ) : null;
@@ -6914,15 +7122,15 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
     return donationId;
   };
 
-  const groupItemsByCategory = (items: FoodItemApiRecord[]) => {
-    const groups: Record<string, FoodItemApiRecord[]> = {};
-    for (const it of items) {
-      const cat = getCategory(it);
-      if (!groups[cat]) groups[cat] = [];
-      groups[cat].push(it);
-    }
-    return groups;
-  };
+  // const groupItemsByCategory = (items: FoodItemApiRecord[]) => {
+  //   const groups: Record<string, FoodItemApiRecord[]> = {};
+  //   for (const it of items) {
+  //     const cat = getCategory(it);
+  //     if (!groups[cat]) groups[cat] = [];
+  //     groups[cat].push(it);
+  //   }
+  //   return groups;
+  // }; // unused
 
   const visibleWarehouses = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();

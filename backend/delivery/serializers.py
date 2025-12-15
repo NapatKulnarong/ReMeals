@@ -1,5 +1,6 @@
 from datetime import datetime, time
 
+from django.utils import timezone as django_timezone
 from rest_framework import serializers
 from rest_framework.fields import DateTimeField
 
@@ -36,8 +37,10 @@ class FlexibleDateTimeField(DateTimeField):
                                     base_date = pickup_dt.date() if isinstance(pickup_dt, datetime) else datetime.now().date()
                                 except (ValueError, AttributeError):
                                     pass
-                    # Combine date with time
+                    # Combine date with time and add timezone
                     combined = datetime.combine(base_date, time_obj)
+                    # Make timezone-aware using Django's current timezone
+                    combined = django_timezone.make_aware(combined)
                     # Convert to ISO format string
                     return combined.isoformat()
                 except (ValueError, AttributeError):
