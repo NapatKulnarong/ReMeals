@@ -4287,6 +4287,8 @@ function DonationRequestSection(props: {
   const [deletingRequestId, setDeletingRequestId] = useState<string | null>(null);
   const [deliveries, setDeliveries] = useState<DeliveryRecordApi[]>([]);
   const [communities, setCommunities] = useState<Community[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [myRequestsOnly, setMyRequestsOnly] = useState(false);
 
   // Auto-populate contact phone from user profile
   useEffect(() => {
@@ -4427,6 +4429,40 @@ function DonationRequestSection(props: {
   const unacceptedRequests = useMemo(() => {
     return requests.filter((request) => !isRequestAccepted(request));
   }, [requests, isRequestAccepted]);
+
+  // Apply search and "My requests only" filter
+  const filteredRequests = useMemo(() => {
+    let filtered = [...unacceptedRequests];
+
+    // Filter by "My requests only" toggle
+    if (myRequestsOnly && currentUser?.userId) {
+      filtered = filtered.filter(
+        (request) => request.ownerUserId === currentUser.userId
+      );
+    }
+
+    // Filter by search query (community, title, address)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((request) => {
+        // Check community name
+        if (request.communityName.toLowerCase().includes(query)) {
+          return true;
+        }
+        // Check request title
+        if (request.requestTitle.toLowerCase().includes(query)) {
+          return true;
+        }
+        // Check recipient address
+        if (request.recipientAddress.toLowerCase().includes(query)) {
+          return true;
+        }
+        return false;
+      });
+    }
+
+    return filtered;
+  }, [unacceptedRequests, searchQuery, myRequestsOnly, currentUser?.userId]);
 
   const resetForm = () => {
     setForm(createDonationRequestForm());
@@ -4765,8 +4801,74 @@ function DonationRequestSection(props: {
             </h3>
           </div>
           <span className="text-xs font-semibold text-gray-500">
-            {unacceptedRequests.length} total
+            {searchQuery || myRequestsOnly
+              ? `${filteredRequests.length}/${unacceptedRequests.length} total`
+              : `${unacceptedRequests.length} total`}
           </span>
+        </div>
+
+        {/* Search and Filter Controls */}
+        <div className="mb-4 flex flex-col gap-3 flex-shrink-0">
+          {/* Search Bar */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by community, title, or address..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-lg border border-[#E6B9A2] bg-white px-4 py-2.5 pl-10 text-sm text-gray-700 placeholder-gray-400 outline-none focus:border-[#B86A49] focus:ring-2 focus:ring-[#B86A49]/20"
+            />
+            <svg
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                title="Clear search"
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* My Requests Only Toggle */}
+          {currentUser && (
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={myRequestsOnly}
+                onChange={(e) => setMyRequestsOnly(e.target.checked)}
+                className="h-4 w-4 rounded border-[#E6B9A2] text-[#B86A49] focus:ring-2 focus:ring-[#B86A49]/20"
+              />
+              <span className="text-sm font-medium text-gray-700">
+                My requests only
+              </span>
+            </label>
+          )}
         </div>
 
         {requestsError && (
@@ -4778,13 +4880,15 @@ function DonationRequestSection(props: {
             <p className="rounded-2xl border border-dashed border-gray-300 bg-white/80 p-6 text-sm text-gray-500">
               Loading requests...
             </p>
-          ) : unacceptedRequests.length === 0 ? (
+          ) : filteredRequests.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-gray-300 bg-white/80 p-6 text-sm text-gray-500">
-              Captured requests will appear here for dispatch review.
+              {searchQuery || myRequestsOnly
+                ? "No requests match your search criteria."
+                : "Captured requests will appear here for dispatch review."}
             </p>
           ) : (
             <div className="space-y-4">
-              {unacceptedRequests.map((request) => (
+              {filteredRequests.map((request) => (
                 <article
                   key={request.id}
                   className="rounded-2xl border border-[#E6B9A2] bg-[#F8F3EE] p-5 shadow-sm"
