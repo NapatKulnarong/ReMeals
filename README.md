@@ -243,7 +243,14 @@ remeals/
 │
 ├── .env.example
 │
+├── .github/
+│   └── pull_request_template.md
+│
 ├── .gitignore
+│
+├── CODE_OF_CONDUCT.md
+│
+├── CONTRIBUTING.md
 │
 ├── docker-compose.yml
 │
@@ -251,7 +258,9 @@ remeals/
 │
 ├── LICENSE
 │
-└── README.md
+├── README.md
+│
+└── SECURITY.md
 ```
 
 ## 🤝 Contributing
@@ -264,7 +273,10 @@ Contributions are what make the open source community amazing! Any contributions
 4. Push to the Branch (`git push origin feat/amazing-feature`)
 5. Open a Pull Request
 
-Please read our [Development Guide](./docs/DEVELOPMENT.md) for detailed contributing guidelines, code style, and best practices.
+**Please read:**
+- **[Contributing Guide](./CONTRIBUTING.md)** - How to contribute to the project
+- **[Code of Conduct](./CODE_OF_CONDUCT.md)** - Our community standards
+- **[Development Guide](./docs/DEVELOPMENT.md)** - Detailed development guidelines, code style, and best practices
 
 ### Commit Convention
 
@@ -288,6 +300,10 @@ We follow conventional commits:
 - [x] Delivery coordination system
 - [x] Impact analytics dashboard
 
+
+## 🔒 Security
+
+If you discover a security vulnerability, please **do not** open a public issue. Instead, please send an email to the project maintainers. See our [Security Policy](./SECURITY.md) for details.
 
 ## 📝 License
 
