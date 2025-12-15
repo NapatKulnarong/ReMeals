@@ -884,13 +884,13 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
     "Content-Type": "application/json",
     ...(options.headers ?? {}),
   };
-  
+
   let response: Response;
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: mergedHeaders,
-  });
+      ...options,
+      headers: mergedHeaders,
+    });
   } catch (error) {
     // Handle network errors (backend not available, CORS, etc.)
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -926,15 +926,15 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
 }
 
 // Animated Number Component
-function AnimatedNumber({ 
-  value, 
-  duration = 2000, 
+function AnimatedNumber({
+  value,
+  duration = 2000,
   suffix = "",
   className = "",
-  decimals = 1 
-}: { 
-  value: number; 
-  duration?: number; 
+  decimals = 1
+}: {
+  value: number;
+  duration?: number;
   suffix?: string;
   className?: string;
   decimals?: number;
@@ -964,7 +964,7 @@ function AnimatedNumber({
 
       const elapsed = timestamp - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      
+
       // Easing function for smooth animation
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
       const currentValue = value * easeOutQuart;
@@ -1013,13 +1013,13 @@ function CommunityImpactHeatMap({
     if (!foodId) return "";
     const foodIdStr = String(foodId).trim();
     if (!foodIdStr) return "";
-    
+
     // If it already starts with FOO, normalize the digits
     if (foodIdStr.startsWith("FOO") || foodIdStr.startsWith("foo")) {
       const digits = foodIdStr.replace(/\D/g, '');
       return digits ? `FOO${digits.padStart(7, '0')}` : foodIdStr.toUpperCase();
     }
-    
+
     // Extract digits and format as FOO0000000
     const digits = foodIdStr.replace(/\D/g, '');
     if (!digits) return foodIdStr;
@@ -1039,21 +1039,21 @@ function CommunityImpactHeatMap({
     // Build delivery map with multiple key formats for flexible lookup
     const foodToDelivery = new Map<string, DeliveryRecordApi[]>();
     const deliveryKeys = new Set<string>();
-    
+
     deliveries.forEach(delivery => {
       if (delivery.delivery_type === "distribution" && delivery.food_item && delivery.status === "delivered") {
         const foodItemValue = String(delivery.food_item).trim();
         if (!foodItemValue) return;
-        
+
         const normalizedFoodId = normalizeFoodId(foodItemValue);
-        
+
         // Store with normalized key
         if (!foodToDelivery.has(normalizedFoodId)) {
           foodToDelivery.set(normalizedFoodId, []);
         }
         foodToDelivery.get(normalizedFoodId)!.push(delivery);
         deliveryKeys.add(normalizedFoodId);
-        
+
         // Also store with original format for lookup
         if (foodItemValue !== normalizedFoodId) {
           if (!foodToDelivery.has(foodItemValue)) {
@@ -1085,21 +1085,21 @@ function CommunityImpactHeatMap({
       } else if (impact.food && typeof impact.food === "object") {
         foodIdValue = (impact.food as any).food_id || (impact.food as any).id || "";
       }
-      
+
       if (!foodIdValue) {
         skippedNoFood++;
         return;
       }
-      
+
       const normalizedFoodId = normalizeFoodId(foodIdValue);
-      
+
       // Try multiple lookup strategies
-      const distributionDeliveries = foodToDelivery.get(normalizedFoodId) || 
-                                    foodToDelivery.get(foodIdValue) ||
-                                    foodToDelivery.get(foodIdValue.toUpperCase()) ||
-                                    foodToDelivery.get(foodIdValue.toLowerCase()) ||
-                                    [];
-      
+      const distributionDeliveries = foodToDelivery.get(normalizedFoodId) ||
+        foodToDelivery.get(foodIdValue) ||
+        foodToDelivery.get(foodIdValue.toUpperCase()) ||
+        foodToDelivery.get(foodIdValue.toLowerCase()) ||
+        [];
+
       if (distributionDeliveries.length === 0) {
         skippedNoDeliveries++;
         if (skippedNoDeliveries <= 3) {
@@ -1112,12 +1112,12 @@ function CommunityImpactHeatMap({
         }
         return;
       }
-      
+
       matchedImpacts++;
 
       let totalQuantity = 0;
       const deliveryQuantities = new Map<string, number>();
-      
+
       distributionDeliveries.forEach(delivery => {
         if (delivery.delivery_quantity) {
           const quantityMatch = delivery.delivery_quantity.match(/^(\d+(?:\.\d+)?)/);
@@ -1136,15 +1136,15 @@ function CommunityImpactHeatMap({
         if (delivery.community_id && delivery.dropoff_time) {
           const deliveryDate = new Date(delivery.dropoff_time);
           const monthKey = `${deliveryDate.getFullYear()}-${String(deliveryDate.getMonth() + 1).padStart(2, '0')}`;
-          
+
           const key = `${delivery.community_id}|${monthKey}`;
           const current = map.get(key) || 0;
-          
-          const deliveryQty = distributeEqually 
-            ? 1 
+
+          const deliveryQty = distributeEqually
+            ? 1
             : (deliveryQuantities.get(delivery.delivery_id) || 0);
           const proportionalImpact = (impact.meals_saved || 0) * (deliveryQty / divisor);
-          
+
           map.set(key, current + proportionalImpact);
         }
       });
@@ -1184,7 +1184,7 @@ function CommunityImpactHeatMap({
     communityMonthMap.forEach((value, key) => {
       const [communityId, monthKey] = key.split('|');
       total += value;
-      
+
       if (communityId) {
         commTotals.set(communityId, (commTotals.get(communityId) || 0) + value);
       }
@@ -1276,7 +1276,7 @@ function CommunityImpactHeatMap({
                     const key = `${communityId}|${month}`;
                     const value = communityMonthMap.get(key) || 0;
                     const isHovered = hoveredCell?.community === communityId && hoveredCell?.month === month;
-                    
+
                     return (
                       <td
                         key={month}
@@ -1287,7 +1287,7 @@ function CommunityImpactHeatMap({
                       >
                         {value > 0 ? (
                           <span className="font-semibold text-gray-900">
-                            {value >= 1 
+                            {value >= 1
                               ? value.toLocaleString(undefined, { maximumFractionDigits: 0 })
                               : value.toFixed(1)}
                           </span>
@@ -1302,7 +1302,7 @@ function CommunityImpactHeatMap({
                       const commTotal = communityTotals.get(communityId) || 0;
                       return commTotal > 0 ? (
                         <span className="text-gray-900">
-                          {commTotal >= 1 
+                          {commTotal >= 1
                             ? commTotal.toLocaleString(undefined, { maximumFractionDigits: 0 })
                             : commTotal.toFixed(1)}
                         </span>
@@ -1327,7 +1327,7 @@ function CommunityImpactHeatMap({
                   >
                     {monthTotal > 0 ? (
                       <span className="font-bold text-gray-900">
-                        {monthTotal >= 1 
+                        {monthTotal >= 1
                           ? monthTotal.toLocaleString(undefined, { maximumFractionDigits: 0 })
                           : monthTotal.toFixed(1)}
                       </span>
@@ -1339,7 +1339,7 @@ function CommunityImpactHeatMap({
               })}
               <td className="px-3 py-3 text-center text-xs border-t-2 border-gray-300 bg-gray-50">
                 <span className="font-bold text-gray-900">
-                  {grandTotal >= 1 
+                  {grandTotal >= 1
                     ? grandTotal.toLocaleString(undefined, { maximumFractionDigits: 0 })
                     : grandTotal.toFixed(1)}
                 </span>
@@ -1348,7 +1348,7 @@ function CommunityImpactHeatMap({
           </tbody>
         </table>
       </div>
-      
+
       <div className="mt-4 flex items-center justify-between text-xs text-gray-600">
         <div className="flex items-center gap-4">
           <span>Intensity:</span>
@@ -1419,7 +1419,7 @@ function HomePage({
   // Load all dashboard data in parallel for faster loading
   useEffect(() => {
     let ignore = false;
-    
+
     async function loadAllDashboardData() {
       // Set all loading states
       setImpactLoading(true);
@@ -1485,16 +1485,16 @@ function HomePage({
 
         for (const result of [impactResult1, impactResult2]) {
           if (result.status === "fulfilled") {
-          try {
+            try {
               loaded = normalizeImpactData(result.value);
-            if (loaded.length) break;
-          } catch (err) {
+              if (loaded.length) break;
+            } catch (err) {
               impactError = err;
-          }
+            }
           } else {
             impactError = result.reason;
-        }
           }
+        }
 
         if (loaded.length) {
           setImpactRecords(loaded);
@@ -1504,7 +1504,7 @@ function HomePage({
           );
         }
         // Always clear loading state
-          setImpactLoading(false);
+        setImpactLoading(false);
 
         // Process leaderboard data - update state as soon as available
         if (restaurantsData.status === "fulfilled") {
@@ -1627,13 +1627,13 @@ function HomePage({
     if (!foodId) return "";
     const foodIdStr = String(foodId).trim();
     if (!foodIdStr) return "";
-    
+
     // If it already starts with FOO, normalize the digits
     if (foodIdStr.startsWith("FOO") || foodIdStr.startsWith("foo")) {
       const digits = foodIdStr.replace(/\D/g, '');
       return digits ? `FOO${digits.padStart(7, '0')}` : foodIdStr.toUpperCase();
     }
-    
+
     // Handle F{4digits} format from FoodItemSerializer (e.g., F0001)
     if (foodIdStr.startsWith("F") && foodIdStr.length <= 5) {
       const digits = foodIdStr.replace(/\D/g, '');
@@ -1641,7 +1641,7 @@ function HomePage({
         return `FOO${digits.padStart(7, '0')}`;
       }
     }
-    
+
     // Extract digits and format as FOO0000000
     const digits = foodIdStr.replace(/\D/g, '');
     if (!digits) return foodIdStr;
@@ -1688,23 +1688,23 @@ function HomePage({
       if (foodId) {
         const originalStr = String(foodId).trim();
         const normalized = normalizeFoodId(foodId);
-        
+
         // Store with normalized key (primary lookup) - this handles F0001 -> FOO0000001
         foodItemMap.set(normalized, f);
-        
+
         // Also store with original format for flexible lookup
         foodItemMap.set(originalStr, f);
-        
+
         // Store with uppercase version if different
         if (originalStr !== originalStr.toUpperCase()) {
           foodItemMap.set(originalStr.toUpperCase(), f);
         }
-        
+
         // Store with lowercase version if different
         if (originalStr !== originalStr.toLowerCase()) {
           foodItemMap.set(originalStr.toLowerCase(), f);
         }
-        
+
         // Also store the normalized version of the original (in case original is already normalized)
         if (originalStr !== normalized) {
           // If original is F0001 format, normalized will be FOO0000001
@@ -1716,7 +1716,7 @@ function HomePage({
         }
       }
     });
-    
+
     console.log("Food item map created:", {
       totalFoodItems: foodItems.length,
       mapSize: foodItemMap.size,
@@ -1727,7 +1727,7 @@ function HomePage({
         donationType: typeof f.donation,
       })),
     });
-    
+
     console.log("Donation map created:", {
       totalDonations: donations.length,
       sampleDonationIds: Array.from(donationMap.keys()).slice(0, 5),
@@ -1737,7 +1737,7 @@ function HomePage({
         restaurant_name: d.restaurant_name,
       })),
     });
-    
+
     console.log("Restaurant map created:", {
       totalRestaurants: restaurants.length,
       sampleRestaurantIds: Array.from(restaurantMap.keys()).slice(0, 5),
@@ -1746,7 +1746,7 @@ function HomePage({
         name: r.name,
       })),
     });
-    
+
     console.log("Sample impact records:", impactRecords.slice(0, 3).map(i => ({
       impact_id: i.impact_id,
       food: i.food,
@@ -1772,28 +1772,28 @@ function HomePage({
         // If it's an object, try to extract food_id
         foodIdValue = (impact.food as any).food_id || (impact.food as any).id || "";
       }
-      
+
       if (!foodIdValue) {
         skippedNoFood++;
         return;
       }
-      
+
       const normalizedFoodId = normalizeFoodId(foodIdValue);
-      
+
       // Try multiple lookup strategies
-      let foodItem = foodItemMap.get(normalizedFoodId) || 
-                    foodItemMap.get(foodIdValue) ||
-                    foodItemMap.get(foodIdValue.toUpperCase()) ||
-                    foodItemMap.get(foodIdValue.toLowerCase()) ||
-                    foodItems.find(f => {
-                      const fId = String(f.food_id || "").trim();
-                      if (!fId) return false;
-                      const fNormalized = normalizeFoodId(fId);
-                      return fId === foodIdValue || 
-                             fId === normalizedFoodId ||
-                             fNormalized === normalizedFoodId ||
-                             normalizeFoodId(fId) === normalizedFoodId;
-                    });
+      let foodItem = foodItemMap.get(normalizedFoodId) ||
+        foodItemMap.get(foodIdValue) ||
+        foodItemMap.get(foodIdValue.toUpperCase()) ||
+        foodItemMap.get(foodIdValue.toLowerCase()) ||
+        foodItems.find(f => {
+          const fId = String(f.food_id || "").trim();
+          if (!fId) return false;
+          const fNormalized = normalizeFoodId(fId);
+          return fId === foodIdValue ||
+            fId === normalizedFoodId ||
+            fNormalized === normalizedFoodId ||
+            normalizeFoodId(fId) === normalizedFoodId;
+        });
 
       if (!foodItem) {
         skippedNoFoodItem++;
@@ -1818,7 +1818,7 @@ function HomePage({
         donationId = (foodItem.donation as any).donation_id || (foodItem.donation as any).id || "";
         if (donationId) donationId = String(donationId).trim();
       }
-      
+
       if (!donationId) {
         skippedNoDonation++;
         if (skippedNoDonation <= 3) {
@@ -1903,7 +1903,7 @@ function HomePage({
       <div className="relative overflow-hidden rounded-[40px] bg-[#e8ede3] p-8 shadow-[0_40px_120px_-45px rgba(59,31,16,0.6)] sm:p-10">
         <div aria-hidden className="pointer-events-none absolute -right-8 top-6 hidden h-64 w-64 rounded-[40px] bg-[#DEF7EA]/60 blur-3xl lg:block" />
         <div aria-hidden className="pointer-events-none absolute bottom-8 left-4 h-24 w-24 rounded-full bg-[#F1FBF5]/70 blur-2xl" />
-        
+
         <div className="relative space-y-6 text-[#2C1A10]">
           <div className="relative flex items-center gap-5">
             {/* Spinning Logo in front of the text */}
@@ -1929,33 +1929,33 @@ function HomePage({
             Re-Meals brings together restaurants, drivers, and community hearts to ensure no good meal goes to waste—and no neighbor goes without. Share what you have, ask for what you need, and help nourish the people around you.
           </p>
           {!currentUser && (
-          <div className="flex flex-wrap gap-3">
-            <button
-              className="flex items-center gap-3 rounded-full bg-[#708A58] px-5 py-3 pr-3 text-sm font-semibold text-white shadow hover:bg-[#576c45] transition"
-              onClick={() => {
-                setAuthMode("signup");
-                setShowAuthModal(true);
-              }}
-              type="button"
-            >
-              Login / Sign up to donate or request
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
-                <svg
-                  className="h-6 w-6 text-[#d48a68]"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M13 7l5 5m0 0l-5 5m5-5H6"
-                  />
-                </svg>
-              </span>
-            </button>
-          </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                className="flex items-center gap-3 rounded-full bg-[#708A58] px-5 py-3 pr-3 text-sm font-semibold text-white shadow hover:bg-[#576c45] transition"
+                onClick={() => {
+                  setAuthMode("signup");
+                  setShowAuthModal(true);
+                }}
+                type="button"
+              >
+                Login / Sign up to donate or request
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
+                  <svg
+                    className="h-6 w-6 text-[#d48a68]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M13 7l5 5m0 0l-5 5m5-5H6"
+                    />
+                  </svg>
+                </span>
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -2002,14 +2002,14 @@ function HomePage({
               {impactLoading ? (
                 <div className="mt-2 h-10 w-24 bg-gray-200 rounded animate-pulse"></div>
               ) : (
-              <p className={`text-3xl font-bold ${card.classes}`}>
-                  <AnimatedNumber 
-                    value={card.value} 
+                <p className={`text-3xl font-bold ${card.classes}`}>
+                  <AnimatedNumber
+                    value={card.value}
                     suffix={card.suffix}
                     className={card.classes}
                     decimals={card.label === "Meals saved" ? 0 : 1}
                   />
-              </p>
+                </p>
               )}
             </div>
           ))}
@@ -2050,46 +2050,46 @@ function HomePage({
                     </div>
                   ))}
                 </div>
-            ) : restaurantLeaderboard.length === 0 ? (
+              ) : restaurantLeaderboard.length === 0 ? (
                 <div className="flex items-center justify-center h-full">
                   <p className="text-sm text-gray-600 text-center animate-fade-in">No restaurant data available yet.</p>
                 </div>
-            ) : (
+              ) : (
                 <div className="space-y-2 w-full">
-                {restaurantLeaderboard.map((restaurant, index) => (
-                  <div
-                    key={restaurant.restaurantId}
+                  {restaurantLeaderboard.map((restaurant, index) => (
+                    <div
+                      key={restaurant.restaurantId}
                       className="rounded-xl border border-dashed border-[#F3C7A0] bg-white p-3 hover:bg-[#f9fff4] transition-all duration-300 hover:shadow-md hover:scale-[1.02] animate-fade-in-up"
                       style={{
                         animationDelay: `${index * 0.1}s`,
                         opacity: 0,
                       }}
-                  >
-                    <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#F3C7A0] text-sm font-bold text-[#B25C23] transition-transform duration-300 hover:scale-110">
-                        {index + 1}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-gray-900">
-                          {restaurant.name}
-                        </p>
-                        <div className="mt-1 flex gap-4 text-xs text-gray-600">
-                              <span className="font-semibold text-[#365032] transition-colors duration-300">
-                            {restaurant.meals.toLocaleString(undefined, { maximumFractionDigits: 0 })} meals
-                          </span>
-                              <span className="text-[#708A58] transition-colors duration-300">
-                            {restaurant.weight.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg
-                          </span>
-                              <span className="text-[#B25C23] transition-colors duration-300">
-                            {restaurant.co2.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg CO₂
-                          </span>
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#F3C7A0] text-sm font-bold text-[#B25C23] transition-transform duration-300 hover:scale-110">
+                          {index + 1}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-gray-900">
+                            {restaurant.name}
+                          </p>
+                          <div className="mt-1 flex gap-4 text-xs text-gray-600">
+                            <span className="font-semibold text-[#365032] transition-colors duration-300">
+                              {restaurant.meals.toLocaleString(undefined, { maximumFractionDigits: 0 })} meals
+                            </span>
+                            <span className="text-[#708A58] transition-colors duration-300">
+                              {restaurant.weight.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg
+                            </span>
+                            <span className="text-[#B25C23] transition-colors duration-300">
+                              {restaurant.co2.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg CO₂
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -2105,20 +2105,20 @@ function HomePage({
               </span>
             </div>
             <div className="px-6 pb-6">
-            {impactLoading ? (
-              <p className="text-sm text-gray-600 py-8 text-center">Loading CO₂ data...</p>
-            ) : weeklyMealsData.length === 0 ? (
-              <p className="text-sm text-gray-600 py-8 text-center">No CO₂ data available yet.</p>
-            ) : (
-              <CO2TrendChart
-                data={weeklyMealsData.map(({ weekKey, co2, startDate, endDate }) => ({
-                  weekKey,
-                  co2,
-                  startDate,
-                  endDate,
-                }))}
-              />
-            )}
+              {impactLoading ? (
+                <p className="text-sm text-gray-600 py-8 text-center">Loading CO₂ data...</p>
+              ) : weeklyMealsData.length === 0 ? (
+                <p className="text-sm text-gray-600 py-8 text-center">No CO₂ data available yet.</p>
+              ) : (
+                <CO2TrendChart
+                  data={weeklyMealsData.map(({ weekKey, co2, startDate, endDate }) => ({
+                    weekKey,
+                    co2,
+                    startDate,
+                    endDate,
+                  }))}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -2459,7 +2459,7 @@ function YourStatsSection({
         monthKey,
         (donationsByMonth.get(monthKey) || 0) + 1
       );
-      
+
       // Calculate quantity for this donation
       const donationItems = foodItems.filter(item => {
         return item.donation === donation.id;
@@ -3183,7 +3183,7 @@ function QuantityLineChart({
           {points.map((point, index) => {
             // Only show points up to animatedIndex
             if (index > animatedIndex) return null;
-            
+
             const isHovered = hoveredIndex === index;
             const isVisible = visiblePoint === index;
             return (
@@ -3620,7 +3620,8 @@ function DonationSection(props: {
 
   const loadDonationsData = useCallback(async () => {
     try {
-      const donationData = await apiFetch<DonationApiRecord[]>("/donations/");
+      // Only fetch pending donations for the donation log
+      const donationData = await apiFetch<DonationApiRecord[]>("/donations/?status=pending");
       const donationsWithItems = await Promise.all(
         donationData.map(async (donation) => {
           const items = await apiFetch<FoodItemApiRecord[]>(
@@ -3903,9 +3904,9 @@ function DonationSection(props: {
         : null;
 
       // If user doesn't have restaurant info but filled it in the form, save it to their profile
-      const shouldUpdateProfile = !currentUser.restaurantName && !currentUser.restaurantId && 
+      const shouldUpdateProfile = !currentUser.restaurantName && !currentUser.restaurantId &&
         (form.restaurantName.trim() || form.restaurantAddress.trim());
-      
+
       if (shouldUpdateProfile && currentUser) {
         try {
           await apiFetch<{
@@ -4023,7 +4024,7 @@ function DonationSection(props: {
     if (currentUser.restaurantId && donation.restaurantId === currentUser.restaurantId) {
       return true;
     }
-      return false;
+    return false;
   };
 
   const canShowEditDeleteButtons = (donation: DonationRecord) => {
@@ -4733,11 +4734,11 @@ function DonationRequestSection(props: {
       }
       // Fallback for legacy requests: check if contact phone matches
       // This helps with old requests that don't have created_by set
-      if (!request.ownerUserId && 
-          request.status !== "accepted" &&
-          request.contactPhone && 
-          currentUser.phone &&
-          request.contactPhone.trim() === currentUser.phone.trim()) {
+      if (!request.ownerUserId &&
+        request.status !== "accepted" &&
+        request.contactPhone &&
+        currentUser.phone &&
+        request.contactPhone.trim() === currentUser.phone.trim()) {
         return true;
       }
       return false;
@@ -5308,13 +5309,13 @@ function DonationRequestSection(props: {
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                    <div className="text-right text-xs text-gray-500">
-                      <p>{formatDisplayDate(request.createdAt)}</p>
-                      {request.expectedDelivery && (
-                        <p>
-                          Due{" "}
-                          {formatDisplayDate(request.expectedDelivery)}
-                        </p>
+                      <div className="text-right text-xs text-gray-500">
+                        <p>{formatDisplayDate(request.createdAt)}</p>
+                        {request.expectedDelivery && (
+                          <p>
+                            Due{" "}
+                            {formatDisplayDate(request.expectedDelivery)}
+                          </p>
                         )}
                       </div>
                       {canManageRequest(request) && (
@@ -5843,16 +5844,29 @@ function AdminDashboard({ currentUser }: { currentUser: LoggedUser }) {
     setUpdatingId(itemId);
     try {
       if (itemType === "donation") {
-        await apiFetch(`/donations/${itemId}/`, {
-          method: "PATCH",
-          body: JSON.stringify({ status: nextStatus }),
-          headers: buildAuthHeaders(currentUser),
-        });
-        setDonations((prev) =>
-          prev.map((donation) =>
-            donation.donation_id === itemId ? { ...donation, status: nextStatus } : donation,
-          ),
-        );
+        if (nextStatus === "declined") {
+          // Delete the donation from database when declined
+          await apiFetch(`/donations/${itemId}/`, {
+            method: "DELETE",
+            headers: buildAuthHeaders(currentUser),
+          });
+          // Remove from local state
+          setDonations((prev) =>
+            prev.filter((donation) => donation.donation_id !== itemId)
+          );
+        } else {
+          // For accepted status, update the status
+          await apiFetch(`/donations/${itemId}/`, {
+            method: "PATCH",
+            body: JSON.stringify({ status: nextStatus }),
+            headers: buildAuthHeaders(currentUser),
+          });
+          setDonations((prev) =>
+            prev.map((donation) =>
+              donation.donation_id === itemId ? { ...donation, status: nextStatus } : donation,
+            ),
+          );
+        }
       } else {
         // For requests, we only update local state since backend doesn't have status field
         setRequestStatuses((prev) => ({
@@ -6245,27 +6259,27 @@ function StatusSection({
     return requests
       .filter((r) => {
         // Show if user owns it
-      if (!r.ownerUserId || r.ownerUserId !== currentUser?.userId) {
-        return false;
-      }
+        if (!r.ownerUserId || r.ownerUserId !== currentUser?.userId) {
+          return false;
+        }
         // Only show requests that have been accepted (status = "accepted")
         // Once accepted, they may or may not have distribution deliveries yet
         return r.status === "accepted";
       })
       .map((r) => {
-      const communityId = communityNameToId.get(r.communityName);
+        const communityId = communityNameToId.get(r.communityName);
         const delivery = communityId ? communityToDelivery.get(communityId) : undefined;
         return {
           request: r,
           delivery: delivery,
         };
-    });
+      });
   }, [requests, deliveries, communities, currentUser?.userId]);
 
   // Filter and sort accepted requests
   const filteredAndSortedRequests = useMemo(() => {
     let filtered = [...acceptedRequests];
-    
+
     // Status filter - filter by delivery status if available
     if (donationStatusFilter !== "all") {
       filtered = filtered.filter(({ delivery }) => {
@@ -6556,9 +6570,9 @@ function StatusSection({
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                        <p className="text-xs uppercase tracking-wide text-gray-400">
-                          {donation.restaurantId ?? "Manual entry"}
-                        </p>
+                          <p className="text-xs uppercase tracking-wide text-gray-400">
+                            {donation.restaurantId ?? "Manual entry"}
+                          </p>
                           {donation.ownerUserId === currentUser?.userId && (
                             <span className="inline-flex rounded-full bg-[#B86A49]/10 px-2 py-0.5 text-xs font-semibold text-[#8B4513]">
                               Your donation
@@ -6655,45 +6669,45 @@ function StatusSection({
                 const status = statusLabel(delivery?.status);
 
                 return (
-                <article
-                  key={request.id}
-                  className="rounded-2xl border border-dashed border-[#F3C7A0] bg-white p-4 shadow-sm"
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
+                  <article
+                    key={request.id}
+                    className="rounded-2xl border border-dashed border-[#F3C7A0] bg-white p-4 shadow-sm"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                      <p className="text-xs uppercase tracking-wide text-gray-400">
-                        {request.id}
-                      </p>
+                          <p className="text-xs uppercase tracking-wide text-gray-400">
+                            {request.id}
+                          </p>
                           {request.ownerUserId === currentUser?.userId && (
                             <span className="inline-flex rounded-full bg-[#B86A49]/10 px-2 py-0.5 text-xs font-semibold text-[#8B4513]">
                               Your request
                             </span>
                           )}
                         </div>
-                      <p className="text-lg font-semibold text-gray-900">
-                        {request.requestTitle}
-                      </p>
-                      <p className="text-sm text-gray-500">{request.communityName}</p>
-                    </div>
+                        <p className="text-lg font-semibold text-gray-900">
+                          {request.requestTitle}
+                        </p>
+                        <p className="text-sm text-gray-500">{request.communityName}</p>
+                      </div>
                       <div className="flex items-center gap-2">
-                    <div className="text-right text-xs text-gray-500">
-                      <p>{formatDisplayDate(request.createdAt)}</p>
-                      <p>{request.numberOfPeople} people</p>
+                        <div className="text-right text-xs text-gray-500">
+                          <p>{formatDisplayDate(request.createdAt)}</p>
+                          <p>{request.numberOfPeople} people</p>
                         </div>
                         <span
                           className={`rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}
                         >
                           {status.text}
                         </span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="mt-3 rounded-lg border border-[#F3C7A0] bg-[#FFF3E7] p-2.5">
-                    <p className="text-xs font-medium text-[#8B4C1F]">
+                    <div className="mt-3 rounded-lg border border-[#F3C7A0] bg-[#FFF3E7] p-2.5">
+                      <p className="text-xs font-medium text-[#8B4C1F]">
                         ✓ This request has been accepted{delivery ? ` and assigned for delivery. Status: ${status.text}` : " and is awaiting delivery assignment."}
-                    </p>
-                  </div>
-                </article>
+                      </p>
+                    </div>
+                  </article>
                 );
               })
             )}
@@ -6881,10 +6895,10 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
     // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
-      
+
       // Search by delivery ID
       if (delivery.delivery_id.toLowerCase().includes(query)) {
-    return true;
+        return true;
       }
 
       // Search by notes
@@ -7269,44 +7283,40 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
             <button
               type="button"
               onClick={() => setStatusFilter("all")}
-              className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
-                statusFilter === "all"
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
+              className={`rounded-full px-4 py-2 text-xs font-semibold transition ${statusFilter === "all"
+                ? "bg-gray-900 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
             >
               All
             </button>
             <button
               type="button"
               onClick={() => setStatusFilter("pending")}
-              className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
-                statusFilter === "pending"
-                  ? "bg-[#FFF1E3] text-[#C46A24] ring-2 ring-[#C46A24]"
-                  : "bg-[#FFF1E3] text-[#C46A24] hover:ring-2 hover:ring-[#C46A24]"
-              }`}
+              className={`rounded-full px-4 py-2 text-xs font-semibold transition ${statusFilter === "pending"
+                ? "bg-[#FFF1E3] text-[#C46A24] ring-2 ring-[#C46A24]"
+                : "bg-[#FFF1E3] text-[#C46A24] hover:ring-2 hover:ring-[#C46A24]"
+                }`}
             >
               Pending
             </button>
             <button
               type="button"
               onClick={() => setStatusFilter("in_transit")}
-              className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
-                statusFilter === "in_transit"
-                  ? "bg-[#E6F4FF] text-[#1D4ED8] ring-2 ring-[#1D4ED8]"
-                  : "bg-[#E6F4FF] text-[#1D4ED8] hover:ring-2 hover:ring-[#1D4ED8]"
-              }`}
+              className={`rounded-full px-4 py-2 text-xs font-semibold transition ${statusFilter === "in_transit"
+                ? "bg-[#E6F4FF] text-[#1D4ED8] ring-2 ring-[#1D4ED8]"
+                : "bg-[#E6F4FF] text-[#1D4ED8] hover:ring-2 hover:ring-[#1D4ED8]"
+                }`}
             >
               In Transit
             </button>
             <button
               type="button"
               onClick={() => setStatusFilter("delivered")}
-              className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
-                statusFilter === "delivered"
-                  ? "bg-[#E6F7EE] text-[#1F4D36] ring-2 ring-[#1F4D36]"
-                  : "bg-[#E6F7EE] text-[#1F4D36] hover:ring-2 hover:ring-[#1F4D36]"
-              }`}
+              className={`rounded-full px-4 py-2 text-xs font-semibold transition ${statusFilter === "delivered"
+                ? "bg-[#E6F7EE] text-[#1F4D36] ring-2 ring-[#1F4D36]"
+                : "bg-[#E6F7EE] text-[#1F4D36] hover:ring-2 hover:ring-[#1F4D36]"
+                }`}
             >
               Delivered
             </button>
@@ -7598,7 +7608,7 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
     } else {
       pickupDateTime = new Date(pickupTime);
     }
-    
+
     if (isNaN(pickupDateTime.getTime())) {
       return { available: false, reason: "Invalid pickup time" };
     }
@@ -7608,7 +7618,7 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
 
     const conflictingDelivery = deliveries.find(d => {
       if (d.user_id !== driverId || d.delivery_id === editingDeliveryId) return false;
-      
+
       const existingPickup = new Date(d.pickup_time);
       if (isNaN(existingPickup.getTime())) return false;
 
@@ -7636,14 +7646,14 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
       //                    new dropoff is between existing pickup/dropoff OR
       //                    new time range completely contains existing range
       const timesOverlap = !(dropoffDateTime <= existingPickup || pickupDateTime >= existingDropoff);
-      
+
       return timesOverlap;
     });
 
     if (conflictingDelivery) {
-      return { 
-        available: false, 
-        reason: `Driver has a conflicting delivery at ${formatBangkokDateTime(conflictingDelivery.pickup_time)}` 
+      return {
+        available: false,
+        reason: `Driver has a conflicting delivery at ${formatBangkokDateTime(conflictingDelivery.pickup_time)}`
       };
     }
 
@@ -7825,8 +7835,8 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
 
   const visibleDeliveries = useMemo(() => {
     let filtered = (canEdit
-    ? deliveries
-    : deliveries.filter((delivery) => delivery.user_id === currentUserId)
+      ? deliveries
+      : deliveries.filter((delivery) => delivery.user_id === currentUserId)
     ).filter((delivery) => delivery.delivery_type === "donation");
 
     // Status filter
@@ -8257,17 +8267,17 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
             {/* Status Filter */}
             <div>
               <label className="mb-1 block text-xs font-semibold text-gray-600">Status</label>
-            <select
+              <select
                 className="w-full rounded-lg border border-[#CFE6D8] bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2F855A] focus:border-transparent"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as DeliveryRecordApi["status"] | "all")}
-            >
-              <option value="all">All</option>
-              <option value="pending">Pending</option>
-              <option value="in_transit">In Transit</option>
-              <option value="delivered">Delivered</option>
-            </select>
-          </div>
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as DeliveryRecordApi["status"] | "all")}
+              >
+                <option value="all">All</option>
+                <option value="pending">Pending</option>
+                <option value="in_transit">In Transit</option>
+                <option value="delivered">Delivered</option>
+              </select>
+            </div>
 
             {/* Date Filter */}
             <div>
@@ -8776,7 +8786,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
     } else {
       pickupDateTime = new Date(pickupTime);
     }
-    
+
     if (isNaN(pickupDateTime.getTime())) {
       return { available: false, reason: "Invalid pickup time" };
     }
@@ -8786,7 +8796,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
 
     const conflictingDelivery = deliveries.find(d => {
       if (d.user_id !== driverId) return false;
-      
+
       const existingPickup = new Date(d.pickup_time);
       if (isNaN(existingPickup.getTime())) return false;
 
@@ -8814,14 +8824,14 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
       //                    new dropoff is between existing pickup/dropoff OR
       //                    new time range completely contains existing range
       const timesOverlap = !(dropoffDateTime <= existingPickup || pickupDateTime >= existingDropoff);
-      
+
       return timesOverlap;
     });
 
     if (conflictingDelivery) {
-      return { 
-        available: false, 
-        reason: `Driver has a conflicting delivery at ${formatBangkokDateTime(conflictingDelivery.pickup_time)}` 
+      return {
+        available: false,
+        reason: `Driver has a conflicting delivery at ${formatBangkokDateTime(conflictingDelivery.pickup_time)}`
       };
     }
 
@@ -8830,7 +8840,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
 
   const handleEditDelivery = (delivery: DeliveryRecordApi) => {
     if (!canEdit) return;
-    
+
     // Convert food_id from database format (FOO0000014) to API format (F0000014) if needed
     let foodIdForForm = delivery.food_item || "";
     if (foodIdForForm.startsWith("FOO")) {
@@ -8839,7 +8849,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
       // Convert to F0000014 (F prefix + digits)
       foodIdForForm = `F${digits}`;
     }
-    
+
     setEditingDeliveryId(delivery.delivery_id);
     setDistributionForm({
       warehouseId: delivery.warehouse_id,
@@ -8870,7 +8880,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
     if (!window.confirm("Are you sure you want to delete this delivery assignment? This action cannot be undone.")) {
       return;
     }
-    
+
     setDeletingDeliveryId(deliveryId);
     try {
       await apiFetch(`${API_PATHS.deliveries}${deliveryId}/`, {
@@ -8900,25 +8910,25 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
       if (!distributionForm.pickupTime) {
         throw new Error("Pickup time is required.");
       }
-      
+
       if (!selectedFoodItem) {
         throw new Error("Please select a food item to deliver.");
       }
-      
+
       if (!deliveryQuantity || deliveryQuantity.trim() === "") {
         throw new Error("Please enter a delivery quantity.");
       }
-      
+
       // Validate that the unit matches the selected food item's unit
       const selectedItem = warehouseInventory.find(item => item.food_id === selectedFoodItem);
       if (selectedItem && !deliveryQuantity.endsWith(` ${selectedItem.unit}`)) {
         throw new Error(`Quantity must be in ${selectedItem.unit} units.`);
       }
-      
+
       // Calculate dropoff time (3 hours after pickup)
       const pickupDate = new Date(distributionForm.pickupTime);
       const dropoffDate = new Date(pickupDate.getTime() + 3 * 60 * 60 * 1000);
-      
+
       // Convert food_id from API format (F0000014) back to database format (FOO0000014)
       // The API serializer formats FOO0000014 -> F0000014, but backend needs FOO0000014
       let foodIdForBackend = selectedFoodItem;
@@ -8928,7 +8938,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
         // Convert to FOO0000014 (FOO prefix + 7 digits)
         foodIdForBackend = `FOO${digits.padStart(7, "0")}`;
       }
-      
+
 
       // Check only if driver is_available field is false (not checking for conflicting deliveries)
       const selectedStaff = staff.find(s => s.user_id === distributionForm.userId);
@@ -8958,14 +8968,14 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
         setNotice("Delivery assignment updated.");
       } else {
         // Create new delivery
-      await apiFetch(API_PATHS.deliveries, {
-        method: "POST",
-        body: JSON.stringify(payload),
-        headers: buildAuthHeaders(currentUser),
-      });
-      setNotice("Distribution assignment saved.");
+        await apiFetch(API_PATHS.deliveries, {
+          method: "POST",
+          body: JSON.stringify(payload),
+          headers: buildAuthHeaders(currentUser),
+        });
+        setNotice("Distribution assignment saved.");
       }
-      
+
       await loadData();
       handleCancelEdit();
     } catch (err) {
@@ -9038,14 +9048,14 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
     // Try direct match first
     let foodItem = foodItems.find(f => f.food_id === foodId);
     if (foodItem) return foodItem;
-    
+
     // Try normalized match
     const normalizedId = normalizeFoodId(foodId);
     foodItem = foodItems.find(f => {
       const normalizedFoodId = normalizeFoodId(f.food_id);
       return normalizedFoodId === normalizedId;
     });
-    
+
     return foodItem || null;
   }, [foodItems]);
 
@@ -9343,11 +9353,11 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
                       }
                     >
                       <option value="">Select community</option>
-                        {communities.map((community) => (
-                          <option key={community.community_id} value={community.community_id}>
-                            {community.name} ({shortenCommunityId(community.community_id)})
-                          </option>
-                        ))}
+                      {communities.map((community) => (
+                        <option key={community.community_id} value={community.community_id}>
+                          {community.name} ({shortenCommunityId(community.community_id)})
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div>
@@ -9382,7 +9392,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
                       }
                     />
                   </div>
-                  
+
                   <div>
                     <label className="mb-1 block text-sm font-semibold text-gray-700">
                       Select food item
@@ -9419,7 +9429,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
                       </select>
                     )}
                   </div>
-                  
+
                   {selectedFoodItem && (
                     <div>
                       <label className="mb-1 block text-sm font-semibold text-gray-700">
@@ -9489,7 +9499,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
                       })()}
                     </div>
                   )}
-                  
+
                   <div className="mt-4 flex gap-3">
                     {editingDeliveryId && (
                       <button
@@ -9500,10 +9510,10 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
                         Cancel
                       </button>
                     )}
-                  <button
-                    type="button"
-                    disabled={submitting}
-                    onClick={handleSubmitDistribution}
+                    <button
+                      type="button"
+                      disabled={submitting}
+                      onClick={handleSubmitDistribution}
                       className={`${editingDeliveryId ? "flex-1" : "w-full"} rounded-2xl bg-[#2F8A61] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#25724F] disabled:opacity-60 disabled:cursor-not-allowed transition`}
                     >
                       {submitting
@@ -9511,7 +9521,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
                         : editingDeliveryId
                           ? "Update delivery assignment"
                           : "Save delivery assignment"}
-                  </button>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -9591,17 +9601,17 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
             {/* Status Filter */}
             <div>
               <label className="mb-1 block text-xs font-semibold text-gray-600">Status</label>
-            <select
+              <select
                 className="w-full rounded-lg border border-[#CFE6D8] bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2F855A] focus:border-transparent"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as DeliveryRecordApi["status"] | "all")}
-            >
-              <option value="all">All</option>
-              <option value="pending">Pending</option>
-              <option value="in_transit">In Transit</option>
-              <option value="delivered">Delivered</option>
-            </select>
-          </div>
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as DeliveryRecordApi["status"] | "all")}
+              >
+                <option value="all">All</option>
+                <option value="pending">Pending</option>
+                <option value="in_transit">In Transit</option>
+                <option value="delivered">Delivered</option>
+              </select>
+            </div>
 
             {/* Date Filter */}
             <div>
@@ -9799,11 +9809,11 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
                           </button>
                         </div>
                       )}
-                    <span
-                      className={`rounded-full px-3 py-1.5 text-xs font-semibold ${statusLabel(delivery.status).className}`}
-                    >
-                      {statusLabel(delivery.status).text}
-                    </span>
+                      <span
+                        className={`rounded-full px-3 py-1.5 text-xs font-semibold ${statusLabel(delivery.status).className}`}
+                      >
+                        {statusLabel(delivery.status).text}
+                      </span>
                     </div>
                   </div>
 
@@ -10854,11 +10864,10 @@ function AuthModal({
                       setRestaurantSelectionMode("existing");
                       setSignupData((prev) => ({ ...prev, restaurant_id: "", restaurant_name: "", branch: "", restaurant_address: "" }));
                     }}
-                    className={`rounded-lg px-2.5 py-1 text-[10px] font-semibold transition ${
-                      restaurantSelectionMode === "existing"
-                        ? "bg-[#d48a68] text-white"
-                        : "bg-white text-[#d48a68] border border-[#d48a68]"
-                    }`}
+                    className={`rounded-lg px-2.5 py-1 text-[10px] font-semibold transition ${restaurantSelectionMode === "existing"
+                      ? "bg-[#d48a68] text-white"
+                      : "bg-white text-[#d48a68] border border-[#d48a68]"
+                      }`}
                   >
                     Existing
                   </button>
@@ -10868,11 +10877,10 @@ function AuthModal({
                       setRestaurantSelectionMode("manual");
                       setSignupData((prev) => ({ ...prev, restaurant_id: "" }));
                     }}
-                    className={`rounded-lg px-2.5 py-1 text-[10px] font-semibold transition ${
-                      restaurantSelectionMode === "manual"
-                        ? "bg-[#d48a68] text-white"
-                        : "bg-white text-[#d48a68] border border-[#d48a68]"
-                    }`}
+                    className={`rounded-lg px-2.5 py-1 text-[10px] font-semibold transition ${restaurantSelectionMode === "manual"
+                      ? "bg-[#d48a68] text-white"
+                      : "bg-white text-[#d48a68] border border-[#d48a68]"
+                      }`}
                   >
                     New
                   </button>
