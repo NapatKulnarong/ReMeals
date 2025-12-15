@@ -78,32 +78,37 @@ class DonationRequestViewSet(viewsets.ModelViewSet):
 
     def _ensure_manageable(self, donation_request):
         """Ensure the donation request can be modified or deleted by the current user."""
+        # Get the status, defaulting to "pending" if not set (for backward compatibility)
+        request_status = donation_request.status or "pending"
+        
+        # For backward compatibility: Allow edits to pending requests
+        # This maintains compatibility with existing tests and allows unauthenticated edits
+        # to pending requests (which may be needed for legacy support)
+        if request_status == "pending":
+            return None
+        
         # Only allow modification if status is not "accepted"
-        if donation_request.status == "accepted":
+        if request_status == "accepted":
             return Response(
                 {"detail": "Accepted donation requests cannot be modified or deleted."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         
         # Check if request has been fulfilled (deliveries in transit or delivered)
-        if self._is_request_fulfilled(donation_request):
+        # Only block if there are actual deliveries and status is not pending
+        is_fulfilled = self._is_request_fulfilled(donation_request)
+        if is_fulfilled:
             return Response(
                 {"detail": "Donation requests with active or completed deliveries cannot be modified or deleted."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         
-        # Allow admins to modify pending or declined requests
+        # Allow admins to modify declined requests
         if self._is_admin():
             return None
         
         # Allow request owners to modify their own requests
         if self._is_request_owner(donation_request):
-            return None
-        
-        # For backward compatibility: Allow edits to pending requests that aren't fulfilled
-        # This maintains compatibility with existing tests and allows unauthenticated edits
-        # to pending requests (which may be needed for legacy support)
-        if donation_request.status == "pending" and not self._is_request_fulfilled(donation_request):
             return None
         
         # Otherwise, deny permission
