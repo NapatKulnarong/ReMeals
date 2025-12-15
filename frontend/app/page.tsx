@@ -5960,8 +5960,9 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
     });
   }, []);
 
-  // Check if driver is available at the given pickup time
-  const isDriverAvailable = useCallback((driverId: string, pickupTime: string): { available: boolean; reason?: string } => {
+  // Check if driver is available - only checks is_available field
+  // Drivers can accept multiple deliveries at the same time (like Grab)
+  const isDriverAvailable = useCallback((driverId: string): boolean => {
     const selectedStaff = staff.find(s => s.user_id === driverId);
     if (!selectedStaff) {
       return { available: false, reason: "Driver not found" };
@@ -6108,37 +6109,11 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
         throw new Error("Pickup time is required.");
       }
 
-      // Check driver availability
-      const availability = isDriverAvailable(pickupForm.userId, pickupForm.pickupTime);
-      if (!availability.available) {
-        throw new Error(`Driver is not available: ${availability.reason}`);
-      }
-
-      // Check province match for donation type
-      const selectedDonation = donations.find(d => d.donation_id === pickupForm.donationId);
-      const selectedWarehouse = warehouses.find(w => w.warehouse_id === pickupForm.warehouseId);
+      // Check only if driver is_available field is false (not checking for conflicting deliveries)
+      // Drivers can accept multiple deliveries at the same time (like Grab)
       const selectedStaff = staff.find(s => s.user_id === pickupForm.userId);
-      
-      if (selectedDonation && selectedWarehouse && selectedStaff) {
-        const restaurant = restaurants.find(r => r.restaurant_id === selectedDonation.restaurant);
-        if (restaurant) {
-          const pickupProvince = extractProvince(restaurant.address);
-          const dropoffProvince = extractProvince(selectedWarehouse.address);
-          
-          // Check if provinces match
-          if (pickupProvince !== dropoffProvince) {
-            throw new Error(`Pickup and dropoff must be in the same province. Pickup: ${pickupProvince}, Dropoff: ${dropoffProvince}`);
-          }
-
-          // Check if driver's assigned area matches
-          const driverProvince = selectedStaff.assigned_area;
-          if (driverProvince && driverProvince !== pickupProvince && driverProvince !== "Bangkok" && pickupProvince !== "Bangkok") {
-            // Allow DEL0000005 to handle both Bangkok and Ayutthaya
-            if (!(selectedStaff.user_id === "DEL0000005" && (pickupProvince === "Bangkok" || pickupProvince === "Ayutthaya"))) {
-              throw new Error(`Driver is assigned to ${driverProvince}, but delivery is in ${pickupProvince}`);
-            }
-          }
-        }
+      if (selectedStaff && !selectedStaff.is_available) {
+        throw new Error("Driver is not available");
       }
       const payload: Record<string, unknown> = {
         delivery_type: "donation",
@@ -6364,25 +6339,33 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
                       onChange={(e) => setPickupForm((prev) => ({ ...prev, warehouseId: e.target.value }))}
                     >
                       <option value="">Select warehouse</option>
-                      {warehouses.map((warehouse) => {
-                        // Helper to shorten warehouse ID: WAH0000004 -> WH001
-                        const shortenId = (id: string) => {
-                          const digits = id.replace(/\D/g, "");
-                          if (!digits) return id;
-                          const num = parseInt(digits, 10);
-                          return `WH${num.toString().padStart(3, "0")}`;
-                        };
-                        // Helper to remove postal code from address
-                        const removePostalCode = (addr: string) => {
-                          if (!addr) return addr;
-                          return addr.replace(/\s*[,，]?\s*\d{5}\s*$/, "").trim();
-                        };
-                        return (
-                          <option key={warehouse.warehouse_id} value={warehouse.warehouse_id}>
-                            {shortenId(warehouse.warehouse_id)} — {removePostalCode(warehouse.address)}
-                          </option>
-                        );
-                      })}
+                      {warehouses
+                        .slice()
+                        .sort((a, b) => {
+                          // Extract numeric part from warehouse_id (e.g., WAH0000004 -> 4)
+                          const numA = parseInt(a.warehouse_id.replace(/\D/g, ""), 10) || 0;
+                          const numB = parseInt(b.warehouse_id.replace(/\D/g, ""), 10) || 0;
+                          return numA - numB;
+                        })
+                        .map((warehouse) => {
+                          // Helper to shorten warehouse ID: WAH0000004 -> WH001
+                          const shortenId = (id: string) => {
+                            const digits = id.replace(/\D/g, "");
+                            if (!digits) return id;
+                            const num = parseInt(digits, 10);
+                            return `WH${num.toString().padStart(3, "0")}`;
+                          };
+                          // Helper to remove postal code from address
+                          const removePostalCode = (addr: string) => {
+                            if (!addr) return addr;
+                            return addr.replace(/\s*[,，]?\s*\d{5}\s*$/, "").trim();
+                          };
+                          return (
+                            <option key={warehouse.warehouse_id} value={warehouse.warehouse_id}>
+                              {shortenId(warehouse.warehouse_id)} — {removePostalCode(warehouse.address)}
+                            </option>
+                          );
+                        })}
                     </select>
                   </div>
                   <div>
@@ -6860,8 +6843,9 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
     });
   }, []);
 
-  // Check if driver is available at the given pickup time
-  const isDriverAvailable = useCallback((driverId: string, pickupTime: string): { available: boolean; reason?: string } => {
+  // Check if driver is available - only checks is_available field
+  // Drivers can accept multiple deliveries at the same time (like Grab)
+  const isDriverAvailable = useCallback((driverId: string): boolean => {
     const selectedStaff = staff.find(s => s.user_id === driverId);
     if (!selectedStaff) {
       return { available: false, reason: "Driver not found" };
@@ -6982,34 +6966,10 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
       }
       
 
-      // Check driver availability
-      const availability = isDriverAvailable(distributionForm.userId, distributionForm.pickupTime);
-      if (!availability.available) {
-        throw new Error(`Driver is not available: ${availability.reason}`);
-      }
-
-      // Check province match for distribution type
-      const selectedWarehouse = warehouses.find(w => w.warehouse_id === distributionForm.warehouseId);
-      const selectedCommunity = communities.find(c => c.community_id === distributionForm.communityId);
+      // Check only if driver is_available field is false (not checking for conflicting deliveries)
       const selectedStaff = staff.find(s => s.user_id === distributionForm.userId);
-      
-      if (selectedWarehouse && selectedCommunity && selectedStaff) {
-        const pickupProvince = extractProvince(selectedWarehouse.address);
-        const dropoffProvince = extractProvince(selectedCommunity.address);
-        
-        // Check if provinces match
-        if (pickupProvince !== dropoffProvince) {
-          throw new Error(`Pickup and dropoff must be in the same province. Pickup: ${pickupProvince}, Dropoff: ${dropoffProvince}`);
-        }
-
-        // Check if driver's assigned area matches
-        const driverProvince = selectedStaff.assigned_area;
-        if (driverProvince && driverProvince !== pickupProvince && driverProvince !== "Bangkok" && pickupProvince !== "Bangkok") {
-          // Allow DEL0000005 to handle both Bangkok and Ayutthaya
-          if (!(selectedStaff.user_id === "DEL0000005" && (pickupProvince === "Bangkok" || pickupProvince === "Ayutthaya"))) {
-            throw new Error(`Driver is assigned to ${driverProvince}, but delivery is in ${pickupProvince}`);
-          }
-        }
+      if (selectedStaff && !selectedStaff.is_available) {
+        throw new Error("Driver is not available");
       }
       const payload: Record<string, unknown> = {
         delivery_type: "distribution",
@@ -7223,25 +7183,33 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
                       }
                     >
                       <option value="">Select warehouse</option>
-                      {warehouses.map((warehouse) => {
-                        // Helper to shorten warehouse ID: WAH0000004 -> WH001
-                        const shortenId = (id: string) => {
-                          const digits = id.replace(/\D/g, "");
-                          if (!digits) return id;
-                          const num = parseInt(digits, 10);
-                          return `WH${num.toString().padStart(3, "0")}`;
-                        };
-                        // Helper to remove postal code from address
-                        const removePostalCode = (addr: string) => {
-                          if (!addr) return addr;
-                          return addr.replace(/\s*[,，]?\s*\d{5}\s*$/, "").trim();
-                        };
-                        return (
-                          <option key={warehouse.warehouse_id} value={warehouse.warehouse_id}>
-                            {shortenId(warehouse.warehouse_id)} — {removePostalCode(warehouse.address)}
-                          </option>
-                        );
-                      })}
+                      {warehouses
+                        .slice()
+                        .sort((a, b) => {
+                          // Extract numeric part from warehouse_id (e.g., WAH0000004 -> 4)
+                          const numA = parseInt(a.warehouse_id.replace(/\D/g, ""), 10) || 0;
+                          const numB = parseInt(b.warehouse_id.replace(/\D/g, ""), 10) || 0;
+                          return numA - numB;
+                        })
+                        .map((warehouse) => {
+                          // Helper to shorten warehouse ID: WAH0000004 -> WH001
+                          const shortenId = (id: string) => {
+                            const digits = id.replace(/\D/g, "");
+                            if (!digits) return id;
+                            const num = parseInt(digits, 10);
+                            return `WH${num.toString().padStart(3, "0")}`;
+                          };
+                          // Helper to remove postal code from address
+                          const removePostalCode = (addr: string) => {
+                            if (!addr) return addr;
+                            return addr.replace(/\s*[,，]?\s*\d{5}\s*$/, "").trim();
+                          };
+                          return (
+                            <option key={warehouse.warehouse_id} value={warehouse.warehouse_id}>
+                              {shortenId(warehouse.warehouse_id)} — {removePostalCode(warehouse.address)}
+                            </option>
+                          );
+                        })}
                     </select>
                   </div>
                   <div>
