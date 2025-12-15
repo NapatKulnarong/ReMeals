@@ -1095,11 +1095,11 @@ function CommunityImpactHeatMap({
   const getColorIntensity = (value: number): string => {
     if (maxValue === 0) return 'bg-gray-100';
     const intensity = value / maxValue;
-    if (intensity >= 0.8) return 'bg-[#2F855A]';
-    if (intensity >= 0.6) return 'bg-[#48BB78]';
-    if (intensity >= 0.4) return 'bg-[#68D391]';
-    if (intensity >= 0.2) return 'bg-[#9AE6B4]';
-    return 'bg-[#C6F6D5]';
+    if (intensity >= 0.8) return 'bg-[#d48a68]';
+    if (intensity >= 0.6) return 'bg-[#E09A7A]';
+    if (intensity >= 0.4) return 'bg-[#ECAA8C]';
+    if (intensity >= 0.2) return 'bg-[#F8BA9E]';
+    return 'bg-[#FFD4C0]';
   };
 
   const formatMonthLabel = (monthKey: string): string => {
@@ -1167,7 +1167,7 @@ function CommunityImpactHeatMap({
                     return (
                       <td
                         key={month}
-                        className={`px-3 py-3 text-center text-xs border-b border-gray-100 transition-all cursor-pointer ${getColorIntensity(value)} ${isHovered ? 'ring-2 ring-[#2F855A] ring-offset-1' : ''}`}
+                        className={`px-3 py-3 text-center text-xs border-b border-gray-100 transition-all cursor-pointer ${getColorIntensity(value)} ${isHovered ? 'ring-2 ring-[#d48a68] ring-offset-1' : ''}`}
                         onMouseEnter={() => setHoveredCell({ community: communityId, month })}
                         onMouseLeave={() => setHoveredCell(null)}
                         title={`${communityName} - ${formatMonthLabel(month)}: ${value.toLocaleString(undefined, { maximumFractionDigits: 1 })} meals saved`}
@@ -1240,15 +1240,15 @@ function CommunityImpactHeatMap({
         <div className="flex items-center gap-4">
           <span>Intensity:</span>
           <div className="flex items-center gap-1">
-            <div className="w-4 h-4 bg-[#C6F6D5] border border-gray-300"></div>
+            <div className="w-4 h-4 bg-[#FFD4C0] border border-gray-300"></div>
             <span>Low</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-4 h-4 bg-[#68D391] border border-gray-300"></div>
+            <div className="w-4 h-4 bg-[#ECAA8C] border border-gray-300"></div>
             <span>Medium</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-4 h-4 bg-[#2F855A] border border-gray-300"></div>
+            <div className="w-4 h-4 bg-[#d48a68] border border-gray-300"></div>
             <span>High</span>
           </div>
         </div>
