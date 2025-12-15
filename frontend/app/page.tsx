@@ -884,10 +884,23 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
     "Content-Type": "application/json",
     ...(options.headers ?? {}),
   };
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: mergedHeaders,
   });
+  } catch (error) {
+    // Handle network errors (backend not available, CORS, etc.)
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    if (errorMessage.includes("Failed to fetch") || errorMessage.includes("NetworkError")) {
+      throw new Error(
+        `Unable to connect to the server. Please ensure the backend is running at ${API_BASE_URL}`
+      );
+    }
+    throw error;
+  }
 
   if (!response.ok) {
     let message = `Request failed (${response.status} ${response.statusText})`;
@@ -1422,6 +1435,7 @@ function HomePage({
         ];
 
         // Fetch all data in parallel for maximum speed
+        // Wrap each fetch in a promise that handles network errors gracefully
         const [
           impactResult1,
           impactResult2,
@@ -1431,14 +1445,35 @@ function HomePage({
           communitiesData,
           deliveriesData,
         ] = await Promise.allSettled([
-          apiFetch<unknown>(impactCandidates[0]),
-          apiFetch<unknown>(impactCandidates[1]),
-          apiFetch<Restaurant[]>("/restaurants/"),
-          apiFetch<DonationApiRecord[]>("/donations/"),
-          apiFetch<FoodItemApiRecord[]>("/fooditems/"),
-          apiFetch<Community[]>(API_PATHS.communities),
+          apiFetch<unknown>(impactCandidates[0]).catch((err) => {
+            console.warn("Failed to fetch impact data from first endpoint:", err);
+            throw err;
+          }),
+          apiFetch<unknown>(impactCandidates[1]).catch((err) => {
+            console.warn("Failed to fetch impact data from second endpoint:", err);
+            throw err;
+          }),
+          apiFetch<Restaurant[]>("/restaurants/").catch((err) => {
+            console.warn("Failed to fetch restaurants:", err);
+            throw err;
+          }),
+          apiFetch<DonationApiRecord[]>("/donations/").catch((err) => {
+            console.warn("Failed to fetch donations:", err);
+            throw err;
+          }),
+          apiFetch<FoodItemApiRecord[]>("/fooditems/").catch((err) => {
+            console.warn("Failed to fetch food items:", err);
+            throw err;
+          }),
+          apiFetch<Community[]>(API_PATHS.communities).catch((err) => {
+            console.warn("Failed to fetch communities:", err);
+            throw err;
+          }),
           apiFetch<DeliveryRecordApi[]>(API_PATHS.deliveries, {
             headers: buildAuthHeaders(currentUser),
+          }).catch((err) => {
+            console.warn("Failed to fetch deliveries:", err);
+            throw err;
           }),
         ]);
 
@@ -1450,16 +1485,16 @@ function HomePage({
 
         for (const result of [impactResult1, impactResult2]) {
           if (result.status === "fulfilled") {
-            try {
+          try {
               loaded = normalizeImpactData(result.value);
-              if (loaded.length) break;
-            } catch (err) {
+            if (loaded.length) break;
+          } catch (err) {
               impactError = err;
-            }
+          }
           } else {
             impactError = result.reason;
-          }
         }
+          }
 
         if (loaded.length) {
           setImpactRecords(loaded);
@@ -1469,7 +1504,7 @@ function HomePage({
           );
         }
         // Always clear loading state
-        setImpactLoading(false);
+          setImpactLoading(false);
 
         // Process leaderboard data - update state as soon as available
         if (restaurantsData.status === "fulfilled") {
@@ -1894,33 +1929,33 @@ function HomePage({
             Re-Meals brings together restaurants, drivers, and community hearts to ensure no good meal goes to waste—and no neighbor goes without. Share what you have, ask for what you need, and help nourish the people around you.
           </p>
           {!currentUser && (
-            <div className="flex flex-wrap gap-3">
-              <button
-                className="flex items-center gap-3 rounded-full bg-[#708A58] px-5 py-3 pr-3 text-sm font-semibold text-white shadow hover:bg-[#576c45] transition"
-                onClick={() => {
-                  setAuthMode("signup");
-                  setShowAuthModal(true);
-                }}
-                type="button"
-              >
-                Login / Sign up to donate or request
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
-                  <svg
-                    className="h-6 w-6 text-[#d48a68]"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M13 7l5 5m0 0l-5 5m5-5H6"
-                    />
-                  </svg>
-                </span>
-              </button>
-            </div>
+          <div className="flex flex-wrap gap-3">
+            <button
+              className="flex items-center gap-3 rounded-full bg-[#708A58] px-5 py-3 pr-3 text-sm font-semibold text-white shadow hover:bg-[#576c45] transition"
+              onClick={() => {
+                setAuthMode("signup");
+                setShowAuthModal(true);
+              }}
+              type="button"
+            >
+              Login / Sign up to donate or request
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
+                <svg
+                  className="h-6 w-6 text-[#d48a68]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  />
+                </svg>
+              </span>
+            </button>
+          </div>
           )}
         </div>
       </div>
@@ -1967,14 +2002,14 @@ function HomePage({
               {impactLoading ? (
                 <div className="mt-2 h-10 w-24 bg-gray-200 rounded animate-pulse"></div>
               ) : (
-                <p className={`text-3xl font-bold ${card.classes}`}>
+              <p className={`text-3xl font-bold ${card.classes}`}>
                   <AnimatedNumber 
                     value={card.value} 
                     suffix={card.suffix}
                     className={card.classes}
                     decimals={card.label === "Meals saved" ? 0 : 1}
                   />
-                </p>
+              </p>
               )}
             </div>
           ))}
@@ -2015,46 +2050,46 @@ function HomePage({
                     </div>
                   ))}
                 </div>
-              ) : restaurantLeaderboard.length === 0 ? (
+            ) : restaurantLeaderboard.length === 0 ? (
                 <div className="flex items-center justify-center h-full">
                   <p className="text-sm text-gray-600 text-center animate-fade-in">No restaurant data available yet.</p>
                 </div>
-              ) : (
+            ) : (
                 <div className="space-y-2 w-full">
-                  {restaurantLeaderboard.map((restaurant, index) => (
-                    <div
-                      key={restaurant.restaurantId}
+                {restaurantLeaderboard.map((restaurant, index) => (
+                  <div
+                    key={restaurant.restaurantId}
                       className="rounded-xl border border-dashed border-[#F3C7A0] bg-white p-3 hover:bg-[#f9fff4] transition-all duration-300 hover:shadow-md hover:scale-[1.02] animate-fade-in-up"
                       style={{
                         animationDelay: `${index * 0.1}s`,
                         opacity: 0,
                       }}
-                    >
-                        <div className="flex items-center gap-3">
+                  >
+                    <div className="flex items-center gap-3">
                           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#F3C7A0] text-sm font-bold text-[#B25C23] transition-transform duration-300 hover:scale-110">
-                            {index + 1}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-semibold text-gray-900">
-                              {restaurant.name}
-                            </p>
-                            <div className="mt-1 flex gap-4 text-xs text-gray-600">
+                        {index + 1}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-gray-900">
+                          {restaurant.name}
+                        </p>
+                        <div className="mt-1 flex gap-4 text-xs text-gray-600">
                               <span className="font-semibold text-[#365032] transition-colors duration-300">
-                                {restaurant.meals.toLocaleString(undefined, { maximumFractionDigits: 0 })} meals
-                              </span>
+                            {restaurant.meals.toLocaleString(undefined, { maximumFractionDigits: 0 })} meals
+                          </span>
                               <span className="text-[#708A58] transition-colors duration-300">
-                                {restaurant.weight.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg
-                              </span>
+                            {restaurant.weight.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg
+                          </span>
                               <span className="text-[#B25C23] transition-colors duration-300">
-                                {restaurant.co2.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg CO₂
-                              </span>
-                            </div>
-                          </div>
+                            {restaurant.co2.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg CO₂
+                          </span>
                         </div>
                       </div>
-                  ))}
-                </div>
-              )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
             </div>
           </div>
 
@@ -3988,7 +4023,7 @@ function DonationSection(props: {
     if (currentUser.restaurantId && donation.restaurantId === currentUser.restaurantId) {
       return true;
     }
-    return false;
+      return false;
   };
 
   const canShowEditDeleteButtons = (donation: DonationRecord) => {
@@ -5273,13 +5308,13 @@ function DonationRequestSection(props: {
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <div className="text-right text-xs text-gray-500">
-                        <p>{formatDisplayDate(request.createdAt)}</p>
-                        {request.expectedDelivery && (
-                          <p>
-                            Due{" "}
-                            {formatDisplayDate(request.expectedDelivery)}
-                          </p>
+                    <div className="text-right text-xs text-gray-500">
+                      <p>{formatDisplayDate(request.createdAt)}</p>
+                      {request.expectedDelivery && (
+                        <p>
+                          Due{" "}
+                          {formatDisplayDate(request.expectedDelivery)}
+                        </p>
                         )}
                       </div>
                       {canManageRequest(request) && (
@@ -6038,21 +6073,21 @@ function StatusSection({
     return requests
       .filter((r) => {
         // Show if user owns it
-        if (!r.ownerUserId || r.ownerUserId !== currentUser?.userId) {
-          return false;
-        }
+      if (!r.ownerUserId || r.ownerUserId !== currentUser?.userId) {
+        return false;
+      }
         // Only show requests that have been accepted (status = "accepted")
         // Once accepted, they may or may not have distribution deliveries yet
         return r.status === "accepted";
       })
       .map((r) => {
-        const communityId = communityNameToId.get(r.communityName);
+      const communityId = communityNameToId.get(r.communityName);
         const delivery = communityId ? communityToDelivery.get(communityId) : undefined;
         return {
           request: r,
           delivery: delivery,
         };
-      });
+    });
   }, [requests, deliveries, communities, currentUser?.userId]);
 
   // Filter and sort accepted requests
@@ -6349,9 +6384,9 @@ function StatusSection({
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="text-xs uppercase tracking-wide text-gray-400">
-                            {donation.restaurantId ?? "Manual entry"}
-                          </p>
+                        <p className="text-xs uppercase tracking-wide text-gray-400">
+                          {donation.restaurantId ?? "Manual entry"}
+                        </p>
                           {donation.ownerUserId === currentUser?.userId && (
                             <span className="inline-flex rounded-full bg-[#B86A49]/10 px-2 py-0.5 text-xs font-semibold text-[#8B4513]">
                               Your donation
@@ -6448,45 +6483,45 @@ function StatusSection({
                 const status = statusLabel(delivery?.status);
 
                 return (
-                  <article
-                    key={request.id}
-                    className="rounded-2xl border border-dashed border-[#F3C7A0] bg-white p-4 shadow-sm"
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
+                <article
+                  key={request.id}
+                  className="rounded-2xl border border-dashed border-[#F3C7A0] bg-white p-4 shadow-sm"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="text-xs uppercase tracking-wide text-gray-400">
-                            {request.id}
-                          </p>
+                      <p className="text-xs uppercase tracking-wide text-gray-400">
+                        {request.id}
+                      </p>
                           {request.ownerUserId === currentUser?.userId && (
                             <span className="inline-flex rounded-full bg-[#B86A49]/10 px-2 py-0.5 text-xs font-semibold text-[#8B4513]">
                               Your request
                             </span>
                           )}
                         </div>
-                        <p className="text-lg font-semibold text-gray-900">
-                          {request.requestTitle}
-                        </p>
-                        <p className="text-sm text-gray-500">{request.communityName}</p>
-                      </div>
+                      <p className="text-lg font-semibold text-gray-900">
+                        {request.requestTitle}
+                      </p>
+                      <p className="text-sm text-gray-500">{request.communityName}</p>
+                    </div>
                       <div className="flex items-center gap-2">
-                        <div className="text-right text-xs text-gray-500">
-                          <p>{formatDisplayDate(request.createdAt)}</p>
-                          <p>{request.numberOfPeople} people</p>
+                    <div className="text-right text-xs text-gray-500">
+                      <p>{formatDisplayDate(request.createdAt)}</p>
+                      <p>{request.numberOfPeople} people</p>
                         </div>
                         <span
                           className={`rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}
                         >
                           {status.text}
                         </span>
-                      </div>
                     </div>
-                    <div className="mt-3 rounded-lg border border-[#F3C7A0] bg-[#FFF3E7] p-2.5">
-                      <p className="text-xs font-medium text-[#8B4C1F]">
+                  </div>
+                  <div className="mt-3 rounded-lg border border-[#F3C7A0] bg-[#FFF3E7] p-2.5">
+                    <p className="text-xs font-medium text-[#8B4C1F]">
                         ✓ This request has been accepted{delivery ? ` and assigned for delivery. Status: ${status.text}` : " and is awaiting delivery assignment."}
-                      </p>
-                    </div>
-                  </article>
+                    </p>
+                  </div>
+                </article>
                 );
               })
             )}
@@ -6677,7 +6712,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
       
       // Search by delivery ID
       if (delivery.delivery_id.toLowerCase().includes(query)) {
-        return true;
+    return true;
       }
 
       // Search by notes
@@ -7618,8 +7653,8 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
 
   const visibleDeliveries = useMemo(() => {
     let filtered = (canEdit
-      ? deliveries
-      : deliveries.filter((delivery) => delivery.user_id === currentUserId)
+    ? deliveries
+    : deliveries.filter((delivery) => delivery.user_id === currentUserId)
     ).filter((delivery) => delivery.delivery_type === "donation");
 
     // Status filter
@@ -8050,17 +8085,17 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
             {/* Status Filter */}
             <div>
               <label className="mb-1 block text-xs font-semibold text-gray-600">Status</label>
-              <select
+            <select
                 className="w-full rounded-lg border border-[#CFE6D8] bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2F855A] focus:border-transparent"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as DeliveryRecordApi["status"] | "all")}
-              >
-                <option value="all">All</option>
-                <option value="pending">Pending</option>
-                <option value="in_transit">In Transit</option>
-                <option value="delivered">Delivered</option>
-              </select>
-            </div>
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as DeliveryRecordApi["status"] | "all")}
+            >
+              <option value="all">All</option>
+              <option value="pending">Pending</option>
+              <option value="in_transit">In Transit</option>
+              <option value="delivered">Delivered</option>
+            </select>
+          </div>
 
             {/* Date Filter */}
             <div>
@@ -8751,12 +8786,12 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
         setNotice("Delivery assignment updated.");
       } else {
         // Create new delivery
-        await apiFetch(API_PATHS.deliveries, {
-          method: "POST",
-          body: JSON.stringify(payload),
-          headers: buildAuthHeaders(currentUser),
-        });
-        setNotice("Distribution assignment saved.");
+      await apiFetch(API_PATHS.deliveries, {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: buildAuthHeaders(currentUser),
+      });
+      setNotice("Distribution assignment saved.");
       }
       
       await loadData();
@@ -9293,10 +9328,10 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
                         Cancel
                       </button>
                     )}
-                    <button
-                      type="button"
-                      disabled={submitting}
-                      onClick={handleSubmitDistribution}
+                  <button
+                    type="button"
+                    disabled={submitting}
+                    onClick={handleSubmitDistribution}
                       className={`${editingDeliveryId ? "flex-1" : "w-full"} rounded-2xl bg-[#2F8A61] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#25724F] disabled:opacity-60 disabled:cursor-not-allowed transition`}
                     >
                       {submitting
@@ -9304,7 +9339,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
                         : editingDeliveryId
                           ? "Update delivery assignment"
                           : "Save delivery assignment"}
-                    </button>
+                  </button>
                   </div>
                 </div>
               </div>
@@ -9384,17 +9419,17 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
             {/* Status Filter */}
             <div>
               <label className="mb-1 block text-xs font-semibold text-gray-600">Status</label>
-              <select
+            <select
                 className="w-full rounded-lg border border-[#CFE6D8] bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2F855A] focus:border-transparent"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as DeliveryRecordApi["status"] | "all")}
-              >
-                <option value="all">All</option>
-                <option value="pending">Pending</option>
-                <option value="in_transit">In Transit</option>
-                <option value="delivered">Delivered</option>
-              </select>
-            </div>
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as DeliveryRecordApi["status"] | "all")}
+            >
+              <option value="all">All</option>
+              <option value="pending">Pending</option>
+              <option value="in_transit">In Transit</option>
+              <option value="delivered">Delivered</option>
+            </select>
+          </div>
 
             {/* Date Filter */}
             <div>
@@ -9592,11 +9627,11 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
                           </button>
                         </div>
                       )}
-                      <span
-                        className={`rounded-full px-3 py-1.5 text-xs font-semibold ${statusLabel(delivery.status).className}`}
-                      >
-                        {statusLabel(delivery.status).text}
-                      </span>
+                    <span
+                      className={`rounded-full px-3 py-1.5 text-xs font-semibold ${statusLabel(delivery.status).className}`}
+                    >
+                      {statusLabel(delivery.status).text}
+                    </span>
                     </div>
                   </div>
 
