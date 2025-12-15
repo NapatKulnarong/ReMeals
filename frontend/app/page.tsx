@@ -9112,7 +9112,7 @@ export default function Home() {
               } else if (user.isDeliveryStaff) {
                 setActiveTab(4);
               } else {
-                setActiveTab(1);
+                setActiveTab(0); // Redirect to homepage instead of donate page
               }
               setShowAuthModal(false);
             }}
