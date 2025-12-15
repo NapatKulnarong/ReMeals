@@ -9363,13 +9363,15 @@ export default function Home() {
   const [authMode, setAuthMode] = useState<AuthMode>("signup"); // current auth tab
   const [currentUser, setCurrentUser] = useState<LoggedUser | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [hasInitializedAdminTab, setHasInitializedAdminTab] = useState(false);
 
-  // Set default tab to donate page (1) for admin users
+  // Set default tab to donate page (1) for admin users on initial load only
   useEffect(() => {
-    if (currentUser?.isAdmin && activeTab === 0) {
+    if (currentUser?.isAdmin && !hasInitializedAdminTab && activeTab === 0) {
       setActiveTab(1);
+      setHasInitializedAdminTab(true);
     }
-  }, [currentUser, activeTab]);
+  }, [currentUser, activeTab, hasInitializedAdminTab]);
 
   const navItems: NavItem[] = currentUser?.isAdmin
     ? [
@@ -9396,10 +9398,6 @@ export default function Home() {
   const normalizedActiveTab = useMemo(() => {
     // Home page (0) is always accessible
     if (activeTab === 0) {
-      // For admin users, redirect home (0) to donate page (1)
-      if (currentUser?.isAdmin) {
-        return 1;
-      }
       return 0;
     }
     // Status tab (7) is accessible even when not logged in

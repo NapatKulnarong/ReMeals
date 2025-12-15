@@ -100,7 +100,9 @@ export default function Sidebar({
   const primaryTabs = tabs.filter(tab => tab.id === 1 || tab.id === 2);
   const statsTab = tabs.find(tab => tab.id === 8); // Donation Stats
   const statusTab = tabs.find(tab => tab.id === 7); // Status
-  const secondaryTabs = tabs.filter(tab => tab.id > 2 && tab.id !== 7 && tab.id !== 8);
+  const dashboardTab = tabs.find(tab => tab.id === 3); // Dashboard
+  const warehouseTab = tabs.find(tab => tab.id === 5); // Warehouse
+  const secondaryTabs = tabs.filter(tab => tab.id > 2 && tab.id !== 3 && tab.id !== 5 && tab.id !== 7 && tab.id !== 8);
 
   return (
     // Sidebar container: flex-col + justify-between lets us push the auth button to the bottom
@@ -296,6 +298,68 @@ export default function Sidebar({
               ].join(" ")}
             >
               {renderSidebarIcon(statsTab.id, "h-5 w-5")}
+            </span>
+          </button>
+        )}
+
+        {/* Dashboard Button - Full Width */}
+        {dashboardTab && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onTabChange(dashboardTab.id);
+            }}
+            className={[
+              "flex items-center justify-between rounded-2xl border px-4 py-4 text-left text-base font-semibold shadow-sm transition duration-200",
+              activeTab === dashboardTab.id
+                ? "border-[#B86A49] bg-[#F1CBB5] text-[#4B2415] shadow-md"
+                : "border-[#E6B9A2] bg-white text-[#70402B] hover:border-[#B86A49] hover:shadow",
+            ].join(" ")}
+          >
+            <span>{dashboardTab.label}</span>
+            <span
+              aria-hidden
+              className={[
+                "flex h-10 w-10 items-center justify-center rounded-full transition",
+                activeTab === dashboardTab.id
+                  ? "bg-white text-[#B86A49]"
+                  : "bg-[#F3D6C3] text-[#9A5335]",
+              ].join(" ")}
+            >
+              {renderSidebarIcon(dashboardTab.id, "h-5 w-5")}
+            </span>
+          </button>
+        )}
+
+        {/* Warehouse Button - Full Width */}
+        {warehouseTab && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onTabChange(warehouseTab.id);
+            }}
+            className={[
+              "flex items-center justify-between rounded-2xl border px-4 py-4 text-left text-base font-semibold shadow-sm transition duration-200",
+              activeTab === warehouseTab.id
+                ? "border-[#B86A49] bg-[#F1CBB5] text-[#4B2415] shadow-md"
+                : "border-[#E6B9A2] bg-white text-[#70402B] hover:border-[#B86A49] hover:shadow",
+            ].join(" ")}
+          >
+            <span>{warehouseTab.label}</span>
+            <span
+              aria-hidden
+              className={[
+                "flex h-10 w-10 items-center justify-center rounded-full transition",
+                activeTab === warehouseTab.id
+                  ? "bg-white text-[#B86A49]"
+                  : "bg-[#F3D6C3] text-[#9A5335]",
+              ].join(" ")}
+            >
+              {renderSidebarIcon(warehouseTab.id, "h-5 w-5")}
             </span>
           </button>
         )}
