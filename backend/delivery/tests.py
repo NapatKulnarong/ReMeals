@@ -1,4 +1,4 @@
-from datetime import date, timedelta, time
+from datetime import date, timedelta, time, datetime
 
 
 from django.contrib.auth.models import User as DjangoAuthUser
@@ -149,6 +149,9 @@ class DeliveryAPITests(APITestCase):
 
         response = self.client.post(self.list_url, payload, format="json", **self.admin_headers)
 
+        if response.status_code != 201:
+            print(f"Response status: {response.status_code}")
+            print(f"Response data: {response.data}")
         self.assertEqual(response.status_code, 201)
         created_id = response.data["delivery_id"]
         self.assertTrue(created_id.startswith("DLV"))
@@ -184,7 +187,13 @@ class DeliveryAPITests(APITestCase):
 
         self.assertEqual(response.status_code, 200)
         self.existing_delivery.refresh_from_db()
-        self.assertEqual(self.existing_delivery.dropoff_time, time(5, 0))
+        # dropoff_time is now a datetime, check the time component (accounting for timezone)
+        dropoff_time = self.existing_delivery.dropoff_time
+        if dropoff_time.tzinfo:
+            # Convert to local timezone for comparison
+            from django.utils import timezone as django_timezone
+            dropoff_time = dropoff_time.astimezone(django_timezone.get_current_timezone())
+        self.assertEqual(dropoff_time.time(), time(5, 0))
         self.assertEqual(self.existing_delivery.notes, "Updated schedule")
 
     # 5. Requests must be authenticated
@@ -268,7 +277,14 @@ class DeliveryAPITests(APITestCase):
         response = self.client.post(self.list_url, payload, format="json", **self.admin_headers)
         self.assertEqual(response.status_code, 201)
         created = Delivery.objects.get(delivery_id=response.data["delivery_id"])
-        self.assertEqual(created.dropoff_time, time(4, 45))
+        # dropoff_time is now a datetime, check the time component
+        # Account for timezone conversion - check that time component matches in local timezone
+        dropoff_time = created.dropoff_time
+        if dropoff_time.tzinfo:
+            # Convert to local timezone for comparison
+            from django.utils import timezone as django_timezone
+            dropoff_time = dropoff_time.astimezone(django_timezone.get_current_timezone())
+        self.assertEqual(dropoff_time.time(), time(4, 45))
 
     # 10. Detail endpoint returns 404 for unknown delivery_id
     def test_get_nonexistent_delivery_returns_404(self):
@@ -298,6 +314,11 @@ class DeliveryAPITests(APITestCase):
         payload = {"dropoff_time": "02:00:00"}
         response = self.client.patch(detail_url, payload, format="json", **self.admin_headers)
         self.assertEqual(response.status_code, 200)
+        # Verify the dropoff_time was updated (now stored as datetime)
+        self.existing_delivery.refresh_from_db()
+        dropoff_time = self.existing_delivery.dropoff_time
+        # Just verify it's a valid datetime (timezone conversion may occur)
+        self.assertIsInstance(dropoff_time, datetime)
 
     # 14. Creating delivery without pickup_time is rejected
     def test_create_delivery_missing_pickup_time(self):
@@ -389,7 +410,8 @@ class DeliveryAPITests(APITestCase):
         self.assertEqual(patch_response.status_code, 200)
         detail_response = self.client.get(detail_url, **self.admin_headers)
         self.assertEqual(detail_response.status_code, 200)
-        self.assertEqual(detail_response.data["dropoff_time"], "06:15:00")
+        # dropoff_time is now returned as ISO datetime string, check it contains the time
+        self.assertIn("06:15:00", detail_response.data["dropoff_time"])
         self.assertEqual(detail_response.data["notes"], "Extended route")
 
     # 21. Creating delivery with invalid pickup location type fails
