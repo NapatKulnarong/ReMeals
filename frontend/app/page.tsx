@@ -4814,6 +4814,7 @@ function AdminDashboard({ currentUser }: { currentUser: LoggedUser }) {
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<"all" | "donation" | "request">("all");
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
   useEffect(() => {
     let ignore = false;
@@ -4886,16 +4887,27 @@ function AdminDashboard({ currentUser }: { currentUser: LoggedUser }) {
     return item.type === filterType;
   });
 
-  // Group items by status and sort by creation date (newest first)
+  // Sort function based on selected order
+  const sortByDate = (a: ManageableItem, b: ManageableItem) => {
+    const aTime = new Date(a.createdAt).getTime();
+    const bTime = new Date(b.createdAt).getTime();
+    if (sortOrder === "newest") {
+      return bTime - aTime; // Newest first
+    } else {
+      return aTime - bTime; // Oldest first
+    }
+  };
+
+  // Group items by status and sort by creation date
   const pendingItems = filteredItems
     .filter((item) => item.status === "pending")
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    .sort(sortByDate);
   const completedItems = filteredItems
     .filter((item) => item.status === "accepted")
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    .sort(sortByDate);
   const declinedItems = filteredItems
     .filter((item) => item.status === "declined")
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    .sort(sortByDate);
 
   const updateStatus = async (
     itemId: string,
@@ -4999,20 +5011,36 @@ function AdminDashboard({ currentUser }: { currentUser: LoggedUser }) {
             Mark items as completed or declined from the pending column to keep the queue tidy.
           </p>
         </div>
-        <div className="flex-shrink-0">
-          <label htmlFor="filter-type" className="block text-xs font-semibold text-gray-700 mb-1">
-            Filter
-          </label>
-          <select
-            id="filter-type"
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value as "all" | "donation" | "request")}
-            className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 shadow-sm transition hover:border-gray-400 focus:border-[#C46A24] focus:outline-none focus:ring-2 focus:ring-[#C46A24]/20"
-          >
-            <option value="all">All Items</option>
-            <option value="donation">Donations Only</option>
-            <option value="request">Meal Requests Only</option>
-          </select>
+        <div className="flex-shrink-0 flex gap-3">
+          <div>
+            <label htmlFor="filter-type" className="block text-xs font-semibold text-gray-700 mb-1">
+              Filter
+            </label>
+            <select
+              id="filter-type"
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value as "all" | "donation" | "request")}
+              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 shadow-sm transition hover:border-gray-400 focus:border-[#C46A24] focus:outline-none focus:ring-2 focus:ring-[#C46A24]/20"
+            >
+              <option value="all">All Items</option>
+              <option value="donation">Donations Only</option>
+              <option value="request">Meal Requests Only</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="sort-order" className="block text-xs font-semibold text-gray-700 mb-1">
+              Sort
+            </label>
+            <select
+              id="sort-order"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value as "newest" | "oldest")}
+              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 shadow-sm transition hover:border-gray-400 focus:border-[#C46A24] focus:outline-none focus:ring-2 focus:ring-[#C46A24]/20"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+            </select>
+          </div>
         </div>
       </div>
 
