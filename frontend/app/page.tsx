@@ -2314,8 +2314,7 @@ function YourStatsSection({
 
   useEffect(() => {
     if (!currentUser) {
-      setShowAuthModal(true);
-      setAuthMode("login");
+      setLoading(false);
       return;
     }
 
@@ -2430,19 +2429,62 @@ function YourStatsSection({
 
   if (!currentUser) {
     return (
-      <div className="rounded-xl bg-white p-10 shadow text-center">
-        <p className="text-gray-600 mb-4">
-          Please log in to view your statistics.
-        </p>
-        <button
-          onClick={() => {
-            setAuthMode("login");
-            setShowAuthModal(true);
-          }}
-          className="rounded-lg bg-[#d48a68] px-6 py-2 text-sm font-semibold text-white transition hover:bg-[#c47958]"
-        >
-          Log in
-        </button>
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-semibold text-gray-900">Donation Stats</h2>
+          <p className="mt-1 text-sm text-gray-600">
+            View your donation statistics, history, and impact over time.
+          </p>
+        </div>
+        <div className="rounded-2xl border border-[#F3C7A0] bg-[#FFF8F0] p-8 shadow-sm">
+          <div className="flex flex-col items-center justify-center text-center space-y-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#F3C7A0]">
+              <svg
+                className="h-8 w-8 text-[#B25C23]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Sign in to view your donation stats
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Log in or create an account to see your donation history, statistics, and impact over time.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode("login");
+                  setShowAuthModal(true);
+                }}
+                className="rounded-lg bg-[#D48B68] px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#C47958]"
+              >
+                Log in
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode("signup");
+                  setShowAuthModal(true);
+                }}
+                className="rounded-lg border border-[#D48B68] bg-white px-6 py-2.5 text-sm font-semibold text-[#D48B68] transition hover:bg-[#FFF8F0]"
+              >
+                Sign up
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -9404,15 +9446,12 @@ export default function Home() {
     if (activeTab === 7) {
       return 7;
     }
-    // Your stats tab (8) requires login
+    // Your stats tab (8) is accessible even when not logged in (shows sign-in prompt)
     if (activeTab === 8) {
-      if (!currentUser) {
-        return 0; // Redirect to home if not logged in
-      }
       return 8;
     }
-    if (!currentUser && activeTab > 2) {
-      return 0; // Redirect to home if not logged in
+    if (!currentUser && activeTab > 2 && activeTab !== 7 && activeTab !== 8) {
+      return 0; // Redirect to home if not logged in (except for status and stats tabs)
     }
     // For delivery staff (non-admin), redirect tab 6 to tab 4 (combined deliveries view)
     if (currentUser?.isDeliveryStaff && !currentUser?.isAdmin && activeTab === 6) {

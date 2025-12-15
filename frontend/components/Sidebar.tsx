@@ -159,7 +159,7 @@ export default function Sidebar({
               onTabChange(homeTab.id);
             }}
             className={[
-              "flex items-center justify-between rounded-2xl border px-4 py-4 text-left text-base font-semibold shadow-sm transition duration-200",
+              "flex items-center justify-between rounded-2xl border px-4 py-4 text-left text-base font-semibold shadow-sm transition duration-200 cursor-pointer",
               activeTab === homeTab.id
                 ? "border-[#B86A49] bg-[#F1CBB5] text-[#4B2415] shadow-md"
                 : "border-[#E6B9A2] bg-white text-[#70402B] hover:border-[#B86A49] hover:shadow",
@@ -280,8 +280,9 @@ export default function Sidebar({
               e.stopPropagation();
               onTabChange(statsTab.id);
             }}
+            disabled={false}
             className={[
-              "flex items-center justify-between rounded-2xl border px-4 py-4 text-left text-base font-semibold shadow-sm transition duration-200",
+              "flex items-center justify-between rounded-2xl border px-4 py-4 text-left text-base font-semibold shadow-sm transition duration-200 cursor-pointer relative z-10",
               activeTab === statsTab.id
                 ? "border-[#B86A49] bg-[#F1CBB5] text-[#4B2415] shadow-md"
                 : "border-[#E6B9A2] bg-white text-[#70402B] hover:border-[#B86A49] hover:shadow",
