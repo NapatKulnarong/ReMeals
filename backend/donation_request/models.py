@@ -7,6 +7,12 @@ from community.models import Community
 class DonationRequest(models.Model):
     PREFIX = "REQ"
 
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('declined', 'Declined'),
+    ]
+
     request_id = models.CharField(max_length=10, primary_key=True)
     title = models.CharField(max_length=120)
     community_name = models.CharField(max_length=120)
@@ -16,11 +22,20 @@ class DonationRequest(models.Model):
     contact_phone = models.CharField(max_length=30, blank=True)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     community = models.ForeignKey(
         Community,
         on_delete=models.CASCADE,
         related_name="donation_requests",
         db_column="community_id",
+    )
+    created_by = models.ForeignKey(
+        'users.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='created_by',
+        related_name='donation_requests',
     )
 
     class Meta:

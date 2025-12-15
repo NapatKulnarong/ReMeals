@@ -149,9 +149,51 @@ class Delivery(models.Model):
             # Make timezone-aware
             self.dropoff_time = django_timezone.make_aware(combined)
         
+        # Handle quantity updates for existing deliveries
+        is_update = self.pk is not None
+        if is_update:
+            # Get the old instance from database before save
+            try:
+                old_instance = Delivery.objects.get(pk=self.pk)
+                old_food_item = old_instance.food_item
+                old_delivery_quantity = old_instance.delivery_quantity
+                new_food_item = self.food_item
+                new_delivery_quantity = self.delivery_quantity
+                
+                # If food item changed, return old quantity to old food item
+                # (Note: This is also handled in views.py, but we do it here as a safety net)
+                if old_food_item and old_delivery_quantity and new_food_item and old_food_item != new_food_item:
+                    # Old quantity was already returned in views.py, just deduct new quantity
+                    if new_delivery_quantity:
+                        self.update_food_item_quantity()
+                # If same food item but quantity changed, adjust the quantity
+                elif old_food_item and new_food_item and old_food_item == new_food_item:
+                    if old_delivery_quantity != new_delivery_quantity and new_delivery_quantity:
+                        try:
+                            import re
+                            old_match = re.search(r'^(\d+(?:\.\d+)?)', str(old_delivery_quantity).strip())
+                            new_match = re.search(r'^(\d+(?:\.\d+)?)', str(new_delivery_quantity).strip())
+                            if old_match and new_match:
+                                old_quantity = float(old_match.group(1))
+                                new_quantity = float(new_match.group(1))
+                                old_quantity_int = int(round(old_quantity))
+                                new_quantity_int = int(round(new_quantity))
+                                # Return old quantity and deduct new quantity
+                                new_food_item.quantity += old_quantity_int - new_quantity_int
+                                new_food_item.save()
+                        except (ValueError, AttributeError):
+                            pass
+                    # If quantity didn't change, no update needed
+                elif new_food_item and new_delivery_quantity:
+                    # New food item assigned (old was None), deduct quantity
+                    self.update_food_item_quantity()
+            except Delivery.DoesNotExist:
+                # New delivery, just deduct quantity
+                pass
+        
         super().save(*args, **kwargs)
         
         # Update food item quantity if this is a new delivery (after save to ensure pk exists)
-        if not hasattr(self, '_quantity_updated') and self.food_item and self.delivery_quantity:
+        if not is_update and not hasattr(self, '_quantity_updated') and self.food_item and self.delivery_quantity:
             self.update_food_item_quantity()
             self._quantity_updated = True

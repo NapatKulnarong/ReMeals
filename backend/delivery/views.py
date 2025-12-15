@@ -93,6 +93,28 @@ class DeliveryViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         if not _str_to_bool(request.headers.get("X-USER-IS-ADMIN")):
             return Response({"detail": "Admin privileges required."}, status=403)
+        instance = self.get_object()
+        
+        # Before updating, return old quantity to old food item if food_item is being changed
+        old_food_item = instance.food_item
+        old_delivery_quantity = instance.delivery_quantity
+        new_food_item_id = request.data.get("food_item")
+        
+        if old_food_item and old_delivery_quantity and new_food_item_id:
+            # Check if food item is actually changing
+            if str(old_food_item.food_id) != str(new_food_item_id):
+                # Return old quantity to old food item
+                try:
+                    import re
+                    quantity_match = re.search(r'^(\d+(?:\.\d+)?)', str(old_delivery_quantity).strip())
+                    if quantity_match:
+                        old_quantity = float(quantity_match.group(1))
+                        old_quantity_int = int(round(old_quantity))
+                        old_food_item.quantity += old_quantity_int
+                        old_food_item.save()
+                except (ValueError, AttributeError):
+                    pass
+        
         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
@@ -110,15 +132,37 @@ class DeliveryViewSet(viewsets.ModelViewSet):
             if not (is_driver and user_id and instance.user_id and instance.user_id.user_id == user_id):
                 return Response({"detail": "Not permitted."}, status=403)
             allowed_fields = {"status", "notes", "dropoff_time"}
+            data = {k: v for k, v in request.data.items() if k in allowed_fields}
+            if not data:
+                return Response(
+                    {"detail": "No updatable fields provided."},
+                    status=drf_status.HTTP_400_BAD_REQUEST,
+                )
         else:
-            allowed_fields = {"status", "notes", "dropoff_time"}
-
-        data = {k: v for k, v in request.data.items() if k in allowed_fields}
-        if not data:
-            return Response(
-                {"detail": "No updatable fields provided."},
-                status=drf_status.HTTP_400_BAD_REQUEST,
-            )
+            # Admin can update all fields including food_item and delivery_quantity
+            data = request.data
+            
+            # Before updating, return old quantity to old food item if food_item is being changed
+            if "food_item" in data:
+                old_food_item = instance.food_item
+                old_delivery_quantity = instance.delivery_quantity
+                new_food_item_id = data.get("food_item")
+                
+                if old_food_item and old_delivery_quantity and new_food_item_id:
+                    # Check if food item is actually changing
+                    if str(old_food_item.food_id) != str(new_food_item_id):
+                        # Return old quantity to old food item
+                        try:
+                            import re
+                            quantity_match = re.search(r'^(\d+(?:\.\d+)?)', str(old_delivery_quantity).strip())
+                            if quantity_match:
+                                old_quantity = float(quantity_match.group(1))
+                                old_quantity_int = int(round(old_quantity))
+                                old_food_item.quantity += old_quantity_int
+                                old_food_item.save()
+                        except (ValueError, AttributeError):
+                            pass
+        
         serializer = self.get_serializer(instance, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)

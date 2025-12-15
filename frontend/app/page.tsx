@@ -23,6 +23,8 @@ import {
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
 
+const USER_STORAGE_KEY = "re-meals-current-user";
+
 type AuthMode = "signup" | "login";
 
 type SignupCredentials = {
@@ -130,6 +132,7 @@ type DonationRequestRecord = DonationRequestForm & {
   id: string;
   createdAt: string;
   ownerUserId?: string | null;
+  status?: "pending" | "accepted" | "declined";
 };
 
 type DonationApiRecord = {
@@ -167,6 +170,7 @@ type DonationRequestApiRecord = {
   notes: string;
   created_at: string;
   created_by_user_id?: string | null;
+  status?: "pending" | "accepted" | "declined";
 };
 
 type Warehouse = {
@@ -880,10 +884,23 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
     "Content-Type": "application/json",
     ...(options.headers ?? {}),
   };
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: mergedHeaders,
   });
+  } catch (error) {
+    // Handle network errors (backend not available, CORS, etc.)
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    if (errorMessage.includes("Failed to fetch") || errorMessage.includes("NetworkError")) {
+      throw new Error(
+        `Unable to connect to the server. Please ensure the backend is running at ${API_BASE_URL}`
+      );
+    }
+    throw error;
+  }
 
   if (!response.ok) {
     let message = `Request failed (${response.status} ${response.statusText})`;
@@ -1418,6 +1435,7 @@ function HomePage({
         ];
 
         // Fetch all data in parallel for maximum speed
+        // Wrap each fetch in a promise that handles network errors gracefully
         const [
           impactResult1,
           impactResult2,
@@ -1427,14 +1445,35 @@ function HomePage({
           communitiesData,
           deliveriesData,
         ] = await Promise.allSettled([
-          apiFetch<unknown>(impactCandidates[0]),
-          apiFetch<unknown>(impactCandidates[1]),
-          apiFetch<Restaurant[]>("/restaurants/"),
-          apiFetch<DonationApiRecord[]>("/donations/"),
-          apiFetch<FoodItemApiRecord[]>("/fooditems/"),
-          apiFetch<Community[]>(API_PATHS.communities),
+          apiFetch<unknown>(impactCandidates[0]).catch((err) => {
+            console.warn("Failed to fetch impact data from first endpoint:", err);
+            throw err;
+          }),
+          apiFetch<unknown>(impactCandidates[1]).catch((err) => {
+            console.warn("Failed to fetch impact data from second endpoint:", err);
+            throw err;
+          }),
+          apiFetch<Restaurant[]>("/restaurants/").catch((err) => {
+            console.warn("Failed to fetch restaurants:", err);
+            throw err;
+          }),
+          apiFetch<DonationApiRecord[]>("/donations/").catch((err) => {
+            console.warn("Failed to fetch donations:", err);
+            throw err;
+          }),
+          apiFetch<FoodItemApiRecord[]>("/fooditems/").catch((err) => {
+            console.warn("Failed to fetch food items:", err);
+            throw err;
+          }),
+          apiFetch<Community[]>(API_PATHS.communities).catch((err) => {
+            console.warn("Failed to fetch communities:", err);
+            throw err;
+          }),
           apiFetch<DeliveryRecordApi[]>(API_PATHS.deliveries, {
             headers: buildAuthHeaders(currentUser),
+          }).catch((err) => {
+            console.warn("Failed to fetch deliveries:", err);
+            throw err;
           }),
         ]);
 
@@ -1446,16 +1485,16 @@ function HomePage({
 
         for (const result of [impactResult1, impactResult2]) {
           if (result.status === "fulfilled") {
-            try {
+          try {
               loaded = normalizeImpactData(result.value);
-              if (loaded.length) break;
-            } catch (err) {
+            if (loaded.length) break;
+          } catch (err) {
               impactError = err;
-            }
+          }
           } else {
             impactError = result.reason;
-          }
         }
+          }
 
         if (loaded.length) {
           setImpactRecords(loaded);
@@ -1465,7 +1504,7 @@ function HomePage({
           );
         }
         // Always clear loading state
-        setImpactLoading(false);
+          setImpactLoading(false);
 
         // Process leaderboard data - update state as soon as available
         if (restaurantsData.status === "fulfilled") {
@@ -1890,33 +1929,33 @@ function HomePage({
             Re-Meals brings together restaurants, drivers, and community hearts to ensure no good meal goes to waste—and no neighbor goes without. Share what you have, ask for what you need, and help nourish the people around you.
           </p>
           {!currentUser && (
-            <div className="flex flex-wrap gap-3">
-              <button
-                className="flex items-center gap-3 rounded-full bg-[#708A58] px-5 py-3 pr-3 text-sm font-semibold text-white shadow hover:bg-[#576c45] transition"
-                onClick={() => {
-                  setAuthMode("signup");
-                  setShowAuthModal(true);
-                }}
-                type="button"
-              >
-                Login / Sign up to donate or request
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
-                  <svg
-                    className="h-6 w-6 text-[#d48a68]"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M13 7l5 5m0 0l-5 5m5-5H6"
-                    />
-                  </svg>
-                </span>
-              </button>
-            </div>
+          <div className="flex flex-wrap gap-3">
+            <button
+              className="flex items-center gap-3 rounded-full bg-[#708A58] px-5 py-3 pr-3 text-sm font-semibold text-white shadow hover:bg-[#576c45] transition"
+              onClick={() => {
+                setAuthMode("signup");
+                setShowAuthModal(true);
+              }}
+              type="button"
+            >
+              Login / Sign up to donate or request
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
+                <svg
+                  className="h-6 w-6 text-[#d48a68]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  />
+                </svg>
+              </span>
+            </button>
+          </div>
           )}
         </div>
       </div>
@@ -1963,14 +2002,14 @@ function HomePage({
               {impactLoading ? (
                 <div className="mt-2 h-10 w-24 bg-gray-200 rounded animate-pulse"></div>
               ) : (
-                <p className={`text-3xl font-bold ${card.classes}`}>
+              <p className={`text-3xl font-bold ${card.classes}`}>
                   <AnimatedNumber 
                     value={card.value} 
                     suffix={card.suffix}
                     className={card.classes}
                     decimals={card.label === "Meals saved" ? 0 : 1}
                   />
-                </p>
+              </p>
               )}
             </div>
           ))}
@@ -2011,46 +2050,46 @@ function HomePage({
                     </div>
                   ))}
                 </div>
-              ) : restaurantLeaderboard.length === 0 ? (
+            ) : restaurantLeaderboard.length === 0 ? (
                 <div className="flex items-center justify-center h-full">
                   <p className="text-sm text-gray-600 text-center animate-fade-in">No restaurant data available yet.</p>
                 </div>
-              ) : (
+            ) : (
                 <div className="space-y-2 w-full">
-                  {restaurantLeaderboard.map((restaurant, index) => (
-                    <div
-                      key={restaurant.restaurantId}
+                {restaurantLeaderboard.map((restaurant, index) => (
+                  <div
+                    key={restaurant.restaurantId}
                       className="rounded-xl border border-dashed border-[#F3C7A0] bg-white p-3 hover:bg-[#f9fff4] transition-all duration-300 hover:shadow-md hover:scale-[1.02] animate-fade-in-up"
                       style={{
                         animationDelay: `${index * 0.1}s`,
                         opacity: 0,
                       }}
-                    >
-                        <div className="flex items-center gap-3">
+                  >
+                    <div className="flex items-center gap-3">
                           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#F3C7A0] text-sm font-bold text-[#B25C23] transition-transform duration-300 hover:scale-110">
-                            {index + 1}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-semibold text-gray-900">
-                              {restaurant.name}
-                            </p>
-                            <div className="mt-1 flex gap-4 text-xs text-gray-600">
+                        {index + 1}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-gray-900">
+                          {restaurant.name}
+                        </p>
+                        <div className="mt-1 flex gap-4 text-xs text-gray-600">
                               <span className="font-semibold text-[#365032] transition-colors duration-300">
-                                {restaurant.meals.toLocaleString(undefined, { maximumFractionDigits: 0 })} meals
-                              </span>
+                            {restaurant.meals.toLocaleString(undefined, { maximumFractionDigits: 0 })} meals
+                          </span>
                               <span className="text-[#708A58] transition-colors duration-300">
-                                {restaurant.weight.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg
-                              </span>
+                            {restaurant.weight.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg
+                          </span>
                               <span className="text-[#B25C23] transition-colors duration-300">
-                                {restaurant.co2.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg CO₂
-                              </span>
-                            </div>
-                          </div>
+                            {restaurant.co2.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg CO₂
+                          </span>
                         </div>
                       </div>
-                  ))}
-                </div>
-              )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
             </div>
           </div>
 
@@ -2394,9 +2433,24 @@ function YourStatsSection({
       (sum, item) => sum + item.quantity,
       0
     );
+    const avgItemsPerDonation = totalDonations > 0 ? (totalItems / totalDonations).toFixed(1) : "0";
 
-    // Group by month for time series
+    // Status distribution
+    const statusCounts = new Map<string, number>();
+    donations.forEach((donation) => {
+      const status = donation.status || "pending";
+      statusCounts.set(status, (statusCounts.get(status) || 0) + 1);
+    });
+    const statusData = Array.from(statusCounts.entries()).map(([status, count]) => ({
+      status,
+      count,
+      label: status.charAt(0).toUpperCase() + status.slice(1),
+    }));
+
+    // Group by month for time series (donations count)
     const donationsByMonth = new Map<string, number>();
+    // Group by month for quantity
+    const quantityByMonth = new Map<string, number>();
 
     donations.forEach((donation) => {
       const date = new Date(donation.createdAt);
@@ -2404,6 +2458,16 @@ function YourStatsSection({
       donationsByMonth.set(
         monthKey,
         (donationsByMonth.get(monthKey) || 0) + 1
+      );
+      
+      // Calculate quantity for this donation
+      const donationItems = foodItems.filter(item => {
+        return item.donation === donation.id;
+      });
+      const donationQuantity = donationItems.reduce((sum, item) => sum + item.quantity, 0);
+      quantityByMonth.set(
+        monthKey,
+        (quantityByMonth.get(monthKey) || 0) + donationQuantity
       );
     });
 
@@ -2416,14 +2480,49 @@ function YourStatsSection({
         monthKey,
         month: new Date(parseInt(year), parseInt(month) - 1),
         donations: donationsByMonth.get(monthKey) || 0,
+        quantity: quantityByMonth.get(monthKey) || 0,
       };
+    });
+
+    // Category distribution
+    const categoryCounts = new Map<string, number>();
+    foodItems.forEach((item) => {
+      const category = item.category || "Uncategorized";
+      categoryCounts.set(category, (categoryCounts.get(category) || 0) + item.quantity);
+    });
+    const categoryData = Array.from(categoryCounts.entries())
+      .map(([category, quantity]) => ({ category, quantity }))
+      .sort((a, b) => b.quantity - a.quantity)
+      .slice(0, 8); // Top 8 categories
+
+    // Weekly breakdown (last 8 weeks)
+    const weeklyData = new Map<string, number>();
+    const now = new Date();
+    for (let i = 7; i >= 0; i--) {
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - (i * 7));
+      weekStart.setHours(0, 0, 0, 0);
+      const weekKey = `Week ${Math.ceil((now.getTime() - weekStart.getTime()) / (7 * 24 * 60 * 60 * 1000))}`;
+      weeklyData.set(weekKey, 0);
+    }
+    donations.forEach((donation) => {
+      const date = new Date(donation.createdAt);
+      const weekAgo = Math.floor((now.getTime() - date.getTime()) / (7 * 24 * 60 * 60 * 1000));
+      if (weekAgo >= 0 && weekAgo < 8) {
+        const weekKey = `Week ${8 - weekAgo}`;
+        weeklyData.set(weekKey, (weeklyData.get(weekKey) || 0) + 1);
+      }
     });
 
     return {
       totalDonations,
       totalItems,
       totalQuantity,
+      avgItemsPerDonation,
       timeSeriesData,
+      statusData,
+      categoryData,
+      weeklyData: Array.from(weeklyData.entries()).map(([week, count]) => ({ week, count })),
     };
   }, [donations, foodItems]);
 
@@ -2464,13 +2563,13 @@ function YourStatsSection({
 
   return (
     <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold text-gray-900">Donation Stats</h2>
+      </div>
       <div className="rounded-xl bg-white p-6 shadow">
-        <h2 className="text-2xl font-bold text-[#4B2415] mb-6">
-          Donation Stats
-        </h2>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="rounded-lg bg-gradient-to-br from-[#F1CBB5] to-[#E9B79C] p-5 shadow-sm">
             <div className="text-sm font-medium text-[#70402B] mb-1">
               Total Donations
@@ -2495,17 +2594,38 @@ function YourStatsSection({
               {stats.totalQuantity}
             </div>
           </div>
+          <div className="rounded-lg bg-gradient-to-br from-[#E9B79C] to-[#F1CBB5] p-5 shadow-sm">
+            <div className="text-sm font-medium text-[#70402B] mb-1">
+              Avg Items/Donation
+            </div>
+            <div className="text-3xl font-bold text-[#4B2415]">
+              {stats.avgItemsPerDonation}
+            </div>
+          </div>
         </div>
 
-        {/* Time Series Chart */}
-        {stats.timeSeriesData.length > 0 && (
-          <div className="mt-8">
-            <h3 className="text-lg font-semibold text-[#4B2415] mb-4">
-              Donations Over Time
-            </h3>
-            <DonationTimeSeriesChart data={stats.timeSeriesData} />
-          </div>
-        )}
+        {/* Visualizations Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Donations Over Time */}
+          {stats.timeSeriesData.length > 0 && (
+            <div className="rounded-lg border border-[#E6B9A2] bg-white p-6">
+              <h3 className="text-lg font-semibold text-[#4B2415] mb-4">
+                Donations Over Time
+              </h3>
+              <DonationTimeSeriesChart data={stats.timeSeriesData} />
+            </div>
+          )}
+
+          {/* Quantity Over Time */}
+          {stats.timeSeriesData.length > 0 && (
+            <div className="rounded-lg border border-[#E6B9A2] bg-white p-6">
+              <h3 className="text-lg font-semibold text-[#4B2415] mb-4">
+                Quantity Over Time
+              </h3>
+              <QuantityLineChart data={stats.timeSeriesData} />
+            </div>
+          )}
+        </div>
 
         {/* Recent Activity */}
         <div className="mt-8">
@@ -2519,15 +2639,28 @@ function YourStatsSection({
                 className="rounded-lg border border-[#E6B9A2] bg-white p-4"
               >
                 <div className="flex justify-between items-start mb-2">
-                  <div className="font-semibold text-[#4B2415]">
-                    {donation.restaurantName}
+                  <div className="flex-1">
+                    <div className="font-semibold text-[#4B2415] mb-1">
+                      Food Items
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {donation.items.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {donation.items.map((item, idx) => (
+                            <span key={item.id || idx} className="inline-block">
+                              {item.name}
+                              {idx < donation.items.length - 1 && <span className="text-gray-400">, </span>}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">No items</span>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-gray-500 ml-4">
                     {new Date(donation.createdAt).toLocaleDateString()}
                   </div>
-                </div>
-                <div className="text-sm text-gray-600">
-                  {donation.items.length} item(s)
                 </div>
               </div>
             ))}
@@ -2562,23 +2695,21 @@ function DonationTimeSeriesChart({
   const maxValue = Math.max(...data.map((d) => d.donations), 1);
   const chartHeight = 280;
   const chartPadding = { top: 20, right: 20, bottom: 40, left: 60 };
-  const barSpacing = 8;
-  const availableWidth = 800;
-  const barWidth = Math.max(
-    30,
+  const barSpacing = 12;
+  const minBarWidth = 40;
+  const maxBarWidth = 80;
+  // Calculate optimal bar width based on data length
+  const optimalBarWidth = Math.max(
+    minBarWidth,
     Math.min(
-      60,
-      (availableWidth -
-        chartPadding.left -
-        chartPadding.right -
-        (data.length - 1) * barSpacing) /
-        data.length
+      maxBarWidth,
+      data.length <= 2 ? 120 : data.length <= 4 ? 80 : data.length <= 6 ? 60 : 40
     )
   );
-  const chartWidth =
-    data.length * (barWidth + barSpacing) +
-    chartPadding.left +
-    chartPadding.right;
+  const chartWidth = Math.max(
+    400,
+    data.length * (optimalBarWidth + barSpacing) + chartPadding.left + chartPadding.right
+  );
 
   const formatMonthLabel = (date: Date) => {
     return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
@@ -2676,7 +2807,7 @@ function DonationTimeSeriesChart({
               (item.donations / maxValue) *
               (chartHeight - chartPadding.top - chartPadding.bottom);
             const x =
-              chartPadding.left + index * (barWidth + barSpacing);
+              chartPadding.left + index * (optimalBarWidth + barSpacing);
             const donationY = chartHeight - chartPadding.bottom - donationBarHeight;
             const isHovered = hoveredIndex === index;
 
@@ -2686,7 +2817,7 @@ function DonationTimeSeriesChart({
                 <rect
                   x={x}
                   y={donationY}
-                  width={barWidth}
+                  width={optimalBarWidth}
                   height={donationBarHeight}
                   fill="url(#donationGradient)"
                   rx="4"
@@ -2706,17 +2837,16 @@ function DonationTimeSeriesChart({
                   onMouseLeave={handleBarLeave}
                 />
                 {/* Month label */}
-                {index % Math.ceil(data.length / 6) === 0 && (
-                  <text
-                    x={x + barWidth / 2}
-                    y={chartHeight - chartPadding.bottom + 20}
-                    fontSize="10"
-                    fill="#6B7280"
-                    textAnchor="middle"
-                  >
-                    {formatMonthLabel(item.month)}
-                  </text>
-                )}
+                <text
+                  x={x + optimalBarWidth / 2}
+                  y={chartHeight - chartPadding.bottom + 20}
+                  fontSize="11"
+                  fill="#6B7280"
+                  textAnchor="middle"
+                  className="font-medium"
+                >
+                  {formatMonthLabel(item.month)}
+                </text>
               </g>
             );
           })}
@@ -2733,6 +2863,615 @@ function DonationTimeSeriesChart({
         </svg>
       </div>
 
+    </div>
+  );
+}
+
+// Status Pie Chart Component
+function StatusPieChart({
+  data,
+}: {
+  data: Array<{ status: string; count: number; label: string }>;
+}) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const total = data.reduce((sum, item) => sum + item.count, 0);
+  const size = 200;
+  const center = size / 2;
+  const radius = 80;
+  const initialAngle = -90; // Start from top
+
+  const statusColors: Record<string, string> = {
+    pending: "#FCD34D",
+    accepted: "#86EFAC",
+    declined: "#FCA5A5",
+  };
+
+  // Calculate cumulative angles without mutation
+  const segments = data.map((item, index) => {
+    const percentage = (item.count / total) * 100;
+    const angle = (item.count / total) * 360;
+    // Calculate start angle as sum of all previous angles
+    const startAngle = initialAngle + data.slice(0, index).reduce((sum, prevItem) => {
+      return sum + (prevItem.count / total) * 360;
+    }, 0);
+    const endAngle = startAngle + angle;
+
+    const startAngleRad = (startAngle * Math.PI) / 180;
+    const endAngleRad = (endAngle * Math.PI) / 180;
+
+    const x1 = center + radius * Math.cos(startAngleRad);
+    const y1 = center + radius * Math.sin(startAngleRad);
+    const x2 = center + radius * Math.cos(endAngleRad);
+    const y2 = center + radius * Math.sin(endAngleRad);
+
+    const largeArcFlag = angle > 180 ? 1 : 0;
+
+    const pathData = [
+      `M ${center} ${center}`,
+      `L ${x1} ${y1}`,
+      `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+      "Z",
+    ].join(" ");
+
+    return {
+      ...item,
+      pathData,
+      percentage,
+      startAngle,
+      endAngle,
+      index,
+    };
+  });
+
+  return (
+    <div className="flex flex-col items-center">
+      <svg width={size} height={size} className="mb-4">
+        {segments.map((segment) => {
+          const isHovered = hoveredIndex === segment.index;
+          return (
+            <path
+              key={segment.status}
+              d={segment.pathData}
+              fill={statusColors[segment.status] || "#E5E7EB"}
+              stroke="white"
+              strokeWidth="2"
+              className="transition-opacity cursor-pointer"
+              style={{ opacity: isHovered ? 0.8 : 1 }}
+              onMouseEnter={() => setHoveredIndex(segment.index)}
+              onMouseLeave={() => setHoveredIndex(null)}
+            />
+          );
+        })}
+      </svg>
+      <div className="flex flex-wrap gap-4 justify-center">
+        {data.map((item) => (
+          <div
+            key={item.status}
+            className="flex items-center gap-2"
+            onMouseEnter={() => setHoveredIndex(data.indexOf(item))}
+            onMouseLeave={() => setHoveredIndex(null)}
+          >
+            <div
+              className="w-4 h-4 rounded-full"
+              style={{
+                backgroundColor: statusColors[item.status] || "#E5E7EB",
+              }}
+            />
+            <span className="text-sm text-gray-700">
+              {item.label}: {item.count} ({((item.count / total) * 100).toFixed(1)}%)
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Quantity Line Chart Component
+function QuantityLineChart({
+  data,
+}: {
+  data: Array<{
+    monthKey: string;
+    month: Date;
+    quantity: number;
+  }>;
+}) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [tooltip, setTooltip] = useState<{
+    x: number;
+    y: number;
+    month: string;
+    quantity: number;
+  } | null>(null);
+  const [animatedIndex, setAnimatedIndex] = useState<number>(0);
+  const [isAnimating, setIsAnimating] = useState<boolean>(true);
+  const [visiblePoint, setVisiblePoint] = useState<number | null>(null);
+
+  const maxValue = Math.max(...data.map((d) => d.quantity), 1);
+  const chartHeight = 200;
+  const chartPadding = { top: 20, right: 20, bottom: 40, left: 60 };
+  const pointSpacing = 60;
+  const chartWidth = Math.max(400, data.length * pointSpacing + chartPadding.left + chartPadding.right);
+
+  const formatMonthLabel = (date: Date) => {
+    return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+  };
+
+  const getPoint = (index: number, value: number) => {
+    const x = chartPadding.left + index * pointSpacing;
+    const y =
+      chartHeight -
+      chartPadding.bottom -
+      (value / maxValue) * (chartHeight - chartPadding.top - chartPadding.bottom);
+    return { x, y };
+  };
+
+  // Calculate all points
+  const points = useMemo(() => {
+    return data.map((item, index) => {
+      const point = getPoint(index, item.quantity);
+      return { x: point.x, y: point.y, ...item, index };
+    });
+  }, [data, maxValue, chartHeight, chartPadding, pointSpacing]);
+
+  // Animation effect
+  useEffect(() => {
+    if (!isAnimating || points.length === 0) {
+      // When animation completes, show all points
+      if (points.length > 0) {
+        setAnimatedIndex(points.length - 1);
+        setVisiblePoint(null);
+      }
+      return;
+    }
+
+    const pointShowDuration = 150; // Show point for 150ms
+    const pointHideDuration = 50; // Hide point for 50ms before next
+
+    let currentIndex = 0;
+    let timeoutId: NodeJS.Timeout;
+
+    const animateNext = () => {
+      if (currentIndex >= points.length) {
+        setIsAnimating(false);
+        setAnimatedIndex(points.length - 1);
+        setVisiblePoint(null);
+        return;
+      }
+
+      // Show the point and update line
+      setVisiblePoint(currentIndex);
+      setAnimatedIndex(currentIndex);
+
+      // Hide the point after showing it
+      timeoutId = setTimeout(() => {
+        setVisiblePoint(null);
+
+        // Move to next point
+        timeoutId = setTimeout(() => {
+          currentIndex++;
+          animateNext();
+        }, pointHideDuration);
+      }, pointShowDuration);
+    };
+
+    // Start animation after a brief delay
+    timeoutId = setTimeout(animateNext, 300);
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [isAnimating, points.length]);
+
+  const handlePointHover = (
+    e: React.MouseEvent<SVGCircleElement>,
+    index: number,
+    month: string,
+    quantity: number
+  ) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setHoveredIndex(index);
+    setTooltip({
+      x: rect.left + rect.width / 2,
+      y: rect.top - 15,
+      month,
+      quantity,
+    });
+  };
+
+  const handlePointLeave = () => {
+    setHoveredIndex(null);
+    setTooltip(null);
+  };
+
+  // Create animated path that only shows up to animatedIndex
+  const animatedPathData = points.length > 1 && animatedIndex >= 0
+    ? `M ${points.slice(0, animatedIndex + 1).map(p => `${p.x},${p.y}`).join(' L ')}`
+    : '';
+
+  const animatedAreaPath = points.length > 1 && animatedIndex >= 0 && animatedPathData
+    ? `M ${points[0].x} ${chartHeight - chartPadding.bottom} L ${animatedPathData.replace('M ', '')} L ${points[Math.min(animatedIndex, points.length - 1)].x} ${chartHeight - chartPadding.bottom} Z`
+    : '';
+
+  return (
+    <div className="relative">
+      {tooltip && (
+        <div
+          className="fixed z-50 rounded-lg bg-white px-3 py-2 text-xs shadow-lg pointer-events-none border border-gray-200"
+          style={{
+            left: `${tooltip.x}px`,
+            top: `${tooltip.y}px`,
+            transform: "translate(-50%, -100%)",
+            marginTop: "-8px",
+          }}
+        >
+          <div className="font-semibold mb-1 text-[#d48a68] text-sm">
+            {tooltip.month}
+          </div>
+          <div className="text-[#d48a68] opacity-75 text-xs">
+            {tooltip.quantity.toLocaleString()} units
+          </div>
+        </div>
+      )}
+
+      <div className="overflow-x-auto">
+        <svg
+          viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+          className="w-full h-[200px]"
+          preserveAspectRatio="none"
+        >
+          <defs>
+            <linearGradient id="quantityGradient" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stopColor="#86EFAC" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#86EFAC" stopOpacity="0.1" />
+            </linearGradient>
+          </defs>
+
+          {/* Y-axis grid lines */}
+          {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+            const y =
+              chartHeight -
+              chartPadding.bottom -
+              (chartHeight - chartPadding.top - chartPadding.bottom) * ratio;
+            const value = Math.round(maxValue * ratio);
+            return (
+              <g key={ratio}>
+                <line
+                  x1={chartPadding.left}
+                  y1={y}
+                  x2={chartWidth - chartPadding.right}
+                  y2={y}
+                  stroke="#E5E7EB"
+                  strokeWidth="0.5"
+                  strokeDasharray="2,2"
+                />
+                <text
+                  x={chartPadding.left - 10}
+                  y={y + 4}
+                  fontSize="12"
+                  fill="#6B7280"
+                  textAnchor="end"
+                >
+                  {value}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Area under line - animated */}
+          {animatedAreaPath && (
+            <path
+              d={animatedAreaPath}
+              fill="url(#quantityGradient)"
+            />
+          )}
+
+          {/* Line - animated */}
+          {animatedPathData && (
+            <path
+              d={animatedPathData}
+              fill="none"
+              stroke="#86EFAC"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          )}
+
+          {/* Points */}
+          {points.map((point, index) => {
+            // Only show points up to animatedIndex
+            if (index > animatedIndex) return null;
+            
+            const isHovered = hoveredIndex === index;
+            const isVisible = visiblePoint === index;
+            return (
+              <g key={point.monthKey}>
+                <circle
+                  cx={point.x}
+                  cy={point.y}
+                  r={isVisible ? 8 : isHovered ? 6 : 4}
+                  fill="#86EFAC"
+                  stroke="white"
+                  strokeWidth={isVisible ? 3 : 2}
+                  className="transition-all cursor-pointer"
+                  style={{
+                    opacity: isVisible ? 1 : 1,
+                  }}
+                  onMouseEnter={(e) =>
+                    handlePointHover(
+                      e,
+                      index,
+                      formatMonthLabel(point.month),
+                      point.quantity
+                    )
+                  }
+                  onMouseLeave={handlePointLeave}
+                />
+                {/* Month label */}
+                <text
+                  x={point.x}
+                  y={chartHeight - chartPadding.bottom + 20}
+                  fontSize="10"
+                  fill="#6B7280"
+                  textAnchor="middle"
+                >
+                  {formatMonthLabel(point.month)}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* X-axis line */}
+          <line
+            x1={chartPadding.left}
+            y1={chartHeight - chartPadding.bottom}
+            x2={chartWidth - chartPadding.right}
+            y2={chartHeight - chartPadding.bottom}
+            stroke="#D1D5DB"
+            strokeWidth="1"
+          />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+// Category Bar Chart Component
+function CategoryBarChart({
+  data,
+}: {
+  data: Array<{ category: string; quantity: number }>;
+}) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const maxValue = Math.max(...data.map((d) => d.quantity), 1);
+  const chartHeight = Math.min(400, data.length * 45);
+  const chartPadding = { top: 20, right: 20, bottom: 60, left: 150 };
+  const barSpacing = 12;
+  const barHeight = 30;
+  const chartWidth = 800;
+  const availableHeight = chartHeight - chartPadding.top - chartPadding.bottom;
+
+  return (
+    <div className="rounded-lg border border-[#E6B9A2] bg-white p-6">
+      <div className="overflow-x-auto">
+        <svg
+          viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+          className="w-full"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          {/* Y-axis grid lines */}
+          {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+            const y =
+              chartHeight -
+              chartPadding.bottom -
+              availableHeight * ratio;
+            const value = Math.round(maxValue * ratio);
+            return (
+              <g key={ratio}>
+                <line
+                  x1={chartPadding.left}
+                  y1={y}
+                  x2={chartWidth - chartPadding.right}
+                  y2={y}
+                  stroke="#E5E7EB"
+                  strokeWidth="0.5"
+                  strokeDasharray="2,2"
+                />
+                <text
+                  x={chartPadding.left - 10}
+                  y={y + 4}
+                  fontSize="12"
+                  fill="#6B7280"
+                  textAnchor="end"
+                >
+                  {value}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Bars */}
+          {data.map((item, index) => {
+            const barWidth = (item.quantity / maxValue) * (chartWidth - chartPadding.left - chartPadding.right);
+            const y = chartPadding.top + index * (barHeight + barSpacing);
+            const isHovered = hoveredIndex === index;
+
+            return (
+              <g key={item.category}>
+                {/* Bar */}
+                <rect
+                  x={chartPadding.left}
+                  y={y}
+                  width={barWidth}
+                  height={barHeight}
+                  fill="#d48a68"
+                  rx="4"
+                  ry="4"
+                  className="transition-opacity cursor-pointer"
+                  style={{ opacity: isHovered ? 0.8 : 1 }}
+                  onMouseEnter={() => setHoveredIndex(index)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                />
+                {/* Category label */}
+                <text
+                  x={chartPadding.left - 10}
+                  y={y + barHeight / 2 + 4}
+                  fontSize="12"
+                  fill="#4B2415"
+                  textAnchor="end"
+                  className="font-medium"
+                >
+                  {item.category.length > 20 ? item.category.substring(0, 20) + "..." : item.category}
+                </text>
+                {/* Value label */}
+                <text
+                  x={chartPadding.left + barWidth + 10}
+                  y={y + barHeight / 2 + 4}
+                  fontSize="12"
+                  fill="#4B2415"
+                  className="font-semibold"
+                >
+                  {item.quantity.toLocaleString()}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* X-axis line */}
+          <line
+            x1={chartPadding.left}
+            y1={chartHeight - chartPadding.bottom}
+            x2={chartWidth - chartPadding.right}
+            y2={chartHeight - chartPadding.bottom}
+            stroke="#D1D5DB"
+            strokeWidth="1"
+          />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+// Weekly Activity Chart Component
+function WeeklyActivityChart({
+  data,
+}: {
+  data: Array<{ week: string; count: number }>;
+}) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const maxValue = Math.max(...data.map((d) => d.count), 1);
+  const chartHeight = 200;
+  const chartPadding = { top: 20, right: 20, bottom: 40, left: 60 };
+  const barSpacing = 8;
+  const barWidth = 50;
+  const chartWidth = data.length * (barWidth + barSpacing) + chartPadding.left + chartPadding.right;
+
+  return (
+    <div className="overflow-x-auto">
+      <svg
+        viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+        className="w-full h-[200px]"
+        preserveAspectRatio="none"
+      >
+        <defs>
+          <linearGradient id="weeklyGradient" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="#d48a68" stopOpacity="1" />
+            <stop offset="100%" stopColor="#B86A49" stopOpacity="1" />
+          </linearGradient>
+        </defs>
+
+        {/* Y-axis grid lines */}
+        {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+          const y =
+            chartHeight -
+            chartPadding.bottom -
+            (chartHeight - chartPadding.top - chartPadding.bottom) * ratio;
+          const value = Math.round(maxValue * ratio);
+          return (
+            <g key={ratio}>
+              <line
+                x1={chartPadding.left}
+                y1={y}
+                x2={chartWidth - chartPadding.right}
+                y2={y}
+                stroke="#E5E7EB"
+                strokeWidth="0.5"
+                strokeDasharray="2,2"
+              />
+              <text
+                x={chartPadding.left - 10}
+                y={y + 4}
+                fontSize="12"
+                fill="#6B7280"
+                textAnchor="end"
+              >
+                {value}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Bars */}
+        {data.map((item, index) => {
+          const barHeight =
+            (item.count / maxValue) *
+            (chartHeight - chartPadding.top - chartPadding.bottom);
+          const x = chartPadding.left + index * (barWidth + barSpacing);
+          const y = chartHeight - chartPadding.bottom - barHeight;
+          const isHovered = hoveredIndex === index;
+
+          return (
+            <g key={item.week}>
+              <rect
+                x={x}
+                y={y}
+                width={barWidth}
+                height={barHeight}
+                fill="url(#weeklyGradient)"
+                rx="4"
+                ry="4"
+                className="transition-all duration-200 cursor-pointer"
+                style={{ opacity: isHovered ? 1 : 0.9 }}
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              />
+              <text
+                x={x + barWidth / 2}
+                y={chartHeight - chartPadding.bottom + 20}
+                fontSize="10"
+                fill="#6B7280"
+                textAnchor="middle"
+              >
+                {item.week}
+              </text>
+              {item.count > 0 && (
+                <text
+                  x={x + barWidth / 2}
+                  y={y - 5}
+                  fontSize="11"
+                  fill="#4B2415"
+                  textAnchor="middle"
+                  className="font-semibold"
+                >
+                  {item.count}
+                </text>
+              )}
+            </g>
+          );
+        })}
+
+        {/* X-axis line */}
+        <line
+          x1={chartPadding.left}
+          y1={chartHeight - chartPadding.bottom}
+          x2={chartWidth - chartPadding.right}
+          y2={chartHeight - chartPadding.bottom}
+          stroke="#D1D5DB"
+          strokeWidth="1"
+        />
+      </svg>
     </div>
   );
 }
@@ -3275,16 +4014,16 @@ function DonationSection(props: {
     if (isDonationAssigned(donation.id)) {
       return false;
     }
+    // Check if user is the creator of the donation
+    if (donation.ownerUserId && donation.ownerUserId === currentUser.userId) {
+      return true;
+    }
     // Check if donation's restaurant matches user's restaurant
     // User must have restaurant information set
-    if (!currentUser.restaurantId) {
-      return false;
+    if (currentUser.restaurantId && donation.restaurantId === currentUser.restaurantId) {
+      return true;
     }
-    // Donation's restaurant must match user's restaurant
-    if (donation.restaurantId !== currentUser.restaurantId) {
       return false;
-    }
-    return true;
   };
 
   const canShowEditDeleteButtons = (donation: DonationRecord) => {
@@ -3942,8 +4681,11 @@ function DonationRequestSection(props: {
   const [loadingRequests, setLoadingRequests] = useState(false);
   const [requestsError, setRequestsError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingRequestId, setDeletingRequestId] = useState<string | null>(null);
   const [deliveries, setDeliveries] = useState<DeliveryRecordApi[]>([]);
   const [communities, setCommunities] = useState<Community[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [myRequestsOnly, setMyRequestsOnly] = useState(false);
 
   // Auto-populate contact phone from user profile
   useEffect(() => {
@@ -3985,7 +4727,20 @@ function DonationRequestSection(props: {
       if (currentUser.isAdmin) {
         return true;
       }
-      return request.ownerUserId === currentUser.userId;
+      // Primary check: if user is the creator
+      if (request.ownerUserId === currentUser.userId) {
+        return true;
+      }
+      // Fallback for legacy requests: check if contact phone matches
+      // This helps with old requests that don't have created_by set
+      if (!request.ownerUserId && 
+          request.status !== "accepted" &&
+          request.contactPhone && 
+          currentUser.phone &&
+          request.contactPhone.trim() === currentUser.phone.trim()) {
+        return true;
+      }
+      return false;
     },
     [currentUser]
   );
@@ -4025,6 +4780,7 @@ function DonationRequestSection(props: {
                 notes: record.notes ?? "",
                 createdAt: record.created_at,
                 ownerUserId: record.created_by_user_id ?? null,
+                status: record.status ?? "pending",
               }))
             )
           );
@@ -4051,6 +4807,11 @@ function DonationRequestSection(props: {
 
   // Check if a request has been accepted (has a distribution delivery to its community)
   const isRequestAccepted = useCallback((request: DonationRequestRecord) => {
+    // First check if status is explicitly set to "accepted"
+    if (request.status === "accepted") {
+      return true;
+    }
+    // Fall back to checking deliveries if status is not set
     const community = communities.find((c) => c.name === request.communityName);
     if (!community) {
       return false;
@@ -4065,6 +4826,40 @@ function DonationRequestSection(props: {
   const unacceptedRequests = useMemo(() => {
     return requests.filter((request) => !isRequestAccepted(request));
   }, [requests, isRequestAccepted]);
+
+  // Apply search and "My requests only" filter
+  const filteredRequests = useMemo(() => {
+    let filtered = [...unacceptedRequests];
+
+    // Filter by "My requests only" toggle
+    if (myRequestsOnly && currentUser?.userId) {
+      filtered = filtered.filter(
+        (request) => request.ownerUserId === currentUser.userId
+      );
+    }
+
+    // Filter by search query (community, title, address)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((request) => {
+        // Check community name
+        if (request.communityName.toLowerCase().includes(query)) {
+          return true;
+        }
+        // Check request title
+        if (request.requestTitle.toLowerCase().includes(query)) {
+          return true;
+        }
+        // Check recipient address
+        if (request.recipientAddress.toLowerCase().includes(query)) {
+          return true;
+        }
+        return false;
+      });
+    }
+
+    return filtered;
+  }, [unacceptedRequests, searchQuery, myRequestsOnly, currentUser?.userId]);
 
   const resetForm = () => {
     setForm(createDonationRequestForm());
@@ -4204,6 +4999,10 @@ function DonationRequestSection(props: {
       });
       return;
     }
+    if (!confirm("Are you sure you want to delete this request? This action cannot be undone.")) {
+      return;
+    }
+    setDeletingRequestId(target.id);
     try {
       await apiFetch(`/donation-requests/${target.id}/`, {
         method: "DELETE",
@@ -4224,6 +5023,8 @@ function DonationRequestSection(props: {
             ? error.message
             : "Unable to delete request right now.",
       });
+    } finally {
+      setDeletingRequestId(null);
     }
   };
 
@@ -4397,8 +5198,74 @@ function DonationRequestSection(props: {
             </h3>
           </div>
           <span className="text-xs font-semibold text-gray-500">
-            {unacceptedRequests.length} total
+            {searchQuery || myRequestsOnly
+              ? `${filteredRequests.length}/${unacceptedRequests.length} total`
+              : `${unacceptedRequests.length} total`}
           </span>
+        </div>
+
+        {/* Search and Filter Controls */}
+        <div className="mb-4 flex flex-col gap-3 flex-shrink-0">
+          {/* Search Bar */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by community, title, or address..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-lg border border-[#E6B9A2] bg-white px-4 py-2.5 pl-10 text-sm text-gray-700 placeholder-gray-400 outline-none focus:border-[#B86A49] focus:ring-2 focus:ring-[#B86A49]/20"
+            />
+            <svg
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                title="Clear search"
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* My Requests Only Toggle */}
+          {currentUser && (
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={myRequestsOnly}
+                onChange={(e) => setMyRequestsOnly(e.target.checked)}
+                className="h-4 w-4 rounded border-[#E6B9A2] text-[#B86A49] focus:ring-2 focus:ring-[#B86A49]/20"
+              />
+              <span className="text-sm font-medium text-gray-700">
+                My requests only
+              </span>
+            </label>
+          )}
         </div>
 
         {requestsError && (
@@ -4410,19 +5277,21 @@ function DonationRequestSection(props: {
             <p className="rounded-2xl border border-dashed border-gray-300 bg-white/80 p-6 text-sm text-gray-500">
               Loading requests...
             </p>
-          ) : unacceptedRequests.length === 0 ? (
+          ) : filteredRequests.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-gray-300 bg-white/80 p-6 text-sm text-gray-500">
-              Captured requests will appear here for dispatch review.
+              {searchQuery || myRequestsOnly
+                ? "No requests match your search criteria."
+                : "Captured requests will appear here for dispatch review."}
             </p>
           ) : (
             <div className="space-y-4">
-              {unacceptedRequests.map((request) => (
+              {filteredRequests.map((request) => (
                 <article
                   key={request.id}
                   className="rounded-2xl border border-[#E6B9A2] bg-[#F8F3EE] p-5 shadow-sm"
                 >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
+                  <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+                    <div className="flex-1">
                       <p className="text-xs uppercase tracking-wide text-[#B86A49]">
                         {request.communityName || "Community representative"}
                       </p>
@@ -4438,6 +5307,7 @@ function DonationRequestSection(props: {
                         {request.numberOfPeople} people waiting for food
                       </p>
                     </div>
+                    <div className="flex flex-col items-end gap-2">
                     <div className="text-right text-xs text-gray-500">
                       <p>{formatDisplayDate(request.createdAt)}</p>
                       {request.expectedDelivery && (
@@ -4445,6 +5315,75 @@ function DonationRequestSection(props: {
                           Due{" "}
                           {formatDisplayDate(request.expectedDelivery)}
                         </p>
+                        )}
+                      </div>
+                      {canManageRequest(request) && (
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            disabled={deletingRequestId === request.id}
+                            className="rounded-lg bg-[#E6F4FF] p-2 text-[#1D4ED8] hover:bg-[#D0E7FF] disabled:opacity-60 disabled:cursor-not-allowed transition"
+                            title="Edit request"
+                            onClick={() => handleEdit(request)}
+                          >
+                            <svg
+                              className="h-4 w-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            type="button"
+                            disabled={deletingRequestId === request.id}
+                            className="rounded-lg bg-[#FDECEA] p-2 text-[#B42318] hover:bg-[#FCD7D2] disabled:opacity-60 disabled:cursor-not-allowed transition"
+                            title="Delete request"
+                            onClick={() => handleDelete(request)}
+                          >
+                            {deletingRequestId === request.id ? (
+                              <svg
+                                className="h-4 w-4 animate-spin"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                />
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                />
+                              </svg>
+                            ) : (
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                              </svg>
+                            )}
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -4470,25 +5409,6 @@ function DonationRequestSection(props: {
 
                   {request.notes && (
                     <p className="mt-4 text-xs italic text-gray-500">{request.notes}</p>
-                  )}
-
-                  {canManageRequest(request) && (
-                    <div className="mt-5 flex gap-3 justify-end">
-                      <button
-                        type="button"
-                        className="rounded-full border-2 border-[#E6B9A2] bg-white px-5 py-2 text-sm font-semibold text-[#8B5B1F] shadow-sm transition-all duration-200 hover:border-[#B86A49] hover:bg-[#F8F3EE] hover:shadow-md active:scale-95"
-                        onClick={() => handleEdit(request)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        className="rounded-full border-2 border-[#F7B0A0] bg-white px-5 py-2 text-sm font-semibold text-[#B42318] shadow-sm transition-all duration-200 hover:border-[#E63946] hover:bg-[#FFF1F0] hover:shadow-md active:scale-95"
-                        onClick={() => handleDelete(request)}
-                      >
-                        Delete
-                      </button>
-                    </div>
                   )}
                 </article>
               ))}
@@ -5048,6 +5968,7 @@ function StatusSection({
   }, [currentUser]);
 
   // Get assigned donations (donations with pickup deliveries) with their delivery info
+  // Shows all statuses: pending, in_transit, delivered - like a tracking page
   const assignedDonations = useMemo(() => {
     // Create a map of donation_id -> delivery for quick lookup
     const donationToDelivery = new Map<string, DeliveryRecordApi>();
@@ -5065,6 +5986,8 @@ function StatusSection({
         if (d.ownerUserId && d.ownerUserId !== currentUser?.userId) {
           return false;
         }
+        // Show all donations that have been assigned (have a pickup delivery)
+        // regardless of delivery status (pending, in_transit, delivered)
         return donationToDelivery.has(d.id);
       })
       .map((d) => ({
@@ -5129,36 +6052,62 @@ function StatusSection({
     return filtered;
   }, [assignedDonations, donationStatusFilter, dateFilter, donationSort]);
 
-  // Get accepted requests (requests with distribution deliveries to their community)
+  // Get accepted requests (requests that have been accepted by admin)
+  // Shows all statuses: pending, in_transit, delivered - like a tracking page
   const acceptedRequests = useMemo(() => {
-    // Get community IDs that have distribution deliveries
-    const acceptedCommunityIds = new Set(
-      deliveries
-        .filter((d) => d.delivery_type === "distribution" && d.community_id)
-        .map((d) => d.community_id)
-    );
-
     // Map community names to IDs
     const communityNameToId = new Map(
       communities.map((c) => [c.name, c.community_id])
     );
 
-    return requests.filter((r) => {
+    // Create a map of community_id -> delivery for quick lookup
+    const communityToDelivery = new Map<string, DeliveryRecordApi>();
+    deliveries
+      .filter((d) => d.delivery_type === "distribution" && d.community_id)
+      .forEach((d) => {
+        if (d.community_id) {
+          communityToDelivery.set(d.community_id, d);
+        }
+      });
+
+    return requests
+      .filter((r) => {
+        // Show if user owns it
       if (!r.ownerUserId || r.ownerUserId !== currentUser?.userId) {
         return false;
       }
+        // Only show requests that have been accepted (status = "accepted")
+        // Once accepted, they may or may not have distribution deliveries yet
+        return r.status === "accepted";
+      })
+      .map((r) => {
       const communityId = communityNameToId.get(r.communityName);
-      return communityId ? acceptedCommunityIds.has(communityId) : false;
+        const delivery = communityId ? communityToDelivery.get(communityId) : undefined;
+        return {
+          request: r,
+          delivery: delivery,
+        };
     });
   }, [requests, deliveries, communities, currentUser?.userId]);
 
   // Filter and sort accepted requests
   const filteredAndSortedRequests = useMemo(() => {
     let filtered = [...acceptedRequests];
+    
+    // Status filter - filter by delivery status if available
+    if (donationStatusFilter !== "all") {
+      filtered = filtered.filter(({ delivery }) => {
+        if (!delivery) {
+          // If no delivery yet but status is "accepted", show as pending
+          return donationStatusFilter === "pending";
+        }
+        return delivery.status === donationStatusFilter;
+      });
+    }
 
     // Community filter
     if (requestCommunityFilter !== "all") {
-      filtered = filtered.filter((request) => request.communityName === requestCommunityFilter);
+      filtered = filtered.filter(({ request }) => request.communityName === requestCommunityFilter);
     }
 
     // Date filter
@@ -5170,7 +6119,7 @@ function StatusSection({
       const monthAgo = new Date(today);
       monthAgo.setMonth(monthAgo.getMonth() - 1);
 
-      filtered = filtered.filter((request) => {
+      filtered = filtered.filter(({ request }) => {
         const requestDate = new Date(request.createdAt);
         switch (dateFilter) {
           case "today":
@@ -5189,28 +6138,28 @@ function StatusSection({
     filtered.sort((a, b) => {
       switch (requestSort) {
         case "newest":
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return new Date(b.request.createdAt).getTime() - new Date(a.request.createdAt).getTime();
         case "oldest":
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          return new Date(a.request.createdAt).getTime() - new Date(b.request.createdAt).getTime();
         case "community_az":
-          return a.communityName.localeCompare(b.communityName);
+          return a.request.communityName.localeCompare(b.request.communityName);
         case "community_za":
-          return b.communityName.localeCompare(a.communityName);
+          return b.request.communityName.localeCompare(a.request.communityName);
         case "people_desc":
-          return parseInt(b.numberOfPeople) - parseInt(a.numberOfPeople);
+          return parseInt(b.request.numberOfPeople) - parseInt(a.request.numberOfPeople);
         case "people_asc":
-          return parseInt(a.numberOfPeople) - parseInt(b.numberOfPeople);
+          return parseInt(a.request.numberOfPeople) - parseInt(b.request.numberOfPeople);
         default:
           return 0;
       }
     });
 
     return filtered;
-  }, [acceptedRequests, requestCommunityFilter, dateFilter, requestSort]);
+  }, [acceptedRequests, requestCommunityFilter, dateFilter, requestSort, donationStatusFilter]);
 
   // Get unique communities for filter dropdown
   const uniqueCommunities = useMemo(() => {
-    return Array.from(new Set(acceptedRequests.map(r => r.communityName))).sort();
+    return Array.from(new Set(acceptedRequests.map(({ request }) => request.communityName))).sort();
   }, [acceptedRequests]);
 
   if (!currentUser) {
@@ -5433,10 +6382,17 @@ function StatusSection({
                     className="rounded-2xl border border-dashed border-[#4d673f] bg-white p-4 shadow-sm"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
                         <p className="text-xs uppercase tracking-wide text-gray-400">
                           {donation.restaurantId ?? "Manual entry"}
                         </p>
+                          {donation.ownerUserId === currentUser?.userId && (
+                            <span className="inline-flex rounded-full bg-[#B86A49]/10 px-2 py-0.5 text-xs font-semibold text-[#8B4513]">
+                              Your donation
+                            </span>
+                          )}
+                        </div>
                         <p className="text-lg font-semibold text-gray-900">
                           {donation.restaurantName}
                         </p>
@@ -5506,33 +6462,68 @@ function StatusSection({
                   : "No requests match your filters."}
               </p>
             ) : (
-              filteredAndSortedRequests.map((request) => (
+              filteredAndSortedRequests.map(({ request, delivery }) => {
+                const statusLabel = (status: DeliveryRecordApi["status"] | undefined) => {
+                  if (!status) {
+                    // Request accepted but no delivery created yet
+                    return { text: "Accepted", className: "bg-[#FFF1E3] text-[#C46A24]" };
+                  }
+                  switch (status) {
+                    case "pending":
+                      return { text: "Pending", className: "bg-[#E9F1E3] text-[#4E673E]" };
+                    case "in_transit":
+                      return { text: "In transit", className: "bg-[#E6F4FF] text-[#1D4ED8]" };
+                    case "delivered":
+                      return { text: "Delivered", className: "bg-[#E6F7EE] text-[#1F4D36]" };
+                    case "cancelled":
+                    default:
+                      return { text: "Cancelled", className: "bg-[#FDECEA] text-[#B42318]" };
+                  }
+                };
+                const status = statusLabel(delivery?.status);
+
+                return (
                 <article
                   key={request.id}
                   className="rounded-2xl border border-dashed border-[#F3C7A0] bg-white p-4 shadow-sm"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
                       <p className="text-xs uppercase tracking-wide text-gray-400">
                         {request.id}
                       </p>
+                          {request.ownerUserId === currentUser?.userId && (
+                            <span className="inline-flex rounded-full bg-[#B86A49]/10 px-2 py-0.5 text-xs font-semibold text-[#8B4513]">
+                              Your request
+                            </span>
+                          )}
+                        </div>
                       <p className="text-lg font-semibold text-gray-900">
                         {request.requestTitle}
                       </p>
                       <p className="text-sm text-gray-500">{request.communityName}</p>
                     </div>
+                      <div className="flex items-center gap-2">
                     <div className="text-right text-xs text-gray-500">
                       <p>{formatDisplayDate(request.createdAt)}</p>
                       <p>{request.numberOfPeople} people</p>
+                        </div>
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}
+                        >
+                          {status.text}
+                        </span>
                     </div>
                   </div>
                   <div className="mt-3 rounded-lg border border-[#F3C7A0] bg-[#FFF3E7] p-2.5">
                     <p className="text-xs font-medium text-[#8B4C1F]">
-                      ✓ This request has been accepted and assigned for delivery.
+                        ✓ This request has been accepted{delivery ? ` and assigned for delivery. Status: ${status.text}` : " and is awaiting delivery assignment."}
                     </p>
                   </div>
                 </article>
-              ))
+                );
+              })
             )}
           </div>
         </section>
@@ -5556,9 +6547,9 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState<DeliveryRecordApi["status"] | "all">("all");
-  const [staffFilter, setStaffFilter] = useState<string>("all"); // "all", "unassigned", or user_id
   const [areaFilter, setAreaFilter] = useState<string>("all");
   const [dateFilter, setDateFilter] = useState<"all" | "today" | "tomorrow" | "week">("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const statusLabel = (status: DeliveryRecordApi["status"]) => {
     switch (status) {
@@ -5689,10 +6680,6 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
     // Status filter
     if (statusFilter !== "all" && delivery.status !== statusFilter) return false;
 
-    // Staff filter
-    if (staffFilter === "unassigned" && delivery.user_id) return false;
-    if (staffFilter !== "all" && staffFilter !== "unassigned" && delivery.user_id !== staffFilter) return false;
-
     // Area filter
     if (areaFilter !== "all" && getDeliveryArea(delivery) !== areaFilter) return false;
 
@@ -5719,8 +6706,67 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
       }
     }
 
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      
+      // Search by delivery ID
+      if (delivery.delivery_id.toLowerCase().includes(query)) {
     return true;
-  }, [statusFilter, staffFilter, areaFilter, dateFilter, getDeliveryArea]);
+      }
+
+      // Search by notes
+      if (delivery.notes && delivery.notes.toLowerCase().includes(query)) {
+        return true;
+      }
+
+      // For pickups (donation type)
+      if (delivery.delivery_type === "donation" && delivery.donation_id) {
+        const donation = donations[delivery.donation_id];
+        if (donation) {
+          // Search by restaurant name
+          if (donation.restaurant_name?.toLowerCase().includes(query)) {
+            return true;
+          }
+          // Search by restaurant address (pickup address)
+          if (donation.restaurant_address?.toLowerCase().includes(query)) {
+            return true;
+          }
+        }
+        // Search by warehouse address (dropoff address for pickups)
+        if (delivery.warehouse_id && warehouses[delivery.warehouse_id]) {
+          if (warehouses[delivery.warehouse_id].address?.toLowerCase().includes(query)) {
+            return true;
+          }
+        }
+      }
+
+      // For distributions (community type)
+      if (delivery.delivery_type === "distribution" && delivery.community_id) {
+        const community = communities[delivery.community_id];
+        if (community) {
+          // Search by community name
+          if (community.name?.toLowerCase().includes(query)) {
+            return true;
+          }
+          // Search by community address (dropoff address)
+          if (community.address?.toLowerCase().includes(query)) {
+            return true;
+          }
+        }
+        // Search by warehouse address (pickup address for distributions)
+        if (delivery.warehouse_id && warehouses[delivery.warehouse_id]) {
+          if (warehouses[delivery.warehouse_id].address?.toLowerCase().includes(query)) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    }
+
+    return true;
+  }, [statusFilter, areaFilter, dateFilter, searchQuery, getDeliveryArea, donations, warehouses, communities]);
 
   const pickupTasks = useMemo(
     () =>
@@ -5998,6 +7044,52 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
 
       {/* Filters Section */}
       <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+        {/* Search Bar */}
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search by delivery ID, restaurant, community, address, or notes..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 pl-10 text-sm text-gray-700 placeholder-gray-400 outline-none focus:border-[#8B4C1F] focus:ring-2 focus:ring-[#8B4C1F]/20"
+          />
+          <svg
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              title="Clear search"
+            >
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
+
         {/* Status Filter Badges */}
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-600">Filter by Status</p>
@@ -6068,26 +7160,6 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
             </select>
           </div>
 
-          {/* Staff Filter */}
-          <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">
-              Staff Assignment
-            </label>
-            <select
-              value={staffFilter}
-              onChange={(e) => setStaffFilter(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-[#8B4C1F] focus:outline-none focus:ring-2 focus:ring-[#8B4C1F]/20"
-            >
-              <option value="all">All staff</option>
-              <option value="unassigned">Unassigned</option>
-              {staff.map((s) => (
-                <option key={s.user_id} value={s.user_id}>
-                  {s.name} ({s.assigned_area})
-                </option>
-              ))}
-            </select>
-          </div>
-
           {/* Area Filter */}
           <div>
             <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">
@@ -6109,7 +7181,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
         </div>
 
         {/* Active Filters Count */}
-        {(statusFilter !== "all" || staffFilter !== "all" || areaFilter !== "all" || dateFilter !== "all") && (
+        {(statusFilter !== "all" || areaFilter !== "all" || dateFilter !== "all" || searchQuery.trim()) && (
           <div className="flex items-center justify-between border-t border-gray-200 pt-3">
             <p className="text-xs text-gray-600">
               <span className="font-semibold">
@@ -6121,9 +7193,9 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
               type="button"
               onClick={() => {
                 setStatusFilter("all");
-                setStaffFilter("all");
                 setAreaFilter("all");
                 setDateFilter("all");
+                setSearchQuery("");
               }}
               className="text-xs font-semibold text-[#8B4C1F] hover:underline"
             >
@@ -6219,6 +7291,11 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
     pickupTime: "",
   });
   const [statusFilter, setStatusFilter] = useState<DeliveryRecordApi["status"] | "all">("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [restaurantFilter, setRestaurantFilter] = useState<string>("all");
+  const [warehouseFilter, setWarehouseFilter] = useState<string>("all");
+  const [staffFilter, setStaffFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<"all" | "today" | "week" | "month">("all");
 
   const canEdit = currentUser?.isAdmin ?? false;
   const currentUserId = currentUser?.userId ?? "";
@@ -6519,17 +7596,178 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
     }
   };
 
-  const visibleDeliveries = (canEdit
+  const lookupRestaurantName = useCallback((donationId: string) => {
+    const donation = donations.find((d) => d.donation_id === donationId);
+    if (!donation) return donationId;
+    const match = restaurants.find((r) => r.restaurant_id === donation.restaurant);
+    return match ? `${match.name}${match.branch_name ? ` (${match.branch_name})` : ""}` : donationId;
+  }, [donations, restaurants]);
+
+  const lookupStaffName = useCallback((userId: string) => {
+    const member = staff.find((s) => s.user_id === userId);
+    return member ? (member.name || member.username) : userId;
+  }, [staff]);
+
+  // Get unique restaurants, warehouses, and staff for filters
+  const uniqueRestaurants = useMemo(() => {
+    const restaurantSet = new Set<string>();
+    deliveries
+      .filter((d) => d.delivery_type === "donation" && d.donation_id)
+      .forEach((d) => {
+        const restaurantName = lookupRestaurantName(d.donation_id!);
+        if (restaurantName && restaurantName !== d.donation_id) {
+          restaurantSet.add(restaurantName);
+        }
+      });
+    return Array.from(restaurantSet).sort();
+  }, [deliveries, lookupRestaurantName]);
+
+  const uniqueWarehouses = useMemo(() => {
+    const warehouseSet = new Set<string>();
+    deliveries
+      .filter((d) => d.delivery_type === "donation" && d.warehouse_id)
+      .forEach((d) => {
+        const digits = d.warehouse_id.replace(/\D/g, "");
+        if (digits) {
+          const num = parseInt(digits, 10);
+          warehouseSet.add(`WH${num.toString().padStart(3, "0")}`);
+        } else {
+          warehouseSet.add(d.warehouse_id);
+        }
+      });
+    return Array.from(warehouseSet).sort();
+  }, [deliveries]);
+
+  const uniqueStaff = useMemo(() => {
+    const staffSet = new Set<string>();
+    deliveries
+      .filter((d) => d.delivery_type === "donation" && d.user_id)
+      .forEach((d) => {
+        const staffName = lookupStaffName(d.user_id);
+        if (staffName && staffName !== d.user_id) {
+          staffSet.add(staffName);
+        }
+      });
+    return Array.from(staffSet).sort();
+  }, [deliveries, lookupStaffName]);
+
+  const visibleDeliveries = useMemo(() => {
+    let filtered = (canEdit
     ? deliveries
     : deliveries.filter((delivery) => delivery.user_id === currentUserId)
-  )
-    .filter((delivery) => delivery.delivery_type === "donation")
-    .filter((delivery) => statusFilter === "all" || delivery.status === statusFilter)
-    .sort((a, b) => {
+    ).filter((delivery) => delivery.delivery_type === "donation");
+
+    // Status filter
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((delivery) => delivery.status === statusFilter);
+    }
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((delivery) => {
+        // Search by delivery ID
+        if (delivery.delivery_id.toLowerCase().includes(query)) {
+          return true;
+        }
+
+        // Search by donation ID
+        if (delivery.donation_id && delivery.donation_id.toLowerCase().includes(query)) {
+          return true;
+        }
+
+        // Search by restaurant name
+        if (delivery.donation_id) {
+          const restaurantName = lookupRestaurantName(delivery.donation_id);
+          if (restaurantName.toLowerCase().includes(query)) {
+            return true;
+          }
+        }
+
+        // Search by staff name
+        const staffName = lookupStaffName(delivery.user_id);
+        if (staffName.toLowerCase().includes(query)) {
+          return true;
+        }
+
+        // Search by warehouse ID
+        const digits = delivery.warehouse_id.replace(/\D/g, "");
+        if (digits) {
+          const num = parseInt(digits, 10);
+          const warehouseId = `WH${num.toString().padStart(3, "0")}`;
+          if (warehouseId.toLowerCase().includes(query)) {
+            return true;
+          }
+        }
+        if (delivery.warehouse_id.toLowerCase().includes(query)) {
+          return true;
+        }
+
+        return false;
+      });
+    }
+
+    // Restaurant filter
+    if (restaurantFilter !== "all") {
+      filtered = filtered.filter((delivery) => {
+        if (!delivery.donation_id) return false;
+        const restaurantName = lookupRestaurantName(delivery.donation_id);
+        return restaurantName === restaurantFilter;
+      });
+    }
+
+    // Warehouse filter
+    if (warehouseFilter !== "all") {
+      filtered = filtered.filter((delivery) => {
+        const digits = delivery.warehouse_id.replace(/\D/g, "");
+        if (digits) {
+          const num = parseInt(digits, 10);
+          const warehouseId = `WH${num.toString().padStart(3, "0")}`;
+          return warehouseId === warehouseFilter;
+        }
+        return delivery.warehouse_id === warehouseFilter;
+      });
+    }
+
+    // Staff filter
+    if (staffFilter !== "all") {
+      filtered = filtered.filter((delivery) => {
+        const staffName = lookupStaffName(delivery.user_id);
+        return staffName === staffFilter;
+      });
+    }
+
+    // Date filter
+    if (dateFilter !== "all") {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekAgo = new Date(today);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const monthAgo = new Date(today);
+      monthAgo.setMonth(monthAgo.getMonth() - 1);
+
+      filtered = filtered.filter((delivery) => {
+        const pickupDate = new Date(delivery.pickup_time);
+        switch (dateFilter) {
+          case "today":
+            return pickupDate >= today;
+          case "week":
+            return pickupDate >= weekAgo;
+          case "month":
+            return pickupDate >= monthAgo;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Sort by pickup time (earliest first)
+    return filtered.sort((a, b) => {
       const timeA = new Date(a.pickup_time).getTime();
       const timeB = new Date(b.pickup_time).getTime();
-      return timeA - timeB; // Sort ascending (earliest first)
+      return timeA - timeB;
     });
+  }, [deliveries, canEdit, currentUserId, statusFilter, searchQuery, restaurantFilter, warehouseFilter, staffFilter, dateFilter, lookupRestaurantName, lookupStaffName]);
 
   // Get donation IDs that are already assigned to pickup deliveries
   const assignedDonationIds = new Set(
@@ -6554,18 +7792,6 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
 
     return donationHasFreshFood(donation.donation_id);
   });
-
-  const lookupRestaurantName = (donationId: string) => {
-    const donation = donations.find((d) => d.donation_id === donationId);
-    if (!donation) return donationId;
-    const match = restaurants.find((r) => r.restaurant_id === donation.restaurant);
-    return match ? `${match.name}${match.branch_name ? ` (${match.branch_name})` : ""}` : donationId;
-  };
-
-  const lookupStaffName = (userId: string) => {
-    const member = staff.find((s) => s.user_id === userId);
-    return member ? (member.name || member.username) : userId;
-  };
 
   const getFoodItemsForDelivery = (donationId: string) => {
     return foodItems.filter((item) => item.donation === donationId);
@@ -6808,12 +8034,59 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
               {visibleDeliveries.length} total
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            <label className="text-xs font-semibold text-gray-700 whitespace-nowrap">
-              Filter by status:
-            </label>
+          {/* Search Bar */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by ID, restaurant, staff, warehouse..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-lg border border-[#CFE6D8] bg-white px-4 py-2.5 pl-10 text-sm text-gray-700 placeholder-gray-400 outline-none focus:border-[#2F855A] focus:ring-2 focus:ring-[#2F855A]/20"
+            />
+            <svg
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                title="Clear search"
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* Filters Row */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Status Filter */}
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-gray-600">Status</label>
             <select
-              className="rounded-lg border border-[#CFE6D8] bg-white px-3 py-1.5 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2F855A] focus:border-transparent"
+                className="w-full rounded-lg border border-[#CFE6D8] bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2F855A] focus:border-transparent"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as DeliveryRecordApi["status"] | "all")}
             >
@@ -6823,6 +8096,96 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
               <option value="delivered">Delivered</option>
             </select>
           </div>
+
+            {/* Date Filter */}
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-gray-600">Date</label>
+              <select
+                className="w-full rounded-lg border border-[#CFE6D8] bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2F855A] focus:border-transparent"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value as typeof dateFilter)}
+              >
+                <option value="all">All time</option>
+                <option value="today">Today</option>
+                <option value="week">This week</option>
+                <option value="month">This month</option>
+              </select>
+            </div>
+
+            {/* Restaurant Filter */}
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-gray-600">Restaurant</label>
+              <select
+                className="w-full rounded-lg border border-[#CFE6D8] bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2F855A] focus:border-transparent"
+                value={restaurantFilter}
+                onChange={(e) => setRestaurantFilter(e.target.value)}
+              >
+                <option value="all">All restaurants</option>
+                {uniqueRestaurants.map((restaurant) => (
+                  <option key={restaurant} value={restaurant}>
+                    {restaurant}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Warehouse Filter */}
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-gray-600">Warehouse</label>
+              <select
+                className="w-full rounded-lg border border-[#CFE6D8] bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2F855A] focus:border-transparent"
+                value={warehouseFilter}
+                onChange={(e) => setWarehouseFilter(e.target.value)}
+              >
+                <option value="all">All warehouses</option>
+                {uniqueWarehouses.map((warehouse) => (
+                  <option key={warehouse} value={warehouse}>
+                    {warehouse}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Staff Filter */}
+            <div className="col-span-2">
+              <label className="mb-1 block text-xs font-semibold text-gray-600">Assigned Staff</label>
+              <select
+                className="w-full rounded-lg border border-[#CFE6D8] bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2F855A] focus:border-transparent"
+                value={staffFilter}
+                onChange={(e) => setStaffFilter(e.target.value)}
+              >
+                <option value="all">All staff</option>
+                {uniqueStaff.map((staffName) => (
+                  <option key={staffName} value={staffName}>
+                    {staffName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Active Filters Count */}
+          {(statusFilter !== "all" || restaurantFilter !== "all" || warehouseFilter !== "all" || staffFilter !== "all" || dateFilter !== "all" || searchQuery.trim()) && (
+            <div className="flex items-center justify-between border-t border-[#CFE6D8] pt-3">
+              <p className="text-xs text-gray-600">
+                <span className="font-semibold">{visibleDeliveries.length}</span> task(s) match your filters
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setStatusFilter("all");
+                  setRestaurantFilter("all");
+                  setWarehouseFilter("all");
+                  setStaffFilter("all");
+                  setDateFilter("all");
+                  setSearchQuery("");
+                }}
+                className="text-xs font-semibold text-[#2F855A] hover:underline"
+              >
+                Clear all filters
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="overflow-y-auto flex-1 min-h-0 pr-2">
@@ -6833,7 +8196,9 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
           ) : visibleDeliveries.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-gray-300 bg-white/70 p-6 text-sm text-gray-500">
               {canEdit
-                ? "No delivery tasks yet. Create assignments from the form on the left."
+                ? searchQuery || restaurantFilter !== "all" || warehouseFilter !== "all" || staffFilter !== "all" || dateFilter !== "all"
+                  ? "No tasks match your filters."
+                  : "No delivery tasks yet. Create assignments from the form on the left."
                 : "No tasks assigned to you yet."}
             </p>
           ) : (
@@ -7103,6 +8468,13 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
   const [deliveryQuantity, setDeliveryQuantity] = useState<string>(""); // e.g., "15 kg", "8 bucket"
   const [foodItems, setFoodItems] = useState<FoodItemApiRecord[]>([]);
   const [statusFilter, setStatusFilter] = useState<DeliveryRecordApi["status"] | "all">("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [communityFilter, setCommunityFilter] = useState<string>("all");
+  const [warehouseFilter, setWarehouseFilter] = useState<string>("all");
+  const [staffFilter, setStaffFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<"all" | "today" | "week" | "month">("all");
+  const [editingDeliveryId, setEditingDeliveryId] = useState<string | null>(null);
+  const [deletingDeliveryId, setDeletingDeliveryId] = useState<string | null>(null);
 
   const canEdit = currentUser?.isAdmin ?? false;
   const currentUserId = currentUser?.userId ?? "";
@@ -7284,6 +8656,67 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
     return { available: true };
   }, [staff, deliveries, formatBangkokDateTime]);
 
+  const handleEditDelivery = (delivery: DeliveryRecordApi) => {
+    if (!canEdit) return;
+    
+    // Convert food_id from database format (FOO0000014) to API format (F0000014) if needed
+    let foodIdForForm = delivery.food_item || "";
+    if (foodIdForForm.startsWith("FOO")) {
+      // Extract digits from FOO0000014 -> 0000014
+      const digits = foodIdForForm.substring(3);
+      // Convert to F0000014 (F prefix + digits)
+      foodIdForForm = `F${digits}`;
+    }
+    
+    setEditingDeliveryId(delivery.delivery_id);
+    setDistributionForm({
+      warehouseId: delivery.warehouse_id,
+      communityId: delivery.community_id || "",
+      userId: delivery.user_id,
+      pickupTime: toDateTimeLocalValue(delivery.pickup_time),
+    });
+    setSelectedFoodItem(foodIdForForm);
+    setDeliveryQuantity(delivery.delivery_quantity || "");
+    setNotice("Editing delivery assignment. Save or cancel to exit editing mode.");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingDeliveryId(null);
+    setDistributionForm({
+      warehouseId: "",
+      communityId: "",
+      userId: "",
+      pickupTime: "",
+    });
+    setSelectedFoodItem("");
+    setDeliveryQuantity("");
+    setNotice(null);
+  };
+
+  const handleDeleteDelivery = async (deliveryId: string) => {
+    if (!canEdit) return;
+    if (!window.confirm("Are you sure you want to delete this delivery assignment? This action cannot be undone.")) {
+      return;
+    }
+    
+    setDeletingDeliveryId(deliveryId);
+    try {
+      await apiFetch(`${API_PATHS.deliveries}${deliveryId}/`, {
+        method: "DELETE",
+        headers: buildAuthHeaders(currentUser),
+      });
+      setNotice("Delivery assignment deleted.");
+      await loadData();
+      if (editingDeliveryId === deliveryId) {
+        handleCancelEdit();
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to delete delivery assignment.");
+    } finally {
+      setDeletingDeliveryId(null);
+    }
+  };
+
   const handleSubmitDistribution = async () => {
     setSubmitting(true);
     setNotice(null);
@@ -7343,22 +8776,26 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
         delivery_quantity: deliveryQuantity,
       };
 
+      if (editingDeliveryId) {
+        // Update existing delivery
+        await apiFetch(`${API_PATHS.deliveries}${editingDeliveryId}/`, {
+          method: "PATCH",
+          body: JSON.stringify(payload),
+          headers: buildAuthHeaders(currentUser),
+        });
+        setNotice("Delivery assignment updated.");
+      } else {
+        // Create new delivery
       await apiFetch(API_PATHS.deliveries, {
         method: "POST",
         body: JSON.stringify(payload),
         headers: buildAuthHeaders(currentUser),
       });
-
       setNotice("Distribution assignment saved.");
+      }
+      
       await loadData();
-      setDistributionForm({
-        warehouseId: "",
-        communityId: "",
-        userId: "",
-        pickupTime: "",
-      });
-      setSelectedFoodItem("");
-      setDeliveryQuantity("");
+      handleCancelEdit();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to save distribution assignment.");
     } finally {
@@ -7366,27 +8803,15 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
     }
   };
 
-  const visibleDeliveries = (canEdit
-    ? deliveries
-    : deliveries.filter((delivery) => delivery.user_id === currentUserId)
-  )
-    .filter((delivery) => delivery.delivery_type === "distribution")
-    .filter((delivery) => statusFilter === "all" || delivery.status === statusFilter)
-    .sort((a, b) => {
-      const timeA = new Date(a.pickup_time).getTime();
-      const timeB = new Date(b.pickup_time).getTime();
-      return timeA - timeB; // Sort ascending (earliest first)
-    });
-
   // Helper function to shorten warehouse ID: WAH0000004 -> WH001
-  const shortenWarehouseId = (warehouseId: string): string => {
+  const shortenWarehouseId = useCallback((warehouseId: string): string => {
     if (!warehouseId) return warehouseId;
     // Extract digits from WAH0000004 -> 0000004 -> 4
     const digits = warehouseId.replace(/\D/g, "");
     if (!digits) return warehouseId;
     const num = parseInt(digits, 10);
     return `WH${num.toString().padStart(3, "0")}`;
-  };
+  }, []);
 
   // Helper function to shorten community ID: COM0000001 -> CM001
   const shortenCommunityId = (communityId: string): string => {
@@ -7398,15 +8823,15 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
     return `CM${num.toString().padStart(3, "0")}`;
   };
 
-  const lookupCommunityName = (communityId: string) => {
+  const lookupCommunityName = useCallback((communityId: string) => {
     const community = communities.find((c) => c.community_id === communityId);
     return community ? community.name : communityId;
-  };
+  }, [communities]);
 
-  const lookupStaffName = (userId: string) => {
+  const lookupStaffName = useCallback((userId: string) => {
     const member = staff.find((s) => s.user_id === userId);
     return member ? (member.name || member.username) : userId;
-  };
+  }, [staff]);
 
   // Helper function to remove postal code from address
   const removePostalCode = (address: string): string => {
@@ -7416,11 +8841,11 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
     return address.replace(/\s*[,，]?\s*\d{5}\s*$/, "").trim();
   };
 
-  const lookupWarehouseAddress = (warehouseId: string) => {
+  const lookupWarehouseAddress = useCallback((warehouseId: string) => {
     const warehouse = warehouses.find((w) => w.warehouse_id === warehouseId);
     if (!warehouse) return warehouseId;
     return removePostalCode(warehouse.address);
-  };
+  }, [warehouses]);
 
   // Helper to normalize food ID for matching (handles both F0000014 and FOO0000014 formats)
   const normalizeFoodId = (foodId: string): string => {
@@ -7436,7 +8861,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
   };
 
   // Helper to find food item by ID (handles both formats)
-  const lookupFoodItem = (foodId: string | null | undefined): FoodItemApiRecord | null => {
+  const lookupFoodItem = useCallback((foodId: string | null | undefined): FoodItemApiRecord | null => {
     if (!foodId) return null;
     // Try direct match first
     let foodItem = foodItems.find(f => f.food_id === foodId);
@@ -7450,7 +8875,163 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
     });
     
     return foodItem || null;
-  };
+  }, [foodItems]);
+
+  const lookupFoodItemName = useCallback((foodId: string | null | undefined): string => {
+    const item = lookupFoodItem(foodId);
+    return item ? item.name : foodId || "N/A";
+  }, [lookupFoodItem]);
+
+  // Get unique communities, warehouses, and staff for filters
+  const uniqueCommunities = useMemo(() => {
+    const communitySet = new Set<string>();
+    deliveries
+      .filter((d) => d.delivery_type === "distribution" && d.community_id)
+      .forEach((d) => {
+        const communityName = lookupCommunityName(d.community_id!);
+        if (communityName && communityName !== d.community_id) {
+          communitySet.add(communityName);
+        }
+      });
+    return Array.from(communitySet).sort();
+  }, [deliveries, lookupCommunityName]);
+
+  const uniqueWarehouses = useMemo(() => {
+    const warehouseSet = new Set<string>();
+    deliveries
+      .filter((d) => d.delivery_type === "distribution" && d.warehouse_id)
+      .forEach((d) => {
+        const warehouseId = shortenWarehouseId(d.warehouse_id);
+        warehouseSet.add(warehouseId);
+      });
+    return Array.from(warehouseSet).sort();
+  }, [deliveries, shortenWarehouseId]);
+
+  const uniqueStaff = useMemo(() => {
+    const staffSet = new Set<string>();
+    deliveries
+      .filter((d) => d.delivery_type === "distribution" && d.user_id)
+      .forEach((d) => {
+        const staffName = lookupStaffName(d.user_id);
+        if (staffName && staffName !== d.user_id) {
+          staffSet.add(staffName);
+        }
+      });
+    return Array.from(staffSet).sort();
+  }, [deliveries, lookupStaffName]);
+
+  const visibleDeliveries = useMemo(() => {
+    let filtered = (canEdit
+      ? deliveries
+      : deliveries.filter((delivery) => delivery.user_id === currentUserId)
+    ).filter((delivery) => delivery.delivery_type === "distribution");
+
+    // Status filter
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((delivery) => delivery.status === statusFilter);
+    }
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((delivery) => {
+        // Search by delivery ID
+        if (delivery.delivery_id.toLowerCase().includes(query)) {
+          return true;
+        }
+
+        // Search by community name
+        if (delivery.community_id) {
+          const communityName = lookupCommunityName(delivery.community_id);
+          if (communityName.toLowerCase().includes(query)) {
+            return true;
+          }
+        }
+
+        // Search by warehouse ID/address
+        const warehouseId = shortenWarehouseId(delivery.warehouse_id);
+        if (warehouseId.toLowerCase().includes(query)) {
+          return true;
+        }
+        const warehouseAddress = lookupWarehouseAddress(delivery.warehouse_id);
+        if (warehouseAddress.toLowerCase().includes(query)) {
+          return true;
+        }
+
+        // Search by staff name
+        const staffName = lookupStaffName(delivery.user_id);
+        if (staffName.toLowerCase().includes(query)) {
+          return true;
+        }
+
+        // Search by food item name
+        if (delivery.food_item) {
+          const foodItemName = lookupFoodItemName(delivery.food_item);
+          if (foodItemName.toLowerCase().includes(query)) {
+            return true;
+          }
+        }
+
+        return false;
+      });
+    }
+
+    // Community filter
+    if (communityFilter !== "all") {
+      filtered = filtered.filter((delivery) => {
+        if (!delivery.community_id) return false;
+        const communityName = lookupCommunityName(delivery.community_id);
+        return communityName === communityFilter;
+      });
+    }
+
+    // Warehouse filter
+    if (warehouseFilter !== "all") {
+      filtered = filtered.filter((delivery) => {
+        const warehouseId = shortenWarehouseId(delivery.warehouse_id);
+        return warehouseId === warehouseFilter;
+      });
+    }
+
+    // Staff filter
+    if (staffFilter !== "all") {
+      filtered = filtered.filter((delivery) => {
+        const staffName = lookupStaffName(delivery.user_id);
+        return staffName === staffFilter;
+      });
+    }
+
+    // Date filter
+    if (dateFilter !== "all") {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekAgo = new Date(today);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const monthAgo = new Date(today);
+      monthAgo.setMonth(monthAgo.getMonth() - 1);
+
+      filtered = filtered.filter((delivery) => {
+        const pickupDate = new Date(delivery.pickup_time);
+        switch (dateFilter) {
+          case "today":
+            return pickupDate >= today;
+          case "week":
+            return pickupDate >= weekAgo;
+          case "month":
+            return pickupDate >= monthAgo;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Sort by pickup time (earliest first)
+    return filtered.sort((a, b) => {
+      const timeA = new Date(a.pickup_time).getTime();
+      const timeB = new Date(b.pickup_time).getTime();
+      return timeA - timeB;
+    });
+  }, [deliveries, canEdit, currentUserId, statusFilter, searchQuery, communityFilter, warehouseFilter, staffFilter, dateFilter, lookupCommunityName, lookupStaffName, lookupWarehouseAddress, lookupFoodItemName, shortenWarehouseId]);
 
   const statusLabel = (status: DeliveryRecordApi["status"]) => {
     switch (status) {
@@ -7526,7 +9107,14 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
             <div className="h-full overflow-y-auto pr-1 pb-4 sm:pr-3">
               <div className="space-y-4 rounded-2xl border border-[#CFE6D8] bg-white p-6 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm font-semibold text-gray-900">Deliver to community</p>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">
+                      {editingDeliveryId ? "Edit delivery assignment" : "Deliver to community"}
+                    </p>
+                    {editingDeliveryId && (
+                      <p className="text-xs text-gray-500 mt-1">Editing: {editingDeliveryId}</p>
+                    )}
+                  </div>
                   <span className="text-xs text-gray-500">From warehouse</span>
                 </div>
                 <div className="grid gap-4">
@@ -7730,14 +9318,29 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
                     </div>
                   )}
                   
+                  <div className="mt-4 flex gap-3">
+                    {editingDeliveryId && (
+                      <button
+                        type="button"
+                        onClick={handleCancelEdit}
+                        className="flex-1 rounded-2xl border border-[#CFE6D8] px-6 py-3 text-sm font-semibold text-[#2F855A] transition hover:bg-[#F6FBF7]"
+                      >
+                        Cancel
+                      </button>
+                    )}
                   <button
                     type="button"
                     disabled={submitting}
                     onClick={handleSubmitDistribution}
-                    className="mt-4 w-full rounded-2xl bg-[#2F8A61] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#25724F] disabled:opacity-60 disabled:cursor-not-allowed transition"
-                  >
-                    {submitting ? "Saving..." : "Save delivery assignment"}
+                      className={`${editingDeliveryId ? "flex-1" : "w-full"} rounded-2xl bg-[#2F8A61] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#25724F] disabled:opacity-60 disabled:cursor-not-allowed transition`}
+                    >
+                      {submitting
+                        ? "Saving..."
+                        : editingDeliveryId
+                          ? "Update delivery assignment"
+                          : "Save delivery assignment"}
                   </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -7765,12 +9368,59 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
               {visibleDeliveries.length} total
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            <label className="text-xs font-semibold text-gray-700 whitespace-nowrap">
-              Filter by status:
-            </label>
+          {/* Search Bar */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by ID, community, warehouse, staff, food item..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-lg border border-[#CFE6D8] bg-white px-4 py-2.5 pl-10 text-sm text-gray-700 placeholder-gray-400 outline-none focus:border-[#2F855A] focus:ring-2 focus:ring-[#2F855A]/20"
+            />
+            <svg
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                title="Clear search"
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* Filters Row */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Status Filter */}
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-gray-600">Status</label>
             <select
-              className="rounded-lg border border-[#CFE6D8] bg-white px-3 py-1.5 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2F855A] focus:border-transparent"
+                className="w-full rounded-lg border border-[#CFE6D8] bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2F855A] focus:border-transparent"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as DeliveryRecordApi["status"] | "all")}
             >
@@ -7780,6 +9430,96 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
               <option value="delivered">Delivered</option>
             </select>
           </div>
+
+            {/* Date Filter */}
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-gray-600">Date</label>
+              <select
+                className="w-full rounded-lg border border-[#CFE6D8] bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2F855A] focus:border-transparent"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value as typeof dateFilter)}
+              >
+                <option value="all">All time</option>
+                <option value="today">Today</option>
+                <option value="week">This week</option>
+                <option value="month">This month</option>
+              </select>
+            </div>
+
+            {/* Community Filter */}
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-gray-600">Community</label>
+              <select
+                className="w-full rounded-lg border border-[#CFE6D8] bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2F855A] focus:border-transparent"
+                value={communityFilter}
+                onChange={(e) => setCommunityFilter(e.target.value)}
+              >
+                <option value="all">All communities</option>
+                {uniqueCommunities.map((community) => (
+                  <option key={community} value={community}>
+                    {community}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Warehouse Filter */}
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-gray-600">Warehouse</label>
+              <select
+                className="w-full rounded-lg border border-[#CFE6D8] bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2F855A] focus:border-transparent"
+                value={warehouseFilter}
+                onChange={(e) => setWarehouseFilter(e.target.value)}
+              >
+                <option value="all">All warehouses</option>
+                {uniqueWarehouses.map((warehouse) => (
+                  <option key={warehouse} value={warehouse}>
+                    {warehouse}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Staff Filter */}
+            <div className="col-span-2">
+              <label className="mb-1 block text-xs font-semibold text-gray-600">Assigned Staff</label>
+              <select
+                className="w-full rounded-lg border border-[#CFE6D8] bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2F855A] focus:border-transparent"
+                value={staffFilter}
+                onChange={(e) => setStaffFilter(e.target.value)}
+              >
+                <option value="all">All staff</option>
+                {uniqueStaff.map((staffName) => (
+                  <option key={staffName} value={staffName}>
+                    {staffName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Active Filters Count */}
+          {(statusFilter !== "all" || communityFilter !== "all" || warehouseFilter !== "all" || staffFilter !== "all" || dateFilter !== "all" || searchQuery.trim()) && (
+            <div className="flex items-center justify-between border-t border-[#CFE6D8] pt-3">
+              <p className="text-xs text-gray-600">
+                <span className="font-semibold">{visibleDeliveries.length}</span> task(s) match your filters
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setStatusFilter("all");
+                  setCommunityFilter("all");
+                  setWarehouseFilter("all");
+                  setStaffFilter("all");
+                  setDateFilter("all");
+                  setSearchQuery("");
+                }}
+                className="text-xs font-semibold text-[#2F855A] hover:underline"
+              >
+                Clear all filters
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="overflow-y-auto flex-1 min-h-0 pr-2">
@@ -7790,7 +9530,9 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
           ) : visibleDeliveries.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-gray-300 bg-white/70 p-6 text-sm text-gray-500">
               {canEdit
-                ? "No delivery tasks yet. Create assignments from the form on the left."
+                ? searchQuery || communityFilter !== "all" || warehouseFilter !== "all" || staffFilter !== "all" || dateFilter !== "all"
+                  ? "No tasks match your filters."
+                  : "No delivery tasks yet. Create assignments from the form on the left."
                 : "No tasks assigned to you yet."}
             </p>
           ) : (
@@ -7816,11 +9558,81 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
                         </div>
                       </div>
                     </div>
+                    <div className="flex items-center gap-2">
+                      {canEdit && (
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            disabled={deletingDeliveryId === delivery.delivery_id || delivery.status === "delivered"}
+                            className="rounded-lg bg-[#E6F4FF] p-2 text-[#1D4ED8] hover:bg-[#D0E7FF] disabled:opacity-60 disabled:cursor-not-allowed transition"
+                            title="Edit delivery"
+                            onClick={() => handleEditDelivery(delivery)}
+                          >
+                            <svg
+                              className="h-4 w-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            type="button"
+                            disabled={deletingDeliveryId === delivery.delivery_id || delivery.status === "delivered"}
+                            className="rounded-lg bg-[#FDECEA] p-2 text-[#B42318] hover:bg-[#FCD7D2] disabled:opacity-60 disabled:cursor-not-allowed transition"
+                            title="Delete delivery"
+                            onClick={() => handleDeleteDelivery(delivery.delivery_id)}
+                          >
+                            {deletingDeliveryId === delivery.delivery_id ? (
+                              <svg
+                                className="h-4 w-4 animate-spin"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                />
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                />
+                              </svg>
+                            ) : (
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                              </svg>
+                            )}
+                          </button>
+                        </div>
+                      )}
                     <span
                       className={`rounded-full px-3 py-1.5 text-xs font-semibold ${statusLabel(delivery.status).className}`}
                     >
                       {statusLabel(delivery.status).text}
                     </span>
+                    </div>
                   </div>
 
                   <div className="space-y-3 border-t border-gray-100 pt-4">
@@ -9059,8 +10871,48 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState(0); // Start with home page
   const [showAuthModal, setShowAuthModal] = useState(false); // whether popup is visible
   const [authMode, setAuthMode] = useState<AuthMode>("signup"); // current auth tab
-  const [currentUser, setCurrentUser] = useState<LoggedUser | null>(null);
+  // Initialize currentUser from localStorage using lazy initializer
+  // Check for browser environment to avoid SSR issues
+  const [currentUser, setCurrentUser] = useState<LoggedUser | null>(() => {
+    // Only access localStorage in browser environment
+    if (typeof window === "undefined") {
+      return null;
+    }
+    try {
+      const storedUser = localStorage.getItem(USER_STORAGE_KEY);
+      if (storedUser) {
+        return JSON.parse(storedUser) as LoggedUser;
+      }
+    } catch (error) {
+      console.error("Failed to load user from localStorage:", error);
+      if (typeof window !== "undefined") {
+        localStorage.removeItem(USER_STORAGE_KEY);
+      }
+    }
+    return null;
+  });
   const [showProfileModal, setShowProfileModal] = useState(false);
+
+  // Save user to localStorage whenever it changes
+  useEffect(() => {
+    // Only access localStorage in browser environment
+    if (typeof window === "undefined") {
+      return;
+    }
+    if (currentUser) {
+      try {
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(currentUser));
+      } catch (error) {
+        console.error("Failed to save user to localStorage:", error);
+      }
+    } else {
+      try {
+        localStorage.removeItem(USER_STORAGE_KEY);
+      } catch (error) {
+        console.error("Failed to remove user from localStorage:", error);
+      }
+    }
+  }, [currentUser]);
 
   const navItems: NavItem[] = currentUser?.isAdmin
     ? [
