@@ -7,16 +7,34 @@ from .models import Donation
 
 
 class DonationSerializer(serializers.ModelSerializer):
-    restaurant_name = serializers.CharField(source="restaurant.name", read_only=True)
-    restaurant_branch = serializers.CharField(source="restaurant.branch_name", read_only=True)
-    restaurant_address = serializers.CharField(source="restaurant.address", read_only=True)
+    restaurant_name = serializers.SerializerMethodField()
+    restaurant_branch = serializers.SerializerMethodField()
+    restaurant_address = serializers.SerializerMethodField()
     created_by_user_id = serializers.SerializerMethodField()
     manual_restaurant_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
     manual_branch_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
     manual_restaurant_address = serializers.CharField(write_only=True, required=False, allow_blank=True)
     
+    def get_restaurant_name(self, obj):
+        return obj.restaurant.name if obj.restaurant else None
+    
+    def get_restaurant_branch(self, obj):
+        return obj.restaurant.branch_name if obj.restaurant else None
+    
+    def get_restaurant_address(self, obj):
+        return obj.restaurant.address if obj.restaurant else None
+    
     def get_created_by_user_id(self, obj):
-        return obj.created_by.user_id if obj.created_by else None
+        try:
+            # Check if created_by field exists and has a value
+            if hasattr(obj, 'created_by'):
+                created_by = getattr(obj, 'created_by', None)
+                if created_by:
+                    return getattr(created_by, 'user_id', None)
+        except (AttributeError, Exception):
+            # Field doesn't exist in database or other error
+            pass
+        return None
     
     class Meta:
         model = Donation

@@ -80,15 +80,26 @@ class FoodItemSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         food_id = data.get("food_id")
         if food_id:
+            # Normalize to FOO0000001 format to match impact records
             data["food_id"] = self._format_food_id(food_id)
         return data
 
     @staticmethod
     def _format_food_id(value: str) -> str:
+        """
+        Normalize food_id to FOO{7digits} format to match impact records.
+        Handles both FOO0000001 (database format) and F0001 (legacy format).
+        """
+        if not value:
+            return value
+        
+        # Extract digits from the food_id
         digits = "".join(ch for ch in value if ch.isdigit())
         if not digits:
             return value
-        return f"F{digits.zfill(4)}"
+        
+        # Return in FOO{7digits} format to match impact records and database
+        return f"FOO{digits.zfill(7)}"
 
     class Meta:
         model = FoodItem

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { ReactNode } from "react";
-import { Squares2X2Icon, TruckIcon, CubeIcon, Cog6ToothIcon, ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/solid";
+import { Squares2X2Icon, TruckIcon, CubeIcon, Cog6ToothIcon, ArrowRightStartOnRectangleIcon, ChartBarIcon } from "@heroicons/react/24/solid";
 import { InboxStackIcon } from "@heroicons/react/24/solid";
 
 // This marks the component as a Client Component (required because we use state + event handlers)
@@ -75,12 +75,8 @@ const renderSidebarIcon = (id: number, className?: string) => {
     );
   }
   if (id === 8) {
-    // Your stats icon - ChartBarIcon variant
-    return (
-      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-        <path d="M9 7H7v10h2V7zm4 0h-2v10h2V7zm4 0h-2v10h2V7zm2.5-4H4.5C3.67 3 3 3.67 3 4.5v15C3 20.33 3.67 21 4.5 21h15c.83 0 1.5-.67 1.5-1.5v-15C21 3.67 20.33 3 19.5 3z" />
-      </svg>
-    );
+    // Donation Stats icon - ChartBarIcon from Heroicons
+    return <ChartBarIcon className={className} />;
   }
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -102,7 +98,9 @@ export default function Sidebar({
 }: SidebarProps) {
   const homeTab = tabs.find(tab => tab.id === 0);
   const primaryTabs = tabs.filter(tab => tab.id === 1 || tab.id === 2);
-  const secondaryTabs = tabs.filter(tab => tab.id > 2);
+  const statsTab = tabs.find(tab => tab.id === 8); // Donation Stats
+  const statusTab = tabs.find(tab => tab.id === 7); // Status
+  const secondaryTabs = tabs.filter(tab => tab.id > 2 && tab.id !== 7 && tab.id !== 8);
 
   return (
     // Sidebar container: flex-col + justify-between lets us push the auth button to the bottom
@@ -238,6 +236,68 @@ export default function Sidebar({
             );
           })}
           </div>
+        )}
+
+        {/* Status Button */}
+        {statusTab && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onTabChange(statusTab.id);
+            }}
+            className={[
+              "flex items-center justify-between rounded-2xl border px-4 py-4 text-left text-base font-semibold shadow-sm transition duration-200",
+              activeTab === statusTab.id
+                ? "border-[#B86A49] bg-[#F1CBB5] text-[#4B2415] shadow-md"
+                : "border-[#E6B9A2] bg-white text-[#70402B] hover:border-[#B86A49] hover:shadow",
+            ].join(" ")}
+          >
+            <span>{statusTab.label}</span>
+            <span
+              aria-hidden
+              className={[
+                "flex h-10 w-10 items-center justify-center rounded-full transition",
+                activeTab === statusTab.id
+                  ? "bg-white text-[#B86A49]"
+                  : "bg-[#F3D6C3] text-[#9A5335]",
+              ].join(" ")}
+            >
+              {renderSidebarIcon(statusTab.id, "h-5 w-5")}
+            </span>
+          </button>
+        )}
+
+        {/* Donation Stats Button */}
+        {statsTab && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onTabChange(statsTab.id);
+            }}
+            className={[
+              "flex items-center justify-between rounded-2xl border px-4 py-4 text-left text-base font-semibold shadow-sm transition duration-200",
+              activeTab === statsTab.id
+                ? "border-[#B86A49] bg-[#F1CBB5] text-[#4B2415] shadow-md"
+                : "border-[#E6B9A2] bg-white text-[#70402B] hover:border-[#B86A49] hover:shadow",
+            ].join(" ")}
+          >
+            <span>{statsTab.label}</span>
+            <span
+              aria-hidden
+              className={[
+                "flex h-10 w-10 items-center justify-center rounded-full transition",
+                activeTab === statsTab.id
+                  ? "bg-white text-[#B86A49]"
+                  : "bg-[#F3D6C3] text-[#9A5335]",
+              ].join(" ")}
+            >
+              {renderSidebarIcon(statsTab.id, "h-5 w-5")}
+            </span>
+          </button>
         )}
 
         {secondaryTabs.length > 0 && (

@@ -85,7 +85,7 @@ class FoodItemTests(APITestCase):
         )
         res = self.client.get("/api/fooditems/FOO0001/")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data["food_id"], "F0001")
+        self.assertEqual(res.data["food_id"], "FOO0000001")
 
 
     # 4. Update food item quantity
@@ -285,7 +285,7 @@ class FoodItemTests(APITestCase):
         res = self.client.get("/api/fooditems/?is_expired=true")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data), 1)
-        self.assertEqual(res.data[0]["food_id"], "F0001")
+        self.assertEqual(res.data[0]["food_id"], "FOO0000001")
 
 
     # 13. List only claimed items
@@ -304,7 +304,7 @@ class FoodItemTests(APITestCase):
         res = self.client.get("/api/fooditems/?is_claimed=true")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data), 1)
-        self.assertEqual(res.data[0]["food_id"], "F0001")
+        self.assertEqual(res.data[0]["food_id"], "FOO0000001")
 
 
     # 14. Partial update (PATCH) should work
@@ -398,7 +398,7 @@ class FoodItemTests(APITestCase):
 
         res = self.client.get("/api/fooditems/")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data[0]["food_id"], "F0001")  # ordered
+        self.assertEqual(res.data[0]["food_id"], "FOO0000001")  # ordered
 
 
     # 20. Delete non-existent item should return 404
@@ -482,7 +482,7 @@ class FoodItemTests(APITestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         # Only 1 item matches both filters
         self.assertEqual(len(res.data), 1)
-        self.assertEqual(res.data[0]["food_id"], "F0002")
+        self.assertEqual(res.data[0]["food_id"], "FOO0000002")
 
 
     # 26. Getting non-existent food item returns 404

@@ -26,7 +26,7 @@ def _parse_datetime_param(value):
 
 
 class DonationViewSet(viewsets.ModelViewSet):
-    queryset = Donation.objects.select_related("restaurant").all()
+    queryset = Donation.objects.select_related("restaurant").defer("created_by").all()
     serializer_class = DonationSerializer
 
     def _str_to_bool(self, value):
@@ -51,7 +51,7 @@ class DonationViewSet(viewsets.ModelViewSet):
         return None
 
     def get_queryset(self):
-        qs = Donation.objects.select_related("restaurant").all()
+        qs = Donation.objects.select_related("restaurant").defer("created_by").all()
         params = self.request.query_params
 
         restaurant_id = params.get("restaurant_id")
