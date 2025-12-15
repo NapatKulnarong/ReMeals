@@ -6,18 +6,110 @@ Complete setup instructions for getting ReMeals running on your local machine.
 
 Before you begin, ensure you have the following installed:
 
-- **Node.js** >= 20.9 (for Next.js and React 19)
-- **Python** 3.12 or higher
-- **PostgreSQL** 15 or higher
+- **Node.js** >= 20.9 (for Next.js 16.0.3 and React 19.2.0)
+- **Python** 3.12 or higher (for Django 5.2.8)
+- **PostgreSQL** 16 or higher (or use Docker with PostgreSQL 16)
 - **Docker** and **Docker Compose** (optional, for containerized setup)
 - **Git** (for version control)
 
+### Installing Prerequisites
+
+#### macOS
+
+**Install Homebrew** (if not already installed):
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+**Install Node.js** (using nvm - recommended):
+```bash
+# Install nvm
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+
+# Restart terminal or run:
+source ~/.zshrc
+
+# Install and use Node.js 20
+nvm install 20
+nvm use 20
+```
+
+**Or install Node.js directly**:
+```bash
+brew install node@20
+```
+
+**Install Python 3.12**:
+```bash
+brew install python@3.12
+```
+
+**Install PostgreSQL 16**:
+```bash
+brew install postgresql@16
+brew services start postgresql@16
+```
+
+**Install Docker Desktop**:
+- Download from [Docker Desktop for Mac](https://www.docker.com/products/docker-desktop/)
+- Or install via Homebrew: `brew install --cask docker`
+
+**Install Git** (usually pre-installed):
+```bash
+brew install git
+```
+
+#### Windows
+
+**Install Node.js**:
+1. Download Node.js 20.x LTS from [nodejs.org](https://nodejs.org/)
+2. Run the installer and follow the setup wizard
+3. Or use nvm-windows:
+   ```powershell
+   # Download nvm-windows from https://github.com/coreybutler/nvm-windows/releases
+   # Install nvm-windows, then:
+   nvm install 20
+   nvm use 20
+   ```
+
+**Install Python 3.12**:
+1. Download Python 3.12 from [python.org](https://www.python.org/downloads/)
+2. During installation, check "Add Python to PATH"
+3. Verify installation:
+   ```powershell
+   python --version
+   ```
+
+**Install PostgreSQL 16**:
+1. Download PostgreSQL 16 from [postgresql.org](https://www.postgresql.org/download/windows/)
+2. Run the installer
+3. Remember the password you set for the postgres user
+4. Or use Docker (recommended for easier setup)
+
+**Install Docker Desktop**:
+1. Download from [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop/)
+2. Run the installer and follow the setup wizard
+3. Restart your computer if prompted
+
+**Install Git**:
+1. Download from [git-scm.com](https://git-scm.com/download/win)
+2. Run the installer with default options
+
 ### Check Your Versions
 
+**macOS/Linux:**
 ```bash
 node --version    # Should be >= 20.9
 python --version  # Should be >= 3.12
-psql --version    # Should be >= 15
+psql --version    # Should be >= 15 (or 16)
+docker --version  # Optional
+```
+
+**Windows (PowerShell):**
+```powershell
+node --version    # Should be >= 20.9
+python --version  # Should be >= 3.12
+psql --version    # Should be >= 15 (or 16)
 docker --version  # Optional
 ```
 
@@ -70,10 +162,10 @@ docker-compose up -d
 ```
 
 This will start:
-- Frontend at http://localhost:3000
-- Backend API at http://localhost:8000
-- PostgreSQL at localhost:5432
-- pgAdmin at http://localhost:5050
+- Frontend (Next.js 16.0.3) at http://localhost:3000
+- Backend API (Django 5.2.8) at http://localhost:8000
+- PostgreSQL 16 at localhost:5432
+- pgAdmin 8.11 at http://localhost:5050
 
 ### Step 4: Run Database Migrations
 
@@ -124,6 +216,8 @@ cd Re-Meals
 
 ### Step 2: PostgreSQL Setup
 
+#### macOS/Linux
+
 Create a database for ReMeals:
 
 ```bash
@@ -142,6 +236,44 @@ GRANT ALL PRIVILEGES ON DATABASE remeals TO remealsuser;
 # Exit psql
 \q
 ```
+
+**Note**: If you get "role postgres does not exist", create it first:
+```bash
+createuser -s postgres
+```
+
+#### Windows
+
+**Option 1: Using pgAdmin (GUI)**
+1. Open pgAdmin 4 (installed with PostgreSQL)
+2. Connect to your PostgreSQL server
+3. Right-click "Databases" → "Create" → "Database"
+4. Name it `remeals` and click "Save"
+
+**Option 2: Using Command Line (PowerShell)**
+```powershell
+# Navigate to PostgreSQL bin directory (adjust path as needed)
+cd "C:\Program Files\PostgreSQL\16\bin"
+
+# Login to PostgreSQL
+.\psql.exe -U postgres
+
+# Create database
+CREATE DATABASE remeals;
+
+# Create user (optional)
+CREATE USER remealsuser WITH PASSWORD 'your_password';
+
+# Grant privileges
+GRANT ALL PRIVILEGES ON DATABASE remeals TO remealsuser;
+
+# Exit psql
+\q
+```
+
+**Note**: If you get authentication errors, you may need to:
+1. Edit `pg_hba.conf` to allow local connections
+2. Or use the password you set during PostgreSQL installation
 
 ### Step 3: Backend Setup
 
@@ -342,16 +474,23 @@ Open http://localhost:3000 in your browser
 
 **Problem**: `psycopg2.OperationalError: could not connect to server`
 
-**Solution**:
+**Solution (macOS/Linux):**
 - Verify PostgreSQL is running: `pg_isready`
 - Check database credentials in `.env`
 - Ensure database exists: `psql -l`
+- Start PostgreSQL service: `brew services start postgresql@16` (macOS) or `sudo systemctl start postgresql` (Linux)
+
+**Solution (Windows):**
+- Verify PostgreSQL is running: Check Services (services.msc) for "postgresql-x64-16"
+- Start PostgreSQL service: `net start postgresql-x64-16` (run as Administrator)
+- Check database credentials in `.env`
+- Ensure database exists: Use pgAdmin or `psql -U postgres -l`
 
 ### Port Already in Use
 
 **Problem**: `Error: Port 8000 is already in use`
 
-**Solution**:
+**Solution (macOS/Linux):**
 ```bash
 # Find process using port
 lsof -ti:8000
@@ -363,15 +502,37 @@ kill -9 <PID>
 python manage.py runserver 8001
 ```
 
+**Solution (Windows):**
+```powershell
+# Find process using port
+netstat -ano | findstr :8000
+
+# Kill process (replace <PID> with the actual PID from above)
+taskkill /PID <PID> /F
+
+# Or use a different port
+python manage.py runserver 8001
+```
+
 ### Node Version Mismatch
 
 **Problem**: `The engine "node" is incompatible with this module`
 
-**Solution**:
+**Solution (macOS/Linux):**
 ```bash
 # Use nvm to install correct version
 nvm install 20
 nvm use 20
+```
+
+**Solution (Windows):**
+```powershell
+# Use nvm-windows to install correct version
+nvm install 20
+nvm use 20
+
+# If nvm-windows is not installed, download from:
+# https://github.com/coreybutler/nvm-windows/releases
 ```
 
 ### Migration Issues

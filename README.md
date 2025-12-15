@@ -77,11 +77,10 @@ The platform manages multiple stakeholders:
 
 ### Prerequisites
 
-- Node.js (v18+)
-- Python 3.12+ (for the Django backend)
-- Django 5.2.8 (as pinned in `backend/requirements.txt`)
-- PostgreSQL (v15+)
-- Docker & Docker Compose
+- Node.js >= 20.9 (for Next.js 16.0.3 and React 19.2.0)
+- Python 3.12+ (for Django 5.2.8)
+- PostgreSQL 16+ (or use Docker with PostgreSQL 16)
+- Docker & Docker Compose (optional)
 
 ### Installation
 
@@ -191,14 +190,15 @@ For a quick overview of all documentation, see the [Documentation Index](./docs/
 
 ### Backend
 
-- Python 3.12 / Django 5
+- Python 3.12+ / Django 5.2.8
 - Django REST Framework
-- PostgreSQL + pgAdmin
+- PostgreSQL 16 + pgAdmin 8.11
 
 ### Frontend
 
-- Next.js (React 19) — requires Node.js >= 20.9
-- Tailwind CSS
+- Next.js 16.0.3 (React 19.2.0) — requires Node.js >= 20.9
+- Tailwind CSS 4.1.17
+- TypeScript 5.x
 
 ### DevOps
 

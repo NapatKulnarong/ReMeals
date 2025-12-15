@@ -9,7 +9,7 @@ ReMeals is a full-stack web application built with a Django REST API backend and
 ### Backend
 - **Framework**: Django 5.2.8
 - **API**: Django REST Framework
-- **Database**: PostgreSQL 15+
+- **Database**: PostgreSQL 16
 - **Authentication**: Token-based authentication
 - **API Documentation**: drf-yasg (Swagger/OpenAPI)
 - **CORS**: django-cors-headers
@@ -17,15 +17,15 @@ ReMeals is a full-stack web application built with a Django REST API backend and
 - **Password Hashing**: bcrypt
 
 ### Frontend
-- **Framework**: Next.js 16 (App Router)
-- **UI Library**: React 19
+- **Framework**: Next.js 16.0.3 (App Router)
+- **UI Library**: React 19.2.0
 - **Language**: TypeScript 5.x
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS 4.1.17
 - **Node Version**: >= 20.9
 
 ### DevOps
 - **Containerization**: Docker & Docker Compose
-- **Database Admin**: pgAdmin
+- **Database Admin**: pgAdmin 8.11
 - **CI/CD**: GitHub Actions
 
 ## System Components
