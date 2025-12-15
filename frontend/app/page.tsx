@@ -1978,6 +1978,7 @@ function TabContent({
     return <AccessDenied message="Delivery team access required." />;
   }
   if (tab === 6) {
+    // For delivery staff (non-admin), redirect to combined dashboard (tab 4)
     if (currentUser?.isDeliveryStaff && !currentUser?.isAdmin) {
       return <DeliveryStaffDashboard currentUser={currentUser} />;
     }
@@ -8305,8 +8306,7 @@ export default function Home() {
     : currentUser?.isDeliveryStaff
       ? [
         { id: 0, label: "Home", icon: <HomeIcon className="w-5 h-5" aria-hidden="true" /> },
-        { id: 4, label: "Pickup", icon: <InboxIcon className="w-5 h-5" aria-hidden="true" /> },
-        { id: 6, label: "Deliver", icon: <TruckIcon className="w-5 h-5" aria-hidden="true" /> },
+        { id: 4, label: "Deliveries", icon: <TruckIcon className="w-5 h-5" aria-hidden="true" /> },
       ]
       : [
         { id: 0, label: "Home", icon: <HomeIcon className="w-5 h-5" aria-hidden="true" /> },
@@ -8326,6 +8326,10 @@ export default function Home() {
     }
     if (!currentUser && activeTab > 2) {
       return 0; // Redirect to home if not logged in
+    }
+    // For delivery staff (non-admin), redirect tab 6 to tab 4 (combined deliveries view)
+    if (currentUser?.isDeliveryStaff && !currentUser?.isAdmin && activeTab === 6) {
+      return 4;
     }
     if (currentUser?.isAdmin && activeTab > 0 && activeTab < 3) {
       return 3;
