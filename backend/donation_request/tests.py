@@ -463,13 +463,56 @@ class DonationRequestAPITests(APITestCase):
         )
         self.assertIn("T", response.data["created_at"])
 
-    # 30. Community_id field required even if community_name matches
-    def test_create_requires_community_id_even_with_name(self):
+    # 30. Community auto-creation when only community_name is provided
+    def test_create_auto_creates_community_from_name(self):
         payload = self._payload()
         del payload["community_id"]
+        payload["community_name"] = "New Community Name"
+        
+        # Count communities before
+        initial_count = Community.objects.count()
+        
         response = self.client.post(
             reverse("donation-request-list"),
             data=payload,
             format="json",
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        
+        # Verify a new community was created
+        self.assertEqual(Community.objects.count(), initial_count + 1)
+        
+        # Verify the new community has the correct name and auto-generated ID
+        new_community = Community.objects.get(name="New Community Name")
+        self.assertTrue(new_community.community_id.startswith("COM"))
+        self.assertEqual(len(new_community.community_id), 10)  # COM + 7 digits
+        
+        # Verify the request was created with the new community
+        created_request = DonationRequest.objects.get(request_id=response.data["request_id"])
+        self.assertEqual(created_request.community, new_community)
+        self.assertEqual(created_request.community_name, "New Community Name")
+    
+    # 30b. Community auto-creation uses existing community if name matches
+    def test_create_uses_existing_community_by_name(self):
+        payload = self._payload()
+        del payload["community_id"]
+        # Use existing community name (case-insensitive)
+        payload["community_name"] = "community alpha"  # lowercase to test case-insensitive matching
+        
+        # Count communities before
+        initial_count = Community.objects.count()
+        
+        response = self.client.post(
+            reverse("donation-request-list"),
+            data=payload,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        
+        # Verify no new community was created (should use existing one)
+        self.assertEqual(Community.objects.count(), initial_count)
+        
+        # Verify the request was created with the existing community
+        created_request = DonationRequest.objects.get(request_id=response.data["request_id"])
+        self.assertEqual(created_request.community, self.community_one)
+        self.assertEqual(created_request.community_name, "community alpha")  # Stores what was provided

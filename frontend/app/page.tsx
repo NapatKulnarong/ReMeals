@@ -4781,7 +4781,6 @@ function DonationRequestSection(props: {
   const [deliveries, setDeliveries] = useState<DeliveryRecordApi[]>([]);
   const [communities, setCommunities] = useState<Community[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [myRequestsOnly, setMyRequestsOnly] = useState(false);
 
   // Auto-populate contact phone from user profile
   useEffect(() => {
@@ -4923,15 +4922,18 @@ function DonationRequestSection(props: {
     return requests.filter((request) => !isRequestAccepted(request));
   }, [requests, isRequestAccepted]);
 
-  // Apply search and "My requests only" filter
+  // Apply search filter - only show requests created by current user
   const filteredRequests = useMemo(() => {
     let filtered = [...unacceptedRequests];
 
-    // Filter by "My requests only" toggle
-    if (myRequestsOnly && currentUser?.userId) {
+    // Always filter to show only requests created by the current user
+    if (currentUser?.userId) {
       filtered = filtered.filter(
         (request) => request.ownerUserId === currentUser.userId
       );
+    } else {
+      // If no user is logged in, show no requests
+      filtered = [];
     }
 
     // Filter by search query (community, title, address)
@@ -4955,7 +4957,7 @@ function DonationRequestSection(props: {
     }
 
     return filtered;
-  }, [unacceptedRequests, searchQuery, myRequestsOnly, currentUser?.userId]);
+  }, [unacceptedRequests, searchQuery, currentUser?.userId]);
 
   const resetForm = () => {
     setForm(createDonationRequestForm());
@@ -5294,9 +5296,9 @@ function DonationRequestSection(props: {
             </h3>
           </div>
           <span className="text-xs font-semibold text-gray-500">
-            {searchQuery || myRequestsOnly
-              ? `${filteredRequests.length}/${unacceptedRequests.length} total`
-              : `${unacceptedRequests.length} total`}
+            {searchQuery
+              ? `${filteredRequests.length} found`
+              : `${filteredRequests.length} total`}
           </span>
         </div>
 
@@ -5348,20 +5350,6 @@ function DonationRequestSection(props: {
             )}
           </div>
 
-          {/* My Requests Only Toggle */}
-          {currentUser && (
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={myRequestsOnly}
-                onChange={(e) => setMyRequestsOnly(e.target.checked)}
-                className="h-4 w-4 rounded border-[#E6B9A2] text-[#B86A49] focus:ring-2 focus:ring-[#B86A49]/20"
-              />
-              <span className="text-sm font-medium text-gray-700">
-                My requests only
-              </span>
-            </label>
-          )}
         </div>
 
         {requestsError && (
@@ -5375,9 +5363,9 @@ function DonationRequestSection(props: {
             </p>
           ) : filteredRequests.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-gray-300 bg-white/80 p-6 text-sm text-gray-500">
-              {searchQuery || myRequestsOnly
+              {searchQuery
                 ? "No requests match your search criteria."
-                : "Captured requests will appear here for dispatch review."}
+                : "You haven't created any requests yet. Create a request using the form on the left."}
             </p>
           ) : (
             <div className="space-y-4">
