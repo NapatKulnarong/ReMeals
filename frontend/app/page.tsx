@@ -1656,6 +1656,8 @@ function DonationSection(props: {
 
   const [deliveries, setDeliveries] = useState<DeliveryRecordApi[]>([]);
   const [deletingDonationId, setDeletingDonationId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [myRestaurantOnly, setMyRestaurantOnly] = useState<boolean>(false);
 
   const prioritizeDonations = useCallback(
     (list: DonationRecord[]) => {
@@ -2139,6 +2141,44 @@ function DonationSection(props: {
     return true;
   });
 
+  // Apply search and restaurant filter
+  const filteredDonations = useMemo(() => {
+    let filtered = [...unassignedDonations];
+
+    // Filter by "My restaurant only" toggle
+    if (myRestaurantOnly && currentUser?.restaurantId) {
+      filtered = filtered.filter(
+        (donation) => donation.restaurantId === currentUser.restaurantId
+      );
+    }
+
+    // Filter by search query (restaurant name, branch, or food items)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((donation) => {
+        // Check restaurant name
+        if (donation.restaurantName.toLowerCase().includes(query)) {
+          return true;
+        }
+        // Check branch
+        if (donation.branch?.toLowerCase().includes(query)) {
+          return true;
+        }
+        // Check food items
+        if (
+          donation.items.some((item) =>
+            item.name.toLowerCase().includes(query)
+          )
+        ) {
+          return true;
+        }
+        return false;
+      });
+    }
+
+    return filtered;
+  }, [unassignedDonations, searchQuery, myRestaurantOnly, currentUser?.restaurantId]);
+
   const handleEdit = (donation: DonationRecord) => {
     if (!canManageDonation(donation)) {
       if (isDonationAssigned(donation.id)) {
@@ -2499,8 +2539,74 @@ function DonationSection(props: {
             <h3 className="text-2xl font-semibold text-gray-800">Donation log</h3>
           </div>
           <span className="text-xs font-semibold text-gray-500">
-            {unassignedDonations.length} total
+            {searchQuery || myRestaurantOnly
+              ? `${filteredDonations.length}/${unassignedDonations.length} total`
+              : `${unassignedDonations.length} total`}
           </span>
+        </div>
+
+        {/* Search and Filter Controls */}
+        <div className="mb-4 flex flex-col gap-3 flex-shrink-0">
+          {/* Search Bar */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by restaurant, branch, or food item..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-lg border border-[#D7DCC7] bg-white px-4 py-2.5 pl-10 text-sm text-gray-700 placeholder-gray-400 outline-none focus:border-[#7ba061] focus:ring-2 focus:ring-[#7ba061]/20"
+            />
+            <svg
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                title="Clear search"
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* My Restaurant Only Toggle */}
+          {currentUser?.restaurantId && (
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={myRestaurantOnly}
+                onChange={(e) => setMyRestaurantOnly(e.target.checked)}
+                className="h-4 w-4 rounded border-[#D7DCC7] text-[#7ba061] focus:ring-2 focus:ring-[#7ba061]/20"
+              />
+              <span className="text-sm font-medium text-gray-700">
+                My restaurant only
+              </span>
+            </label>
+          )}
         </div>
 
         {currentUser && !currentUser.isAdmin && (
@@ -2520,13 +2626,15 @@ function DonationSection(props: {
             <p className="rounded-2xl border border-dashed border-gray-300 bg-white/70 p-6 text-sm text-gray-500">
               Loading donations...
             </p>
-          ) : unassignedDonations.length === 0 ? (
+          ) : filteredDonations.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-gray-300 bg-white/70 p-6 text-sm text-gray-500">
-              Once you save a donation, it shows up here for editing or delivery planning.
+              {searchQuery || myRestaurantOnly
+                ? "No donations match your search criteria."
+                : "Once you save a donation, it shows up here for editing or delivery planning."}
             </p>
           ) : (
             <div className="space-y-4">
-              {unassignedDonations.map((donation) => (
+              {filteredDonations.map((donation) => (
                 <article
                   key={donation.id}
                   className="rounded-2xl border border-dashed border-[#4d673f] bg-white/90 p-5 "
