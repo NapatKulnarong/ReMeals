@@ -2,6 +2,7 @@ from django.http import QueryDict
 from django.http import QueryDict
 from rest_framework import viewsets
 from rest_framework.response import Response
+from rest_framework.exceptions import NotFound
 
 from .models import FoodItem
 from .serializers import FoodItemSerializer
@@ -10,6 +11,34 @@ from impactrecord.models import ImpactRecord
 
 class FoodItemViewSet(viewsets.ModelViewSet):
     serializer_class = FoodItemSerializer
+
+    def get_object(self):
+        """
+        Override to handle both formatted (F0001) and original (FOO0001) food_id formats.
+        The serializer formats food_id in responses, but the database stores the original format.
+        """
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        food_id = self.kwargs[lookup_url_kwarg]
+        
+        # Try to find by the provided ID first (could be formatted or original)
+        try:
+            return FoodItem.objects.get(food_id=food_id)
+        except FoodItem.DoesNotExist:
+            pass
+        
+        # If not found, try converting formatted ID (F0001) back to original (FOO0001)
+        # Extract digits from the formatted ID
+        digits = "".join(ch for ch in food_id if ch.isdigit())
+        if digits:
+            # Try with FOO prefix
+            original_id = f"FOO{digits.zfill(4)}"
+            try:
+                return FoodItem.objects.get(food_id=original_id)
+            except FoodItem.DoesNotExist:
+                pass
+        
+        # If still not found, raise NotFound
+        raise NotFound("No FoodItem matches the given query.")
 
     def get_queryset(self):
         """

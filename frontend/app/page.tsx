@@ -7778,6 +7778,8 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
   const [deliveryQuantity, setDeliveryQuantity] = useState<string>(""); // e.g., "15 kg", "8 bucket"
   const [foodItems, setFoodItems] = useState<FoodItemApiRecord[]>([]);
   const [statusFilter, setStatusFilter] = useState<DeliveryRecordApi["status"] | "all">("all");
+  const [editingDeliveryId, setEditingDeliveryId] = useState<string | null>(null);
+  const [deletingDeliveryId, setDeletingDeliveryId] = useState<string | null>(null);
 
   const canEdit = currentUser?.isAdmin ?? false;
   const currentUserId = currentUser?.userId ?? "";
@@ -7959,6 +7961,67 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
     return { available: true };
   }, [staff, deliveries, formatBangkokDateTime]);
 
+  const handleEditDelivery = (delivery: DeliveryRecordApi) => {
+    if (!canEdit) return;
+    
+    // Convert food_id from database format (FOO0000014) to API format (F0000014) if needed
+    let foodIdForForm = delivery.food_item || "";
+    if (foodIdForForm.startsWith("FOO")) {
+      // Extract digits from FOO0000014 -> 0000014
+      const digits = foodIdForForm.substring(3);
+      // Convert to F0000014 (F prefix + digits)
+      foodIdForForm = `F${digits}`;
+    }
+    
+    setEditingDeliveryId(delivery.delivery_id);
+    setDistributionForm({
+      warehouseId: delivery.warehouse_id,
+      communityId: delivery.community_id || "",
+      userId: delivery.user_id,
+      pickupTime: toDateTimeLocalValue(delivery.pickup_time),
+    });
+    setSelectedFoodItem(foodIdForForm);
+    setDeliveryQuantity(delivery.delivery_quantity || "");
+    setNotice("Editing delivery assignment. Save or cancel to exit editing mode.");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingDeliveryId(null);
+    setDistributionForm({
+      warehouseId: "",
+      communityId: "",
+      userId: "",
+      pickupTime: "",
+    });
+    setSelectedFoodItem("");
+    setDeliveryQuantity("");
+    setNotice(null);
+  };
+
+  const handleDeleteDelivery = async (deliveryId: string) => {
+    if (!canEdit) return;
+    if (!window.confirm("Are you sure you want to delete this delivery assignment? This action cannot be undone.")) {
+      return;
+    }
+    
+    setDeletingDeliveryId(deliveryId);
+    try {
+      await apiFetch(`${API_PATHS.deliveries}${deliveryId}/`, {
+        method: "DELETE",
+        headers: buildAuthHeaders(currentUser),
+      });
+      setNotice("Delivery assignment deleted.");
+      await loadData();
+      if (editingDeliveryId === deliveryId) {
+        handleCancelEdit();
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to delete delivery assignment.");
+    } finally {
+      setDeletingDeliveryId(null);
+    }
+  };
+
   const handleSubmitDistribution = async () => {
     setSubmitting(true);
     setNotice(null);
@@ -8018,22 +8081,26 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
         delivery_quantity: deliveryQuantity,
       };
 
-      await apiFetch(API_PATHS.deliveries, {
-        method: "POST",
-        body: JSON.stringify(payload),
-        headers: buildAuthHeaders(currentUser),
-      });
-
-      setNotice("Distribution assignment saved.");
+      if (editingDeliveryId) {
+        // Update existing delivery
+        await apiFetch(`${API_PATHS.deliveries}${editingDeliveryId}/`, {
+          method: "PATCH",
+          body: JSON.stringify(payload),
+          headers: buildAuthHeaders(currentUser),
+        });
+        setNotice("Delivery assignment updated.");
+      } else {
+        // Create new delivery
+        await apiFetch(API_PATHS.deliveries, {
+          method: "POST",
+          body: JSON.stringify(payload),
+          headers: buildAuthHeaders(currentUser),
+        });
+        setNotice("Distribution assignment saved.");
+      }
+      
       await loadData();
-      setDistributionForm({
-        warehouseId: "",
-        communityId: "",
-        userId: "",
-        pickupTime: "",
-      });
-      setSelectedFoodItem("");
-      setDeliveryQuantity("");
+      handleCancelEdit();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to save distribution assignment.");
     } finally {
@@ -8201,7 +8268,14 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
             <div className="h-full overflow-y-auto pr-1 pb-4 sm:pr-3">
               <div className="space-y-4 rounded-2xl border border-[#CFE6D8] bg-white p-6 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm font-semibold text-gray-900">Deliver to community</p>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">
+                      {editingDeliveryId ? "Edit delivery assignment" : "Deliver to community"}
+                    </p>
+                    {editingDeliveryId && (
+                      <p className="text-xs text-gray-500 mt-1">Editing: {editingDeliveryId}</p>
+                    )}
+                  </div>
                   <span className="text-xs text-gray-500">From warehouse</span>
                 </div>
                 <div className="grid gap-4">
@@ -8405,14 +8479,29 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
                     </div>
                   )}
                   
-                  <button
-                    type="button"
-                    disabled={submitting}
-                    onClick={handleSubmitDistribution}
-                    className="mt-4 w-full rounded-2xl bg-[#2F8A61] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#25724F] disabled:opacity-60 disabled:cursor-not-allowed transition"
-                  >
-                    {submitting ? "Saving..." : "Save delivery assignment"}
-                  </button>
+                  <div className="mt-4 flex gap-3">
+                    {editingDeliveryId && (
+                      <button
+                        type="button"
+                        onClick={handleCancelEdit}
+                        className="flex-1 rounded-2xl border border-[#CFE6D8] px-6 py-3 text-sm font-semibold text-[#2F855A] transition hover:bg-[#F6FBF7]"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      disabled={submitting}
+                      onClick={handleSubmitDistribution}
+                      className={`${editingDeliveryId ? "flex-1" : "w-full"} rounded-2xl bg-[#2F8A61] px-6 py-3 text-sm font-semibold text-white shadow hover:bg-[#25724F] disabled:opacity-60 disabled:cursor-not-allowed transition`}
+                    >
+                      {submitting
+                        ? "Saving..."
+                        : editingDeliveryId
+                          ? "Update delivery assignment"
+                          : "Save delivery assignment"}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -8491,11 +8580,81 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
                         </div>
                       </div>
                     </div>
-                    <span
-                      className={`rounded-full px-3 py-1.5 text-xs font-semibold ${statusLabel(delivery.status).className}`}
-                    >
-                      {statusLabel(delivery.status).text}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {canEdit && (
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            disabled={deletingDeliveryId === delivery.delivery_id || delivery.status === "delivered"}
+                            className="rounded-lg bg-[#E6F4FF] p-2 text-[#1D4ED8] hover:bg-[#D0E7FF] disabled:opacity-60 disabled:cursor-not-allowed transition"
+                            title="Edit delivery"
+                            onClick={() => handleEditDelivery(delivery)}
+                          >
+                            <svg
+                              className="h-4 w-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            type="button"
+                            disabled={deletingDeliveryId === delivery.delivery_id || delivery.status === "delivered"}
+                            className="rounded-lg bg-[#FDECEA] p-2 text-[#B42318] hover:bg-[#FCD7D2] disabled:opacity-60 disabled:cursor-not-allowed transition"
+                            title="Delete delivery"
+                            onClick={() => handleDeleteDelivery(delivery.delivery_id)}
+                          >
+                            {deletingDeliveryId === delivery.delivery_id ? (
+                              <svg
+                                className="h-4 w-4 animate-spin"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                />
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                />
+                              </svg>
+                            ) : (
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                              </svg>
+                            )}
+                          </button>
+                        </div>
+                      )}
+                      <span
+                        className={`rounded-full px-3 py-1.5 text-xs font-semibold ${statusLabel(delivery.status).className}`}
+                      >
+                        {statusLabel(delivery.status).text}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="space-y-3 border-t border-gray-100 pt-4">

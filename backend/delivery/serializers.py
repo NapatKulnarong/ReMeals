@@ -255,8 +255,31 @@ class DeliverySerializer(serializers.ModelSerializer):
                     else:
                         quantity = float(quantity_match.group(1))
                         quantity_int = int(round(quantity))
-                        if quantity_int > food_item.quantity:
-                            errors["delivery_quantity"] = f"Quantity ({quantity_int}) exceeds available quantity ({food_item.quantity}) for {food_item.name}"
+                        
+                        # When updating an existing delivery, account for the old quantity if food_item is being changed
+                        available_quantity = food_item.quantity
+                        if instance and instance.food_item and instance.food_item != food_item:
+                            # Food item is being changed - old quantity will be returned in views.py before validation
+                            # So we can check the new food item's current quantity directly
+                            # The old quantity return happens before serializer validation
+                            pass
+                        elif instance and instance.food_item and instance.food_item == food_item:
+                            # Same food item, but quantity might be changing
+                            # Need to account for the old quantity that was already deducted
+                            old_quantity_str = instance.delivery_quantity
+                            if old_quantity_str:
+                                try:
+                                    old_quantity_match = re.search(r'^(\d+(?:\.\d+)?)', str(old_quantity_str).strip())
+                                    if old_quantity_match:
+                                        old_quantity = float(old_quantity_match.group(1))
+                                        old_quantity_int = int(round(old_quantity))
+                                        # Add back the old quantity to available quantity for validation
+                                        available_quantity = food_item.quantity + old_quantity_int
+                                except (ValueError, AttributeError):
+                                    pass
+                        
+                        if quantity_int > available_quantity:
+                            errors["delivery_quantity"] = f"Quantity ({quantity_int}) exceeds available quantity ({available_quantity}) for {food_item.name}"
                 except (ValueError, AttributeError):
                     errors["delivery_quantity"] = f"Invalid quantity format: '{delivery_quantity}'"
         else:
