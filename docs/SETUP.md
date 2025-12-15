@@ -136,6 +136,29 @@ cd Re-Meals
 cp .env.example .env
 ```
 
+**Generate Django SECRET_KEY:**
+
+**macOS/Linux:**
+```bash
+python3 -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+**Windows (PowerShell):**
+```powershell
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+**Alternative method (if Django is not installed yet):**
+```bash
+# macOS/Linux
+python3 -c "import secrets; print(secrets.token_urlsafe(50))"
+
+# Windows
+python -c "import secrets; print(secrets.token_urlsafe(50))"
+```
+
+Copy the generated key and use it in your `.env` file.
+
 Edit `.env` with your configuration:
 
 ```env
@@ -147,13 +170,15 @@ POSTGRES_HOST=db
 POSTGRES_PORT=5432
 
 # Django
-SECRET_KEY=your-secret-key-here
+SECRET_KEY=your-generated-secret-key-here
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
 
 # Frontend
 NEXT_PUBLIC_API_URL=http://localhost:8000/api
 ```
+
+**Important**: Never share your SECRET_KEY or commit it to version control. Keep it secure!
 
 ### Step 3: Build and Start Services
 
@@ -298,6 +323,31 @@ pip install -r requirements.txt
 
 #### 3.3 Configure Environment Variables
 
+**Generate Django SECRET_KEY:**
+
+**macOS/Linux:**
+```bash
+# After activating virtual environment
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+**Windows (PowerShell):**
+```powershell
+# After activating virtual environment
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+**Alternative method (if Django is not installed yet):**
+```bash
+# macOS/Linux
+python3 -c "import secrets; print(secrets.token_urlsafe(50))"
+
+# Windows
+python -c "import secrets; print(secrets.token_urlsafe(50))"
+```
+
+Copy the generated key and use it in your `.env` file.
+
 Create a `.env` file in the `backend/` directory:
 
 ```env
@@ -309,10 +359,12 @@ POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 
 # Django
-SECRET_KEY=your-django-secret-key-here
+SECRET_KEY=your-generated-secret-key-here
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
 ```
+
+**Important**: Never share your SECRET_KEY or commit it to version control. Keep it secure!
 
 #### 3.4 Run Migrations
 

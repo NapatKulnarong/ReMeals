@@ -40,15 +40,99 @@ For complete details, see the [Test Users section in SETUP.md](./SETUP.md#test-u
 
 ### Development Environment
 
-```bash
-# Backend - activate virtual environment
-cd backend
-source venv/bin/activate  # On macOS/Linux
-venv\Scripts\activate     # On Windows
+#### Backend Setup
 
-# Frontend - in a separate terminal
+**macOS/Linux:**
+```bash
+# Navigate to backend directory
+cd backend
+
+# Create virtual environment (if not already created)
+python3.12 -m venv venv
+
+# Activate virtual environment
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start development server
+python manage.py runserver
+```
+
+**Windows (PowerShell):**
+```powershell
+# Navigate to backend directory
+cd backend
+
+# Create virtual environment (if not already created)
+python -m venv venv
+
+# Activate virtual environment
+.\venv\Scripts\Activate.ps1
+
+# If you get an execution policy error, run:
+# Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start development server
+python manage.py runserver
+```
+
+#### Frontend Setup
+
+**macOS/Linux/Windows:**
+```bash
+# Navigate to frontend directory
+cd frontend
+
+# Install dependencies (if not already installed)
+npm install
+
+# Start development server
+npm run dev
+```
+
+The frontend will be available at http://localhost:3000 and will automatically reload on file changes.
+
+#### Running Both Services
+
+You'll need two terminal windows/tabs:
+
+**Terminal 1 - Backend:**
+```bash
+cd backend
+source venv/bin/activate  # macOS/Linux
+# OR
+.\venv\Scripts\Activate.ps1  # Windows PowerShell
+
+python manage.py runserver
+```
+
+**Terminal 2 - Frontend:**
+```bash
 cd frontend
 npm run dev
+```
+
+#### Using Docker for Development
+
+Alternatively, you can use Docker for a consistent development environment:
+
+```bash
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Run migrations
+docker-compose exec backend python manage.py migrate
+
+# Access backend shell
+docker-compose exec backend bash
 ```
 
 ---
@@ -69,14 +153,63 @@ Follow the code style guidelines and best practices outlined below.
 
 ### 3. Test Your Changes
 
-```bash
-# Backend tests
-cd backend
-python manage.py test
+**Backend Tests:**
 
-# Frontend tests (when implemented)
+**macOS/Linux:**
+```bash
+cd backend
+source venv/bin/activate
+python manage.py test
+```
+
+**Windows:**
+```powershell
+cd backend
+.\venv\Scripts\Activate.ps1
+python manage.py test
+```
+
+**Run specific test suites:**
+```bash
+# Test specific app
+python manage.py test donation
+
+# Test specific test class
+python manage.py test donation.tests.DonationModelTest
+
+# Run with verbose output
+python manage.py test --verbosity=2
+
+# Run with coverage
+coverage run --source='.' manage.py test
+coverage report
+coverage html  # Generate HTML report
+```
+
+**Frontend Tests:**
+```bash
 cd frontend
 npm test
+```
+
+**Linting:**
+
+**Backend (Python):**
+```bash
+# Install flake8 or black (if not already installed)
+pip install flake8 black
+
+# Check code style
+flake8 .
+
+# Auto-format code
+black .
+```
+
+**Frontend (TypeScript/React):**
+```bash
+cd frontend
+npm run lint
 ```
 
 ### 4. Commit Your Changes
@@ -134,6 +267,8 @@ We follow [PEP 8](https://pep8.org/) with some modifications:
   - Classes: `PascalCase`
   - Functions/Variables: `snake_case`
   - Constants: `UPPER_SNAKE_CASE`
+- **Type hints**: Use type hints for function parameters and return types (Python 3.12+)
+- **Docstrings**: Use Google-style docstrings for classes and functions
 
 **Example:**
 ```python
@@ -168,6 +303,10 @@ class Donation(models.Model):
   - Constants: `UPPER_SNAKE_CASE`
   - Types/Interfaces: `PascalCase`
 - **File naming**: `kebab-case.tsx` for components
+- **TypeScript**: Always use explicit types, avoid `any`
+- **React**: Use functional components with hooks
+- **Next.js**: Use App Router conventions (Next.js 16.0.3)
+- **Tailwind CSS**: Use utility classes (Tailwind CSS 4.1.17)
 
 **Example:**
 ```typescript
@@ -291,19 +430,47 @@ urlpatterns = [
 
 ### Migrations
 
+**Creating Migrations:**
 ```bash
-# Create migrations
+# Create migrations for all apps
 python manage.py makemigrations
 
-# Apply migrations
+# Create migrations for specific app
+python manage.py makemigrations donation
+
+# Create empty migration (for data migrations)
+python manage.py makemigrations --empty donation
+```
+
+**Applying Migrations:**
+```bash
+# Apply all pending migrations
 python manage.py migrate
 
-# Show migration SQL
-python manage.py sqlmigrate <app_name> <migration_number>
+# Apply migrations for specific app
+python manage.py migrate donation
+
+# Show migration status
+python manage.py showmigrations
+```
+
+**Migration Utilities:**
+```bash
+# Show migration SQL (without applying)
+python manage.py sqlmigrate donation 0001
 
 # Check for migration issues
 python manage.py check
+
+# Rollback migration (WARNING: Use with caution)
+python manage.py migrate donation 0001  # Rollback to migration 0001
 ```
+
+**Best Practices:**
+- Always review migration files before committing
+- Test migrations on a copy of production data
+- Never edit existing migrations that have been applied
+- Create new migrations for any changes to applied migrations
 
 ---
 
@@ -454,7 +621,43 @@ coverage report
 
 ### Frontend Testing
 
-(To be implemented - Jest and React Testing Library)
+**Setup (when implemented):**
+
+```bash
+cd frontend
+npm install --save-dev jest @testing-library/react @testing-library/jest-dom
+```
+
+**Example Test:**
+```typescript
+// components/__tests__/DonationCard.test.tsx
+import { render, screen } from '@testing-library/react';
+import { DonationCard } from '../DonationCard';
+
+describe('DonationCard', () => {
+  it('renders donation information', () => {
+    render(<DonationCard id={1} status="pending" />);
+    expect(screen.getByText(/Donation #1/i)).toBeInTheDocument();
+  });
+});
+```
+
+**Run Tests:**
+```bash
+npm test
+npm test -- --watch  # Watch mode
+npm test -- --coverage  # With coverage
+```
+
+**Type Checking:**
+```bash
+# TypeScript type checking
+npx tsc --noEmit
+
+# Or add to package.json:
+# "type-check": "tsc --noEmit"
+npm run type-check
+```
 
 ---
 
@@ -514,12 +717,52 @@ coverage report
 
 ### Environment Variables
 
-Add new environment variables:
+**Adding New Environment Variables:**
 
-1. Add to `.env.example` with placeholder
-2. Add to `.env` with actual value
-3. Access in Django: `os.environ.get('VAR_NAME')`
-4. Access in Next.js: `process.env.NEXT_PUBLIC_VAR_NAME`
+1. **Backend (.env in backend/ directory):**
+   ```env
+   # Add to .env.example first
+   NEW_VAR=example_value
+   
+   # Then add to your local .env
+   NEW_VAR=actual_value
+   ```
+
+   Access in Django:
+   ```python
+   import os
+   from django.conf import settings
+   
+   # Using python-dotenv (recommended)
+   from dotenv import load_dotenv
+   load_dotenv()
+   
+   value = os.environ.get('NEW_VAR')
+   ```
+
+2. **Frontend (.env.local in frontend/ directory):**
+   ```env
+   # Public variables (exposed to browser) must start with NEXT_PUBLIC_
+   NEXT_PUBLIC_NEW_VAR=value
+   
+   # Private variables (server-side only)
+   PRIVATE_VAR=value
+   ```
+
+   Access in Next.js:
+   ```typescript
+   // Public variable (available in browser)
+   const publicVar = process.env.NEXT_PUBLIC_NEW_VAR;
+   
+   // Private variable (server-side only)
+   const privateVar = process.env.PRIVATE_VAR; // Only in API routes/server components
+   ```
+
+**Important Notes:**
+- Never commit `.env` or `.env.local` files
+- Always update `.env.example` with new variables
+- Frontend variables starting with `NEXT_PUBLIC_` are exposed to the browser
+- Restart development servers after adding new environment variables
 
 ---
 
@@ -527,34 +770,143 @@ Add new environment variables:
 
 Before submitting a PR, ensure:
 
-- [ ] Code follows style guidelines
-- [ ] Tests are written and passing
-- [ ] No console.log or debug prints
-- [ ] Environment variables properly configured
-- [ ] Documentation updated if needed
-- [ ] Migrations created and tested
-- [ ] No sensitive data committed
-- [ ] Commit messages follow convention
+**Code Quality:**
+- [ ] Code follows style guidelines (PEP 8 for Python, ESLint for TypeScript)
 - [ ] Code is DRY (Don't Repeat Yourself)
+- [ ] Functions are small and focused
+- [ ] Meaningful variable and function names
+- [ ] Comments explain "why", not "what"
+
+**Testing:**
+- [ ] Tests are written and passing
+- [ ] Test coverage is adequate
+- [ ] Edge cases are handled
+- [ ] No console.log or debug prints left in code
+
+**Security:**
+- [ ] No sensitive data committed (passwords, API keys, etc.)
+- [ ] Environment variables properly configured
+- [ ] Input validation implemented
+- [ ] SQL injection protection (using ORM, not raw SQL)
+
+**Documentation:**
+- [ ] Code is self-documenting
+- [ ] Complex logic has comments
+- [ ] API documentation updated (if applicable)
+- [ ] README or relevant docs updated
+
+**Database:**
+- [ ] Migrations created and tested
+- [ ] Migration files reviewed
+- [ ] No data loss in migrations
+- [ ] Database indexes added where needed
+
+**Git:**
+- [ ] Commit messages follow convention
+- [ ] Related commits are squashed
+- [ ] Branch is up to date with main
+- [ ] No merge conflicts
+
+**Error Handling:**
 - [ ] Error handling implemented
+- [ ] User-friendly error messages
+- [ ] Proper HTTP status codes
+- [ ] Logging for debugging
+
+**Performance:**
+- [ ] Database queries optimized (avoid N+1 queries)
+- [ ] Unnecessary API calls avoided
+- [ ] Images/assets optimized
+- [ ] Code splitting implemented where appropriate
 
 ---
+
+## Development Tools
+
+### Recommended IDE Setup
+
+**VS Code Extensions:**
+- Python (Microsoft)
+- Django (Baptiste Darthenay)
+- ESLint (Microsoft)
+- Prettier (Prettier)
+- Tailwind CSS IntelliSense (Tailwind Labs)
+- Docker (Microsoft)
+- PostgreSQL (Chris Kolkman)
+- GitLens (GitKraken)
+
+**VS Code Settings (`.vscode/settings.json`):**
+```json
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/venv/bin/python",
+  "python.formatting.provider": "black",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}
+```
+
+### Database Tools
+
+- **pgAdmin 8.11**: http://localhost:5050 (if using Docker)
+- **DBeaver**: Cross-platform database tool
+- **TablePlus**: macOS/Windows database client
+- **psql**: Command-line PostgreSQL client
+
+### API Testing Tools
+
+- **Swagger UI**: http://localhost:8000/swagger/ (Interactive API docs)
+- **ReDoc**: http://localhost:8000/redoc/ (Alternative API docs)
+- **Postman**: Desktop API testing application
+- **curl**: Command-line HTTP client
+- **HTTPie**: User-friendly command-line HTTP client
+
+### Debugging
+
+**Backend (Django):**
+```bash
+# Use Django debug toolbar (if installed)
+# Add breakpoints in code
+import pdb; pdb.set_trace()
+
+# Or use Python debugger
+python -m pdb manage.py runserver
+```
+
+**Frontend (Next.js/React):**
+- Use React DevTools browser extension
+- Use Next.js DevTools
+- Browser console for debugging
+- Network tab for API debugging
 
 ## Resources
 
 ### Django & DRF
-- [Django Documentation](https://docs.djangoproject.com/)
+- [Django 5.2 Documentation](https://docs.djangoproject.com/en/5.2/)
 - [Django REST Framework](https://www.django-rest-framework.org/)
 - [Django Best Practices](https://django-best-practices.readthedocs.io/)
+- [Python Type Hints](https://docs.python.org/3/library/typing.html)
 
 ### Next.js & React
-- [Next.js Documentation](https://nextjs.org/docs)
-- [React Documentation](https://react.dev/)
-- [Tailwind CSS](https://tailwindcss.com/docs)
+- [Next.js 16 Documentation](https://nextjs.org/docs)
+- [React 19 Documentation](https://react.dev/)
+- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
+- [Tailwind CSS 4 Documentation](https://tailwindcss.com/docs)
 
 ### Tools
-- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+- [PostgreSQL 16 Documentation](https://www.postgresql.org/docs/16/)
 - [Docker Documentation](https://docs.docker.com/)
+- [Git Documentation](https://git-scm.com/doc)
 
 ---
 
