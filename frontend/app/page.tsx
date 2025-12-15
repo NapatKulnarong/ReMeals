@@ -6150,9 +6150,9 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState<DeliveryRecordApi["status"] | "all">("all");
-  const [staffFilter, setStaffFilter] = useState<string>("all"); // "all", "unassigned", or user_id
   const [areaFilter, setAreaFilter] = useState<string>("all");
   const [dateFilter, setDateFilter] = useState<"all" | "today" | "tomorrow" | "week">("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const statusLabel = (status: DeliveryRecordApi["status"]) => {
     switch (status) {
@@ -6283,10 +6283,6 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
     // Status filter
     if (statusFilter !== "all" && delivery.status !== statusFilter) return false;
 
-    // Staff filter
-    if (staffFilter === "unassigned" && delivery.user_id) return false;
-    if (staffFilter !== "all" && staffFilter !== "unassigned" && delivery.user_id !== staffFilter) return false;
-
     // Area filter
     if (areaFilter !== "all" && getDeliveryArea(delivery) !== areaFilter) return false;
 
@@ -6313,8 +6309,67 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
       }
     }
 
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      
+      // Search by delivery ID
+      if (delivery.delivery_id.toLowerCase().includes(query)) {
+        return true;
+      }
+
+      // Search by notes
+      if (delivery.notes && delivery.notes.toLowerCase().includes(query)) {
+        return true;
+      }
+
+      // For pickups (donation type)
+      if (delivery.delivery_type === "donation" && delivery.donation_id) {
+        const donation = donations[delivery.donation_id];
+        if (donation) {
+          // Search by restaurant name
+          if (donation.restaurant_name?.toLowerCase().includes(query)) {
+            return true;
+          }
+          // Search by restaurant address (pickup address)
+          if (donation.restaurant_address?.toLowerCase().includes(query)) {
+            return true;
+          }
+        }
+        // Search by warehouse address (dropoff address for pickups)
+        if (delivery.warehouse_id && warehouses[delivery.warehouse_id]) {
+          if (warehouses[delivery.warehouse_id].address?.toLowerCase().includes(query)) {
+            return true;
+          }
+        }
+      }
+
+      // For distributions (community type)
+      if (delivery.delivery_type === "distribution" && delivery.community_id) {
+        const community = communities[delivery.community_id];
+        if (community) {
+          // Search by community name
+          if (community.name?.toLowerCase().includes(query)) {
+            return true;
+          }
+          // Search by community address (dropoff address)
+          if (community.address?.toLowerCase().includes(query)) {
+            return true;
+          }
+        }
+        // Search by warehouse address (pickup address for distributions)
+        if (delivery.warehouse_id && warehouses[delivery.warehouse_id]) {
+          if (warehouses[delivery.warehouse_id].address?.toLowerCase().includes(query)) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    }
+
     return true;
-  }, [statusFilter, staffFilter, areaFilter, dateFilter, getDeliveryArea]);
+  }, [statusFilter, areaFilter, dateFilter, searchQuery, getDeliveryArea, donations, warehouses, communities]);
 
   const pickupTasks = useMemo(
     () =>
@@ -6592,6 +6647,52 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
 
       {/* Filters Section */}
       <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+        {/* Search Bar */}
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search by delivery ID, restaurant, community, address, or notes..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 pl-10 text-sm text-gray-700 placeholder-gray-400 outline-none focus:border-[#8B4C1F] focus:ring-2 focus:ring-[#8B4C1F]/20"
+          />
+          <svg
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              title="Clear search"
+            >
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
+
         {/* Status Filter Badges */}
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-600">Filter by Status</p>
@@ -6662,26 +6763,6 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
             </select>
           </div>
 
-          {/* Staff Filter */}
-          <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">
-              Staff Assignment
-            </label>
-            <select
-              value={staffFilter}
-              onChange={(e) => setStaffFilter(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-[#8B4C1F] focus:outline-none focus:ring-2 focus:ring-[#8B4C1F]/20"
-            >
-              <option value="all">All staff</option>
-              <option value="unassigned">Unassigned</option>
-              {staff.map((s) => (
-                <option key={s.user_id} value={s.user_id}>
-                  {s.name} ({s.assigned_area})
-                </option>
-              ))}
-            </select>
-          </div>
-
           {/* Area Filter */}
           <div>
             <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">
@@ -6703,7 +6784,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
         </div>
 
         {/* Active Filters Count */}
-        {(statusFilter !== "all" || staffFilter !== "all" || areaFilter !== "all" || dateFilter !== "all") && (
+        {(statusFilter !== "all" || areaFilter !== "all" || dateFilter !== "all" || searchQuery.trim()) && (
           <div className="flex items-center justify-between border-t border-gray-200 pt-3">
             <p className="text-xs text-gray-600">
               <span className="font-semibold">
@@ -6715,9 +6796,9 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
               type="button"
               onClick={() => {
                 setStatusFilter("all");
-                setStaffFilter("all");
                 setAreaFilter("all");
                 setDateFilter("all");
+                setSearchQuery("");
               }}
               className="text-xs font-semibold text-[#8B4C1F] hover:underline"
             >
