@@ -1941,6 +1941,446 @@ function HomePage({
   );
 }
 
+// Your Stats Section Component
+function YourStatsSection({
+  currentUser,
+  setShowAuthModal,
+  setAuthMode
+}: {
+  currentUser: LoggedUser | null;
+  setShowAuthModal: (show: boolean) => void;
+  setAuthMode: (mode: AuthMode) => void;
+}) {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [donations, setDonations] = useState<DonationRecord[]>([]);
+  const [foodItems, setFoodItems] = useState<FoodItemApiRecord[]>([]);
+
+  useEffect(() => {
+    if (!currentUser) {
+      setShowAuthModal(true);
+      setAuthMode("login");
+      return;
+    }
+
+    let ignore = false;
+    async function loadUserData() {
+      if (!currentUser) return;
+      setLoading(true);
+      setError(null);
+      try {
+        // Fetch all donations and filter by user
+        const donationData = await apiFetch<DonationApiRecord[]>("/donations/");
+        const userDonations = donationData.filter(
+          (d) => d.created_by_user_id === currentUser.userId
+        );
+
+        // Fetch food items for user's donations
+        const donationsWithItems = await Promise.all(
+          userDonations.map(async (donation) => {
+            const items = await apiFetch<FoodItemApiRecord[]>(
+              `/fooditems/?donation=${donation.donation_id}`
+            );
+            return { donation, items };
+          })
+        );
+
+        const mappedDonations: DonationRecord[] = donationsWithItems.map(
+          ({ donation, items }) => ({
+            id: donation.donation_id,
+            restaurantId: donation.restaurant,
+            restaurantName: donation.restaurant_name ?? "",
+            restaurantAddress: donation.restaurant_address ?? "",
+            branch: donation.restaurant_branch ?? "",
+            note: "",
+            items: items.map((item) => ({
+              id: item.food_id,
+              name: item.name,
+              quantity: item.quantity.toString(),
+              unit: item.unit,
+              expiredDate: item.expire_date,
+            })),
+            createdAt: donation.donated_at,
+            ownerUserId: donation.created_by_user_id ?? null,
+          })
+        );
+
+        if (!ignore) {
+          setDonations(mappedDonations);
+          setFoodItems(
+            donationsWithItems.flatMap(({ items }) => items)
+          );
+        }
+      } catch (err) {
+        if (!ignore) {
+          setError(
+            err instanceof Error ? err.message : "Unable to load your stats"
+          );
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadUserData();
+    return () => {
+      ignore = true;
+    };
+  }, [currentUser, setShowAuthModal, setAuthMode]);
+
+  // Calculate statistics
+  const stats = useMemo(() => {
+    const totalDonations = donations.length;
+    const totalItems = foodItems.length;
+    const totalQuantity = foodItems.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    );
+
+    // Group by month for time series
+    const donationsByMonth = new Map<string, number>();
+
+    donations.forEach((donation) => {
+      const date = new Date(donation.createdAt);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      donationsByMonth.set(
+        monthKey,
+        (donationsByMonth.get(monthKey) || 0) + 1
+      );
+    });
+
+    // Get all unique months and sort them
+    const allMonths = Array.from(donationsByMonth.keys()).sort();
+
+    const timeSeriesData = allMonths.map((monthKey) => {
+      const [year, month] = monthKey.split("-");
+      return {
+        monthKey,
+        month: new Date(parseInt(year), parseInt(month) - 1),
+        donations: donationsByMonth.get(monthKey) || 0,
+      };
+    });
+
+    return {
+      totalDonations,
+      totalItems,
+      totalQuantity,
+      timeSeriesData,
+    };
+  }, [donations, foodItems]);
+
+  if (!currentUser) {
+    return (
+      <div className="rounded-xl bg-white p-10 shadow text-center">
+        <p className="text-gray-600 mb-4">
+          Please log in to view your statistics.
+        </p>
+        <button
+          onClick={() => {
+            setAuthMode("login");
+            setShowAuthModal(true);
+          }}
+          className="rounded-lg bg-[#d48a68] px-6 py-2 text-sm font-semibold text-white transition hover:bg-[#c47958]"
+        >
+          Log in
+        </button>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="rounded-xl bg-white p-10 shadow text-center">
+        <p className="text-gray-600">Loading your statistics...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-xl bg-white p-10 shadow text-center">
+        <p className="text-red-600">{error}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-xl bg-white p-6 shadow">
+        <h2 className="text-2xl font-bold text-[#4B2415] mb-6">
+          Donation Stats
+        </h2>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          <div className="rounded-lg bg-gradient-to-br from-[#F1CBB5] to-[#E9B79C] p-5 shadow-sm">
+            <div className="text-sm font-medium text-[#70402B] mb-1">
+              Total Donations
+            </div>
+            <div className="text-3xl font-bold text-[#4B2415]">
+              {stats.totalDonations}
+            </div>
+          </div>
+          <div className="rounded-lg bg-gradient-to-br from-[#E9B79C] to-[#F1CBB5] p-5 shadow-sm">
+            <div className="text-sm font-medium text-[#70402B] mb-1">
+              Food Items
+            </div>
+            <div className="text-3xl font-bold text-[#4B2415]">
+              {stats.totalItems}
+            </div>
+          </div>
+          <div className="rounded-lg bg-gradient-to-br from-[#F1CBB5] to-[#E9B79C] p-5 shadow-sm">
+            <div className="text-sm font-medium text-[#70402B] mb-1">
+              Total Quantity
+            </div>
+            <div className="text-3xl font-bold text-[#4B2415]">
+              {stats.totalQuantity}
+            </div>
+          </div>
+        </div>
+
+        {/* Time Series Chart */}
+        {stats.timeSeriesData.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold text-[#4B2415] mb-4">
+              Donations Over Time
+            </h3>
+            <DonationTimeSeriesChart data={stats.timeSeriesData} />
+          </div>
+        )}
+
+        {/* Recent Activity */}
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold text-[#4B2415] mb-4">
+            Recent Donations
+          </h3>
+          <div className="space-y-3">
+            {donations.slice(0, 5).map((donation) => (
+              <div
+                key={donation.id}
+                className="rounded-lg border border-[#E6B9A2] bg-white p-4"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <div className="font-semibold text-[#4B2415]">
+                    {donation.restaurantName}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {new Date(donation.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
+                <div className="text-sm text-gray-600">
+                  {donation.items.length} item(s)
+                </div>
+              </div>
+            ))}
+            {donations.length === 0 && (
+              <p className="text-gray-500 text-sm">No donations yet</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Time Series Chart Component for Donations
+function DonationTimeSeriesChart({
+  data,
+}: {
+  data: Array<{
+    monthKey: string;
+    month: Date;
+    donations: number;
+  }>;
+}) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [tooltip, setTooltip] = useState<{
+    x: number;
+    y: number;
+    month: string;
+    donations: number;
+  } | null>(null);
+
+  const maxValue = Math.max(...data.map((d) => d.donations), 1);
+  const chartHeight = 280;
+  const chartPadding = { top: 20, right: 20, bottom: 40, left: 60 };
+  const barSpacing = 8;
+  const availableWidth = 800;
+  const barWidth = Math.max(
+    30,
+    Math.min(
+      60,
+      (availableWidth -
+        chartPadding.left -
+        chartPadding.right -
+        (data.length - 1) * barSpacing) /
+        data.length
+    )
+  );
+  const chartWidth =
+    data.length * (barWidth + barSpacing) +
+    chartPadding.left +
+    chartPadding.right;
+
+  const formatMonthLabel = (date: Date) => {
+    return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+  };
+
+  const handleBarHover = (
+    e: React.MouseEvent<SVGRectElement>,
+    index: number,
+    month: string,
+    donations: number
+  ) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setHoveredIndex(index);
+    setTooltip({
+      x: rect.left + rect.width / 2,
+      y: rect.top - 15,
+      month,
+      donations,
+    });
+  };
+
+  const handleBarLeave = () => {
+    setHoveredIndex(null);
+    setTooltip(null);
+  };
+
+  return (
+    <div className="relative">
+      {tooltip && (
+        <div
+          className="fixed z-50 rounded-lg bg-white px-3 py-2 text-xs shadow-lg pointer-events-none border border-gray-200"
+          style={{
+            left: `${tooltip.x}px`,
+            top: `${tooltip.y}px`,
+            transform: "translate(-50%, -100%)",
+            marginTop: "-8px",
+          }}
+        >
+          <div className="font-semibold mb-1 text-[#d48a68] text-sm">
+            {tooltip.month}
+          </div>
+          <div className="text-[#d48a68] opacity-75 text-xs">
+            {tooltip.donations} donation{tooltip.donations !== 1 ? "s" : ""}
+          </div>
+        </div>
+      )}
+
+      <div className="overflow-x-auto">
+        <svg
+          viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+          className="w-full h-[280px]"
+          preserveAspectRatio="none"
+        >
+          <defs>
+            <linearGradient id="donationGradient" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stopColor="#d48a68" stopOpacity="1" />
+              <stop offset="100%" stopColor="#B86A49" stopOpacity="1" />
+            </linearGradient>
+          </defs>
+
+          {/* Y-axis grid lines */}
+          {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+            const y =
+              chartHeight -
+              chartPadding.bottom -
+              (chartHeight - chartPadding.top - chartPadding.bottom) * ratio;
+            const value = Math.round(maxValue * ratio);
+            return (
+              <g key={ratio}>
+                <line
+                  x1={chartPadding.left}
+                  y1={y}
+                  x2={chartWidth - chartPadding.right}
+                  y2={y}
+                  stroke="#E5E7EB"
+                  strokeWidth="0.5"
+                  strokeDasharray="2,2"
+                />
+                <text
+                  x={chartPadding.left - 10}
+                  y={y + 4}
+                  fontSize="12"
+                  fill="#6B7280"
+                  textAnchor="end"
+                >
+                  {value}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Bars */}
+          {data.map((item, index) => {
+            const donationBarHeight =
+              (item.donations / maxValue) *
+              (chartHeight - chartPadding.top - chartPadding.bottom);
+            const x =
+              chartPadding.left + index * (barWidth + barSpacing);
+            const donationY = chartHeight - chartPadding.bottom - donationBarHeight;
+            const isHovered = hoveredIndex === index;
+
+            return (
+              <g key={item.monthKey}>
+                {/* Donation bar */}
+                <rect
+                  x={x}
+                  y={donationY}
+                  width={barWidth}
+                  height={donationBarHeight}
+                  fill="url(#donationGradient)"
+                  rx="4"
+                  ry="4"
+                  className="transition-all duration-200 cursor-pointer"
+                  style={{
+                    opacity: isHovered ? 1 : 0.9,
+                  }}
+                  onMouseEnter={(e) =>
+                    handleBarHover(
+                      e,
+                      index,
+                      formatMonthLabel(item.month),
+                      item.donations
+                    )
+                  }
+                  onMouseLeave={handleBarLeave}
+                />
+                {/* Month label */}
+                {index % Math.ceil(data.length / 6) === 0 && (
+                  <text
+                    x={x + barWidth / 2}
+                    y={chartHeight - chartPadding.bottom + 20}
+                    fontSize="10"
+                    fill="#6B7280"
+                    textAnchor="middle"
+                  >
+                    {formatMonthLabel(item.month)}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+
+          {/* X-axis line */}
+          <line
+            x1={chartPadding.left}
+            y1={chartHeight - chartPadding.bottom}
+            x2={chartWidth - chartPadding.right}
+            y2={chartHeight - chartPadding.bottom}
+            stroke="#D1D5DB"
+            strokeWidth="1"
+          />
+        </svg>
+      </div>
+
+    </div>
+  );
+}
+
 // Content of each tab
 function TabContent({
   tab,
@@ -1995,6 +2435,9 @@ function TabContent({
   }
   if (tab === 7) {
     return <StatusSection currentUser={currentUser} setShowAuthModal={setShowAuthModal} setAuthMode={setAuthMode} />;
+  }
+  if (tab === 8) {
+    return <YourStatsSection currentUser={currentUser} setShowAuthModal={setShowAuthModal} setAuthMode={setAuthMode} />;
   }
 
   return (
@@ -8313,6 +8756,7 @@ export default function Home() {
         { id: 1, label: "Donate", icon: <HeartIcon className="w-5 h-5" aria-hidden="true" /> },
         { id: 2, label: "Get meals", icon: <ShoppingBagIcon className="w-5 h-5" aria-hidden="true" /> },
         { id: 7, label: "Status", icon: <ChartBarIcon className="w-5 h-5" aria-hidden="true" /> },
+        { id: 8, label: "Donation Stats", icon: <ChartBarIcon className="w-5 h-5" aria-hidden="true" /> },
       ];
 
   const normalizedActiveTab = useMemo(() => {
@@ -8323,6 +8767,13 @@ export default function Home() {
     // Status tab (7) is accessible even when not logged in
     if (activeTab === 7) {
       return 7;
+    }
+    // Your stats tab (8) requires login
+    if (activeTab === 8) {
+      if (!currentUser) {
+        return 0; // Redirect to home if not logged in
+      }
+      return 8;
     }
     if (!currentUser && activeTab > 2) {
       return 0; // Redirect to home if not logged in

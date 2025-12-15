@@ -74,6 +74,14 @@ const renderSidebarIcon = (id: number, className?: string) => {
       </svg>
     );
   }
+  if (id === 8) {
+    // Your stats icon - ChartBarIcon variant
+    return (
+      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <path d="M9 7H7v10h2V7zm4 0h-2v10h2V7zm4 0h-2v10h2V7zm2.5-4H4.5C3.67 3 3 3.67 3 4.5v15C3 20.33 3.67 21 4.5 21h15c.83 0 1.5-.67 1.5-1.5v-15C21 3.67 20.33 3 19.5 3z" />
+      </svg>
+    );
+  }
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
       <circle cx="12" cy="12" r="4" />
