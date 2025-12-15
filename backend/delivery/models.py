@@ -1,6 +1,7 @@
 from datetime import datetime, time, timedelta
 
 from django.db import models
+from django.utils import timezone as django_timezone
 from warehouse.models import Warehouse
 from community.models import Community
 from donation.models import Donation
@@ -132,16 +133,21 @@ class Delivery(models.Model):
             if hasattr(self, 'pickup_time') and self.pickup_time:
                 self.dropoff_time = self.pickup_time + self.dropoff_time
             else:
-                base_time = datetime.now()
+                base_time = django_timezone.now()
                 self.dropoff_time = base_time + self.dropoff_time
         # Convert time to datetime if needed (for backward compatibility)
         elif isinstance(self.dropoff_time, time):
             # If pickup_time exists, use its date; otherwise use today
             if hasattr(self, 'pickup_time') and self.pickup_time:
-                base_date = self.pickup_time.date() if isinstance(self.pickup_time, datetime) else datetime.now().date()
+                if isinstance(self.pickup_time, datetime):
+                    base_date = self.pickup_time.date()
+                else:
+                    base_date = django_timezone.now().date()
             else:
-                base_date = datetime.now().date()
-            self.dropoff_time = datetime.combine(base_date, self.dropoff_time)
+                base_date = django_timezone.now().date()
+            combined = datetime.combine(base_date, self.dropoff_time)
+            # Make timezone-aware
+            self.dropoff_time = django_timezone.make_aware(combined)
         
         super().save(*args, **kwargs)
         
