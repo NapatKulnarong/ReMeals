@@ -1966,8 +1966,8 @@ function HomePage({
         {/* Top Restaurants and CO₂ Chart Row */}
         <div className="mt-6 grid gap-6 lg:grid-cols-5">
           {/* Top Restaurants Leaderboard - First visualization */}
-          <div className="lg:col-span-2 rounded-2xl border border-[#F3C7A0] bg-[#FFF8F0] p-5 shadow-sm animate-fade-in">
-            <div className="mb-3 flex items-center justify-between animate-fade-in-up">
+          <div className="lg:col-span-2 rounded-2xl border border-[#F3C7A0] bg-[#FFF8F0] p-5 shadow-sm animate-fade-in h-[450px] flex flex-col">
+            <div className="mb-3 flex items-center justify-between animate-fade-in-up flex-shrink-0">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Impact Leaders</h3>
                 <p className="text-xs text-gray-500 mt-0.5">Top performing restaurants</p>
@@ -1976,13 +1976,17 @@ function HomePage({
                 Top 5
               </span>
             </div>
-            <div className="min-h-[200px]">
+            <div className="flex-1 min-h-0 overflow-y-auto">
               {impactLoading || leaderboardLoading ? (
-                <p className="text-sm text-gray-600 py-8 animate-fade-in">Loading leaderboard...</p>
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-sm text-gray-600 animate-fade-in">Loading leaderboard...</p>
+                </div>
               ) : restaurantLeaderboard.length === 0 ? (
-                <p className="text-sm text-gray-600 py-8 text-center animate-fade-in">No restaurant data available yet.</p>
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-sm text-gray-600 text-center animate-fade-in">No restaurant data available yet.</p>
+                </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-2 w-full">
                   {restaurantLeaderboard.map((restaurant, index) => (
                     <div
                       key={restaurant.restaurantId}
