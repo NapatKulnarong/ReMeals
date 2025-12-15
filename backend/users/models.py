@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
 from restaurants.models import Restaurant
 
-
+#User
 class User(models.Model):
     user_id = models.CharField(max_length=10, primary_key=True)
     username = models.CharField(max_length=20, unique=True)
@@ -28,14 +28,14 @@ class User(models.Model):
     def __str__(self):
         return f"{self.fname} {self.lname}"
 
-
+#Admin
 class Admin(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='admin_roles')
 
     def __str__(self):
         return f"Admin {self.user.user_id}"
 
-
+#Donor
 class Donor(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='donor_roles')
     restaurant_id = models.ForeignKey(
@@ -62,7 +62,7 @@ class Donor(models.Model):
         if updated_fields:
             self.user.save(update_fields=updated_fields)
 
-
+#DeliveryStaff
 class DeliveryStaff(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='delivery_roles')
     assigned_area = models.CharField(max_length=200)
@@ -71,7 +71,7 @@ class DeliveryStaff(models.Model):
     def __str__(self):
         return f"Staff {self.user.user_id}"
 
-
+#Recipient
 class Recipient(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recipient_roles')
     address = models.CharField(max_length=300)
