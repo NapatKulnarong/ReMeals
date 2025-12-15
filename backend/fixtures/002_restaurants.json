@@ -328,5 +328,115 @@
       "is_chain": true,
       "chain": "CHA0000013"
     }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000031",
+    "fields": {
+      "name": "Swensen's",
+      "branch_name": "Central World",
+      "address": "999/9 Rama I Rd, Pathum Wan, Bangkok 10330",
+      "is_chain": true,
+      "chain": "CHA0000014"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000032",
+    "fields": {
+      "name": "Swensen's",
+      "branch_name": "Siam Paragon",
+      "address": "991 Rama I Rd, Pathum Wan, Bangkok 10330",
+      "is_chain": true,
+      "chain": "CHA0000014"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000033",
+    "fields": {
+      "name": "Yoshinoya",
+      "branch_name": "Terminal 21 Asok",
+      "address": "88 Sukhumvit Rd, Khlong Toei Nuea, Watthana, Bangkok 10110",
+      "is_chain": true,
+      "chain": "CHA0000015"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000034",
+    "fields": {
+      "name": "Yoshinoya",
+      "branch_name": "Central Rama 9",
+      "address": "9/9 Rama IX Rd, Huai Khwang, Bangkok 10310",
+      "is_chain": true,
+      "chain": "CHA0000015"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000035",
+    "fields": {
+      "name": "Oishi",
+      "branch_name": "Central Pinklao",
+      "address": "7/222 Borommaratchachonnani Rd, Arun Amarin, Bangkok 10700",
+      "is_chain": true,
+      "chain": "CHA0000016"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000036",
+    "fields": {
+      "name": "Oishi",
+      "branch_name": "Central WestGate",
+      "address": "199/1 Kanchanaphisek Rd, Sao Thong Hin, Bang Yai, Nonthaburi 11140",
+      "is_chain": true,
+      "chain": "CHA0000016"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000037",
+    "fields": {
+      "name": "Fuji",
+      "branch_name": "MBK Center",
+      "address": "444 Phayathai Rd, Pathum Wan, Bangkok 10330",
+      "is_chain": true,
+      "chain": "CHA0000017"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000038",
+    "fields": {
+      "name": "Fuji",
+      "branch_name": "Central Bangna",
+      "address": "587 Bangna-Trad Rd, Bangna, Bangkok 10260",
+      "is_chain": true,
+      "chain": "CHA0000017"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000039",
+    "fields": {
+      "name": "Shabushi",
+      "branch_name": "Seacon Square",
+      "address": "55 Srinakarin Rd, Nong Bon, Prawet, Bangkok 10250",
+      "is_chain": true,
+      "chain": "CHA0000018"
+    }
+  },
+  {
+    "model": "restaurants.restaurant",
+    "pk": "RES0000040",
+    "fields": {
+      "name": "Shabushi",
+      "branch_name": "Fashion Island",
+      "address": "587 Ram Inthra Rd, Khan Na Yao, Bangkok 10230",
+      "is_chain": true,
+      "chain": "CHA0000018"
+    }
   }
 ]

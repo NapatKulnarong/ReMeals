@@ -328,5 +328,115 @@
       "population": 460,
       "warehouse_id": "WAH0000001"
     }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000031",
+    "fields": {
+      "name": "Ratchathewi Community Support",
+      "address": "Ratchathewi, Bangkok 10400",
+      "received_time": "2025-01-25T09:00:00Z",
+      "population": 380,
+      "warehouse_id": "WAH0000013"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000032",
+    "fields": {
+      "name": "Phra Khanong Neighborhood Network",
+      "address": "Phra Khanong, Bangkok 10110",
+      "received_time": "2025-01-25T10:00:00Z",
+      "population": 420,
+      "warehouse_id": "WAH0000014"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000033",
+    "fields": {
+      "name": "Yan Nawa Riverside Community",
+      "address": "Yan Nawa, Bangkok 10120",
+      "received_time": "2025-01-25T11:00:00Z",
+      "population": 350,
+      "warehouse_id": "WAH0000015"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000034",
+    "fields": {
+      "name": "Sathon Community Center",
+      "address": "Sathon, Bangkok 10120",
+      "received_time": "2025-01-26T09:00:00Z",
+      "population": 480,
+      "warehouse_id": "WAH0000015"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000035",
+    "fields": {
+      "name": "Prawet Community Alliance",
+      "address": "Prawet, Bangkok 10250",
+      "received_time": "2025-01-26T10:00:00Z",
+      "population": 540,
+      "warehouse_id": "WAH0000002"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000036",
+    "fields": {
+      "name": "Suan Luang Community Hub",
+      "address": "Suan Luang, Bangkok 10250",
+      "received_time": "2025-01-26T11:00:00Z",
+      "population": 410,
+      "warehouse_id": "WAH0000002"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000037",
+    "fields": {
+      "name": "Bang Sue Community Network",
+      "address": "Bang Sue, Bangkok 10800",
+      "received_time": "2025-01-27T09:00:00Z",
+      "population": 520,
+      "warehouse_id": "WAH0000003"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000038",
+    "fields": {
+      "name": "Dusit Community Welfare",
+      "address": "Dusit, Bangkok 10300",
+      "received_time": "2025-01-27T10:00:00Z",
+      "population": 390,
+      "warehouse_id": "WAH0000003"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000039",
+    "fields": {
+      "name": "Phaya Thai Community Center",
+      "address": "Phaya Thai, Bangkok 10400",
+      "received_time": "2025-01-27T11:00:00Z",
+      "population": 450,
+      "warehouse_id": "WAH0000013"
+    }
+  },
+  {
+    "model": "community.community",
+    "pk": "COM0000040",
+    "fields": {
+      "name": "Wang Thonglang Community Support",
+      "address": "Wang Thonglang, Bangkok 10310",
+      "received_time": "2025-01-28T09:00:00Z",
+      "population": 470,
+      "warehouse_id": "WAH0000006"
+    }
   }
 ]

@@ -3,9 +3,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000001",
     "fields": {
-      "meals_saved": 130.0,
-      "weight_saved_kg": 55.0,
-      "co2_reduced_kg": 30.2,
+      "meals_saved": 150.0,
+      "weight_saved_kg": 60.0,
+      "co2_reduced_kg": 33.0,
       "impact_date": "2025-01-05",
       "food": "FOO0000001"
     }
@@ -14,9 +14,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000002",
     "fields": {
-      "meals_saved": 85.0,
-      "weight_saved_kg": 33.0,
-      "co2_reduced_kg": 18.0,
+      "meals_saved": 145.0,
+      "weight_saved_kg": 58.0,
+      "co2_reduced_kg": 31.9,
       "impact_date": "2025-01-06",
       "food": "FOO0000002"
     }
@@ -25,9 +25,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000003",
     "fields": {
-      "meals_saved": 90.0,
-      "weight_saved_kg": 37.0,
-      "co2_reduced_kg": 20.5,
+      "meals_saved": 150.0,
+      "weight_saved_kg": 60.0,
+      "co2_reduced_kg": 33.0,
       "impact_date": "2025-01-07",
       "food": "FOO0000003"
     }
@@ -36,9 +36,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000004",
     "fields": {
-      "meals_saved": 110.0,
-      "weight_saved_kg": 34.0,
-      "co2_reduced_kg": 18.7,
+      "meals_saved": 155.0,
+      "weight_saved_kg": 62.0,
+      "co2_reduced_kg": 34.1,
       "impact_date": "2025-01-08",
       "food": "FOO0000004"
     }
@@ -47,9 +47,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000005",
     "fields": {
-      "meals_saved": 75.0,
-      "weight_saved_kg": 32.0,
-      "co2_reduced_kg": 17.3,
+      "meals_saved": 145.0,
+      "weight_saved_kg": 58.0,
+      "co2_reduced_kg": 31.9,
       "impact_date": "2025-01-09",
       "food": "FOO0000005"
     }
@@ -58,9 +58,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000006",
     "fields": {
-      "meals_saved": 60.0,
-      "weight_saved_kg": 28.0,
-      "co2_reduced_kg": 15.1,
+      "meals_saved": 140.0,
+      "weight_saved_kg": 56.0,
+      "co2_reduced_kg": 30.8,
       "impact_date": "2025-01-10",
       "food": "FOO0000006"
     }
@@ -69,9 +69,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000007",
     "fields": {
-      "meals_saved": 90.0,
-      "weight_saved_kg": 34.0,
-      "co2_reduced_kg": 18.2,
+      "meals_saved": 150.0,
+      "weight_saved_kg": 60.0,
+      "co2_reduced_kg": 33.0,
       "impact_date": "2025-01-11",
       "food": "FOO0000007"
     }
@@ -80,9 +80,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000008",
     "fields": {
-      "meals_saved": 70.0,
-      "weight_saved_kg": 30.0,
-      "co2_reduced_kg": 16.1,
+      "meals_saved": 145.0,
+      "weight_saved_kg": 58.0,
+      "co2_reduced_kg": 31.9,
       "impact_date": "2025-01-12",
       "food": "FOO0000008"
     }
@@ -91,9 +91,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000009",
     "fields": {
-      "meals_saved": 95.0,
-      "weight_saved_kg": 36.0,
-      "co2_reduced_kg": 19.3,
+      "meals_saved": 150.0,
+      "weight_saved_kg": 60.0,
+      "co2_reduced_kg": 33.0,
       "impact_date": "2025-01-13",
       "food": "FOO0000009"
     }
@@ -102,9 +102,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000010",
     "fields": {
-      "meals_saved": 60.0,
-      "weight_saved_kg": 24.0,
-      "co2_reduced_kg": 12.8,
+      "meals_saved": 140.0,
+      "weight_saved_kg": 56.0,
+      "co2_reduced_kg": 30.8,
       "impact_date": "2025-01-14",
       "food": "FOO0000010"
     }
@@ -113,9 +113,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000011",
     "fields": {
-      "meals_saved": 105.0,
-      "weight_saved_kg": 44.0,
-      "co2_reduced_kg": 23.0,
+      "meals_saved": 155.0,
+      "weight_saved_kg": 62.0,
+      "co2_reduced_kg": 34.1,
       "impact_date": "2025-01-15",
       "food": "FOO0000011"
     }
@@ -124,9 +124,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000012",
     "fields": {
-      "meals_saved": 72.0,
-      "weight_saved_kg": 26.0,
-      "co2_reduced_kg": 14.0,
+      "meals_saved": 145.0,
+      "weight_saved_kg": 58.0,
+      "co2_reduced_kg": 31.9,
       "impact_date": "2025-01-16",
       "food": "FOO0000012"
     }
@@ -135,9 +135,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000013",
     "fields": {
-      "meals_saved": 96.0,
-      "weight_saved_kg": 40.0,
-      "co2_reduced_kg": 21.5,
+      "meals_saved": 150.0,
+      "weight_saved_kg": 60.0,
+      "co2_reduced_kg": 33.0,
       "impact_date": "2025-01-17",
       "food": "FOO0000013"
     }
@@ -146,9 +146,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000014",
     "fields": {
-      "meals_saved": 88.0,
-      "weight_saved_kg": 35.0,
-      "co2_reduced_kg": 18.8,
+      "meals_saved": 145.0,
+      "weight_saved_kg": 58.0,
+      "co2_reduced_kg": 31.9,
       "impact_date": "2025-01-18",
       "food": "FOO0000014"
     }
@@ -313,7 +313,7 @@
     "fields": {
       "meals_saved": 100.0,
       "weight_saved_kg": 40.0,
-      "co2_reduced_kg": 20.5,
+      "co2_reduced_kg": 22.0,
       "impact_date": "2025-02-02",
       "food": "FOO0000029"
     }
@@ -322,9 +322,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000030",
     "fields": {
-      "meals_saved": 65.0,
-      "weight_saved_kg": 24.0,
-      "co2_reduced_kg": 12.1,
+      "meals_saved": 100.0,
+      "weight_saved_kg": 40.0,
+      "co2_reduced_kg": 22.0,
       "impact_date": "2025-02-03",
       "food": "FOO0000030"
     }
@@ -333,9 +333,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000031",
     "fields": {
-      "meals_saved": 80.0,
-      "weight_saved_kg": 30.0,
-      "co2_reduced_kg": 15.8,
+      "meals_saved": 100.0,
+      "weight_saved_kg": 40.0,
+      "co2_reduced_kg": 22.0,
       "impact_date": "2025-02-04",
       "food": "FOO0000031"
     }
@@ -344,9 +344,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000032",
     "fields": {
-      "meals_saved": 72.0,
-      "weight_saved_kg": 28.0,
-      "co2_reduced_kg": 14.5,
+      "meals_saved": 100.0,
+      "weight_saved_kg": 40.0,
+      "co2_reduced_kg": 22.0,
       "impact_date": "2025-02-05",
       "food": "FOO0000032"
     }
@@ -355,9 +355,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000033",
     "fields": {
-      "meals_saved": 90.0,
-      "weight_saved_kg": 34.0,
-      "co2_reduced_kg": 17.2,
+      "meals_saved": 100.0,
+      "weight_saved_kg": 40.0,
+      "co2_reduced_kg": 22.0,
       "impact_date": "2025-02-06",
       "food": "FOO0000033"
     }
@@ -366,9 +366,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000034",
     "fields": {
-      "meals_saved": 76.0,
-      "weight_saved_kg": 29.0,
-      "co2_reduced_kg": 14.8,
+      "meals_saved": 100.0,
+      "weight_saved_kg": 40.0,
+      "co2_reduced_kg": 22.0,
       "impact_date": "2025-02-07",
       "food": "FOO0000034"
     }
@@ -377,9 +377,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000035",
     "fields": {
-      "meals_saved": 84.0,
-      "weight_saved_kg": 32.0,
-      "co2_reduced_kg": 16.5,
+      "meals_saved": 100.0,
+      "weight_saved_kg": 40.0,
+      "co2_reduced_kg": 22.0,
       "impact_date": "2025-02-08",
       "food": "FOO0000035"
     }
@@ -388,9 +388,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000036",
     "fields": {
-      "meals_saved": 92.0,
-      "weight_saved_kg": 36.0,
-      "co2_reduced_kg": 18.9,
+      "meals_saved": 200.0,
+      "weight_saved_kg": 80.0,
+      "co2_reduced_kg": 44.0,
       "impact_date": "2025-02-09",
       "food": "FOO0000036"
     }
@@ -399,9 +399,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000037",
     "fields": {
-      "meals_saved": 75.0,
-      "weight_saved_kg": 31.0,
-      "co2_reduced_kg": 16.0,
+      "meals_saved": 200.0,
+      "weight_saved_kg": 80.0,
+      "co2_reduced_kg": 44.0,
       "impact_date": "2025-02-10",
       "food": "FOO0000037"
     }
@@ -410,9 +410,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000038",
     "fields": {
-      "meals_saved": 98.0,
-      "weight_saved_kg": 39.0,
-      "co2_reduced_kg": 20.0,
+      "meals_saved": 200.0,
+      "weight_saved_kg": 80.0,
+      "co2_reduced_kg": 44.0,
       "impact_date": "2025-02-11",
       "food": "FOO0000038"
     }
@@ -421,9 +421,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000039",
     "fields": {
-      "meals_saved": 88.0,
-      "weight_saved_kg": 35.0,
-      "co2_reduced_kg": 18.0,
+      "meals_saved": 200.0,
+      "weight_saved_kg": 80.0,
+      "co2_reduced_kg": 44.0,
       "impact_date": "2025-02-12",
       "food": "FOO0000039"
     }
@@ -432,9 +432,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000040",
     "fields": {
-      "meals_saved": 105.0,
-      "weight_saved_kg": 42.0,
-      "co2_reduced_kg": 22.3,
+      "meals_saved": 200.0,
+      "weight_saved_kg": 80.0,
+      "co2_reduced_kg": 44.0,
       "impact_date": "2025-02-13",
       "food": "FOO0000040"
     }
@@ -443,9 +443,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000041",
     "fields": {
-      "meals_saved": 96.0,
-      "weight_saved_kg": 38.0,
-      "co2_reduced_kg": 20.4,
+      "meals_saved": 200.0,
+      "weight_saved_kg": 80.0,
+      "co2_reduced_kg": 44.0,
       "impact_date": "2025-02-14",
       "food": "FOO0000041"
     }
@@ -454,9 +454,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000042",
     "fields": {
-      "meals_saved": 60.0,
-      "weight_saved_kg": 25.0,
-      "co2_reduced_kg": 12.7,
+      "meals_saved": 200.0,
+      "weight_saved_kg": 80.0,
+      "co2_reduced_kg": 44.0,
       "impact_date": "2025-02-15",
       "food": "FOO0000042"
     }
@@ -465,9 +465,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000043",
     "fields": {
-      "meals_saved": 82.0,
-      "weight_saved_kg": 33.0,
-      "co2_reduced_kg": 16.9,
+      "meals_saved": 210.0,
+      "weight_saved_kg": 84.0,
+      "co2_reduced_kg": 46.2,
       "impact_date": "2025-02-16",
       "food": "FOO0000043"
     }
@@ -476,9 +476,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000044",
     "fields": {
-      "meals_saved": 68.0,
-      "weight_saved_kg": 27.0,
-      "co2_reduced_kg": 13.5,
+      "meals_saved": 195.0,
+      "weight_saved_kg": 78.0,
+      "co2_reduced_kg": 42.9,
       "impact_date": "2025-02-17",
       "food": "FOO0000044"
     }
@@ -487,9 +487,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000045",
     "fields": {
-      "meals_saved": 118.0,
-      "weight_saved_kg": 46.0,
-      "co2_reduced_kg": 24.1,
+      "meals_saved": 240.0,
+      "weight_saved_kg": 96.0,
+      "co2_reduced_kg": 52.8,
       "impact_date": "2025-02-18",
       "food": "FOO0000045"
     }
@@ -498,9 +498,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000046",
     "fields": {
-      "meals_saved": 92.0,
-      "weight_saved_kg": 38.0,
-      "co2_reduced_kg": 19.4,
+      "meals_saved": 225.0,
+      "weight_saved_kg": 90.0,
+      "co2_reduced_kg": 49.5,
       "impact_date": "2025-02-19",
       "food": "FOO0000046"
     }
@@ -509,9 +509,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000047",
     "fields": {
-      "meals_saved": 85.0,
-      "weight_saved_kg": 30.0,
-      "co2_reduced_kg": 15.3,
+      "meals_saved": 220.0,
+      "weight_saved_kg": 88.0,
+      "co2_reduced_kg": 48.4,
       "impact_date": "2025-02-20",
       "food": "FOO0000047"
     }
@@ -520,9 +520,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000048",
     "fields": {
-      "meals_saved": 130.0,
-      "weight_saved_kg": 52.0,
-      "co2_reduced_kg": 27.0,
+      "meals_saved": 250.0,
+      "weight_saved_kg": 100.0,
+      "co2_reduced_kg": 55.0,
       "impact_date": "2025-02-21",
       "food": "FOO0000048"
     }
@@ -531,9 +531,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000049",
     "fields": {
-      "meals_saved": 96.0,
-      "weight_saved_kg": 40.0,
-      "co2_reduced_kg": 20.5,
+      "meals_saved": 230.0,
+      "weight_saved_kg": 92.0,
+      "co2_reduced_kg": 50.6,
       "impact_date": "2025-02-22",
       "food": "FOO0000049"
     }
@@ -542,9 +542,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000050",
     "fields": {
-      "meals_saved": 88.0,
-      "weight_saved_kg": 34.0,
-      "co2_reduced_kg": 17.6,
+      "meals_saved": 225.0,
+      "weight_saved_kg": 90.0,
+      "co2_reduced_kg": 49.5,
       "impact_date": "2025-02-23",
       "food": "FOO0000050"
     }
@@ -553,9 +553,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000051",
     "fields": {
-      "meals_saved": 90.0,
-      "weight_saved_kg": 37.0,
-      "co2_reduced_kg": 19.0,
+      "meals_saved": 230.0,
+      "weight_saved_kg": 92.0,
+      "co2_reduced_kg": 50.6,
       "impact_date": "2025-02-24",
       "food": "FOO0000051"
     }
@@ -564,9 +564,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000052",
     "fields": {
-      "meals_saved": 64.0,
-      "weight_saved_kg": 25.0,
-      "co2_reduced_kg": 12.7,
+      "meals_saved": 200.0,
+      "weight_saved_kg": 80.0,
+      "co2_reduced_kg": 44.0,
       "impact_date": "2025-02-25",
       "food": "FOO0000052"
     }
@@ -575,9 +575,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000053",
     "fields": {
-      "meals_saved": 82.0,
-      "weight_saved_kg": 31.0,
-      "co2_reduced_kg": 16.0,
+      "meals_saved": 215.0,
+      "weight_saved_kg": 86.0,
+      "co2_reduced_kg": 47.3,
       "impact_date": "2025-02-26",
       "food": "FOO0000053"
     }
@@ -586,9 +586,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000054",
     "fields": {
-      "meals_saved": 115.0,
-      "weight_saved_kg": 44.0,
-      "co2_reduced_kg": 22.7,
+      "meals_saved": 245.0,
+      "weight_saved_kg": 98.0,
+      "co2_reduced_kg": 53.9,
       "impact_date": "2025-02-27",
       "food": "FOO0000054"
     }
@@ -597,9 +597,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000055",
     "fields": {
-      "meals_saved": 58.0,
-      "weight_saved_kg": 22.0,
-      "co2_reduced_kg": 10.9,
+      "meals_saved": 195.0,
+      "weight_saved_kg": 78.0,
+      "co2_reduced_kg": 42.9,
       "impact_date": "2025-02-28",
       "food": "FOO0000055"
     }
@@ -608,9 +608,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000056",
     "fields": {
-      "meals_saved": 76.0,
-      "weight_saved_kg": 29.0,
-      "co2_reduced_kg": 14.5,
+      "meals_saved": 220.0,
+      "weight_saved_kg": 88.0,
+      "co2_reduced_kg": 48.4,
       "impact_date": "2025-03-01",
       "food": "FOO0000056"
     }
@@ -619,9 +619,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000057",
     "fields": {
-      "meals_saved": 94.0,
-      "weight_saved_kg": 36.0,
-      "co2_reduced_kg": 18.3,
+      "meals_saved": 220.0,
+      "weight_saved_kg": 88.0,
+      "co2_reduced_kg": 48.4,
       "impact_date": "2025-03-02",
       "food": "FOO0000057"
     }
@@ -630,9 +630,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000058",
     "fields": {
-      "meals_saved": 68.0,
-      "weight_saved_kg": 26.0,
-      "co2_reduced_kg": 13.0,
+      "meals_saved": 195.0,
+      "weight_saved_kg": 78.0,
+      "co2_reduced_kg": 42.9,
       "impact_date": "2025-03-03",
       "food": "FOO0000058"
     }
@@ -641,9 +641,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000059",
     "fields": {
-      "meals_saved": 72.0,
-      "weight_saved_kg": 28.0,
-      "co2_reduced_kg": 14.2,
+      "meals_saved": 210.0,
+      "weight_saved_kg": 84.0,
+      "co2_reduced_kg": 46.2,
       "impact_date": "2025-03-04",
       "food": "FOO0000059"
     }
@@ -652,9 +652,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000060",
     "fields": {
-      "meals_saved": 112.0,
-      "weight_saved_kg": 43.0,
-      "co2_reduced_kg": 21.6,
+      "meals_saved": 240.0,
+      "weight_saved_kg": 96.0,
+      "co2_reduced_kg": 52.8,
       "impact_date": "2025-03-05",
       "food": "FOO0000060"
     }
@@ -663,9 +663,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000061",
     "fields": {
-      "meals_saved": 78.0,
-      "weight_saved_kg": 31.0,
-      "co2_reduced_kg": 15.9,
+      "meals_saved": 225.0,
+      "weight_saved_kg": 90.0,
+      "co2_reduced_kg": 49.5,
       "impact_date": "2025-03-06",
       "food": "FOO0000061"
     }
@@ -674,9 +674,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000062",
     "fields": {
-      "meals_saved": 54.0,
-      "weight_saved_kg": 20.0,
-      "co2_reduced_kg": 10.1,
+      "meals_saved": 200.0,
+      "weight_saved_kg": 80.0,
+      "co2_reduced_kg": 44.0,
       "impact_date": "2025-03-07",
       "food": "FOO0000062"
     }
@@ -685,9 +685,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000063",
     "fields": {
-      "meals_saved": 84.0,
-      "weight_saved_kg": 35.0,
-      "co2_reduced_kg": 17.8,
+      "meals_saved": 230.0,
+      "weight_saved_kg": 92.0,
+      "co2_reduced_kg": 50.6,
       "impact_date": "2025-03-08",
       "food": "FOO0000063"
     }
@@ -696,9 +696,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000064",
     "fields": {
-      "meals_saved": 68.0,
-      "weight_saved_kg": 27.0,
-      "co2_reduced_kg": 13.5,
+      "meals_saved": 215.0,
+      "weight_saved_kg": 86.0,
+      "co2_reduced_kg": 47.3,
       "impact_date": "2025-03-09",
       "food": "FOO0000064"
     }
@@ -707,9 +707,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000065",
     "fields": {
-      "meals_saved": 70.0,
-      "weight_saved_kg": 26.0,
-      "co2_reduced_kg": 13.1,
+      "meals_saved": 205.0,
+      "weight_saved_kg": 82.0,
+      "co2_reduced_kg": 45.1,
       "impact_date": "2025-03-10",
       "food": "FOO0000065"
     }
@@ -718,9 +718,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000066",
     "fields": {
-      "meals_saved": 98.0,
-      "weight_saved_kg": 39.0,
-      "co2_reduced_kg": 19.7,
+      "meals_saved": 235.0,
+      "weight_saved_kg": 94.0,
+      "co2_reduced_kg": 51.7,
       "impact_date": "2025-03-11",
       "food": "FOO0000066"
     }
@@ -729,9 +729,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000067",
     "fields": {
-      "meals_saved": 88.0,
-      "weight_saved_kg": 33.0,
-      "co2_reduced_kg": 16.6,
+      "meals_saved": 225.0,
+      "weight_saved_kg": 90.0,
+      "co2_reduced_kg": 49.5,
       "impact_date": "2025-03-12",
       "food": "FOO0000067"
     }
@@ -740,9 +740,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000068",
     "fields": {
-      "meals_saved": 62.0,
-      "weight_saved_kg": 24.0,
-      "co2_reduced_kg": 12.0,
+      "meals_saved": 210.0,
+      "weight_saved_kg": 84.0,
+      "co2_reduced_kg": 46.2,
       "impact_date": "2025-03-13",
       "food": "FOO0000068"
     }
@@ -751,9 +751,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000069",
     "fields": {
-      "meals_saved": 108.0,
-      "weight_saved_kg": 42.0,
-      "co2_reduced_kg": 21.3,
+      "meals_saved": 240.0,
+      "weight_saved_kg": 96.0,
+      "co2_reduced_kg": 52.8,
       "impact_date": "2025-03-14",
       "food": "FOO0000069"
     }
@@ -762,9 +762,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000070",
     "fields": {
-      "meals_saved": 74.0,
-      "weight_saved_kg": 30.0,
-      "co2_reduced_kg": 15.2,
+      "meals_saved": 220.0,
+      "weight_saved_kg": 88.0,
+      "co2_reduced_kg": 48.4,
       "impact_date": "2025-03-15",
       "food": "FOO0000070"
     }
@@ -773,9 +773,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000071",
     "fields": {
-      "meals_saved": 66.0,
-      "weight_saved_kg": 28.0,
-      "co2_reduced_kg": 14.1,
+      "meals_saved": 360.0,
+      "weight_saved_kg": 144.0,
+      "co2_reduced_kg": 79.2,
       "impact_date": "2025-03-16",
       "food": "FOO0000071"
     }
@@ -784,9 +784,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000072",
     "fields": {
-      "meals_saved": 102.0,
-      "weight_saved_kg": 40.0,
-      "co2_reduced_kg": 20.1,
+      "meals_saved": 360.0,
+      "weight_saved_kg": 144.0,
+      "co2_reduced_kg": 79.2,
       "impact_date": "2025-03-17",
       "food": "FOO0000072"
     }
@@ -795,9 +795,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000073",
     "fields": {
-      "meals_saved": 58.0,
-      "weight_saved_kg": 22.0,
-      "co2_reduced_kg": 11.1,
+      "meals_saved": 360.0,
+      "weight_saved_kg": 144.0,
+      "co2_reduced_kg": 79.2,
       "impact_date": "2025-03-18",
       "food": "FOO0000073"
     }
@@ -806,9 +806,9 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000074",
     "fields": {
-      "meals_saved": 92.0,
-      "weight_saved_kg": 36.0,
-      "co2_reduced_kg": 18.6,
+      "meals_saved": 360.0,
+      "weight_saved_kg": 144.0,
+      "co2_reduced_kg": 79.2,
       "impact_date": "2025-03-19",
       "food": "FOO0000074"
     }
@@ -817,11 +817,231 @@
     "model": "impactrecord.impactrecord",
     "pk": "IMP0000075",
     "fields": {
-      "meals_saved": 80.0,
-      "weight_saved_kg": 30.0,
-      "co2_reduced_kg": 15.4,
+      "meals_saved": 360.0,
+      "weight_saved_kg": 144.0,
+      "co2_reduced_kg": 79.2,
       "impact_date": "2025-03-20",
       "food": "FOO0000075"
+    }
+  },
+  {
+    "model": "impactrecord.impactrecord",
+    "pk": "IMP0000076",
+    "fields": {
+      "meals_saved": 125.0,
+      "weight_saved_kg": 50.0,
+      "co2_reduced_kg": 27.5,
+      "impact_date": "2025-01-20",
+      "food": "FOO0000111"
+    }
+  },
+  {
+    "model": "impactrecord.impactrecord",
+    "pk": "IMP0000077",
+    "fields": {
+      "meals_saved": 150.0,
+      "weight_saved_kg": 60.0,
+      "co2_reduced_kg": 33.0,
+      "impact_date": "2025-01-21",
+      "food": "FOO0000112"
+    }
+  },
+  {
+    "model": "impactrecord.impactrecord",
+    "pk": "IMP0000078",
+    "fields": {
+      "meals_saved": 100.0,
+      "weight_saved_kg": 40.0,
+      "co2_reduced_kg": 22.0,
+      "impact_date": "2025-01-22",
+      "food": "FOO0000113"
+    }
+  },
+  {
+    "model": "impactrecord.impactrecord",
+    "pk": "IMP0000079",
+    "fields": {
+      "meals_saved": 140.0,
+      "weight_saved_kg": 56.0,
+      "co2_reduced_kg": 30.8,
+      "impact_date": "2025-01-23",
+      "food": "FOO0000114"
+    }
+  },
+  {
+    "model": "impactrecord.impactrecord",
+    "pk": "IMP0000080",
+    "fields": {
+      "meals_saved": 110.0,
+      "weight_saved_kg": 44.0,
+      "co2_reduced_kg": 24.2,
+      "impact_date": "2025-01-24",
+      "food": "FOO0000115"
+    }
+  },
+  {
+    "model": "impactrecord.impactrecord",
+    "pk": "IMP0000081",
+    "fields": {
+      "meals_saved": 175.0,
+      "weight_saved_kg": 70.0,
+      "co2_reduced_kg": 38.5,
+      "impact_date": "2025-01-25",
+      "food": "FOO0000116"
+    }
+  },
+  {
+    "model": "impactrecord.impactrecord",
+    "pk": "IMP0000082",
+    "fields": {
+      "meals_saved": 160.0,
+      "weight_saved_kg": 64.0,
+      "co2_reduced_kg": 35.2,
+      "impact_date": "2025-01-26",
+      "food": "FOO0000117"
+    }
+  },
+  {
+    "model": "impactrecord.impactrecord",
+    "pk": "IMP0000083",
+    "fields": {
+      "meals_saved": 90.0,
+      "weight_saved_kg": 36.0,
+      "co2_reduced_kg": 19.8,
+      "impact_date": "2025-01-27",
+      "food": "FOO0000118"
+    }
+  },
+  {
+    "model": "impactrecord.impactrecord",
+    "pk": "IMP0000084",
+    "fields": {
+      "meals_saved": 130.0,
+      "weight_saved_kg": 52.0,
+      "co2_reduced_kg": 28.6,
+      "impact_date": "2025-01-28",
+      "food": "FOO0000119"
+    }
+  },
+  {
+    "model": "impactrecord.impactrecord",
+    "pk": "IMP0000085",
+    "fields": {
+      "meals_saved": 120.0,
+      "weight_saved_kg": 48.0,
+      "co2_reduced_kg": 26.4,
+      "impact_date": "2025-01-29",
+      "food": "FOO0000120"
+    }
+  },
+  {
+    "model": "impactrecord.impactrecord",
+    "pk": "IMP0000086",
+    "fields": {
+      "meals_saved": 200.0,
+      "weight_saved_kg": 80.0,
+      "co2_reduced_kg": 44.0,
+      "impact_date": "2025-01-30",
+      "food": "FOO0000121"
+    }
+  },
+  {
+    "model": "impactrecord.impactrecord",
+    "pk": "IMP0000087",
+    "fields": {
+      "meals_saved": 145.0,
+      "weight_saved_kg": 58.0,
+      "co2_reduced_kg": 31.9,
+      "impact_date": "2025-01-31",
+      "food": "FOO0000122"
+    }
+  },
+  {
+    "model": "impactrecord.impactrecord",
+    "pk": "IMP0000088",
+    "fields": {
+      "meals_saved": 80.0,
+      "weight_saved_kg": 32.0,
+      "co2_reduced_kg": 17.6,
+      "impact_date": "2025-02-01",
+      "food": "FOO0000123"
+    }
+  },
+  {
+    "model": "impactrecord.impactrecord",
+    "pk": "IMP0000089",
+    "fields": {
+      "meals_saved": 100.0,
+      "weight_saved_kg": 40.0,
+      "co2_reduced_kg": 22.0,
+      "impact_date": "2025-02-02",
+      "food": "FOO0000124"
+    }
+  },
+  {
+    "model": "impactrecord.impactrecord",
+    "pk": "IMP0000090",
+    "fields": {
+      "meals_saved": 100.0,
+      "weight_saved_kg": 40.0,
+      "co2_reduced_kg": 22.0,
+      "impact_date": "2025-02-03",
+      "food": "FOO0000125"
+    }
+  },
+  {
+    "model": "impactrecord.impactrecord",
+    "pk": "IMP0000091",
+    "fields": {
+      "meals_saved": 100.0,
+      "weight_saved_kg": 40.0,
+      "co2_reduced_kg": 22.0,
+      "impact_date": "2025-02-04",
+      "food": "FOO0000126"
+    }
+  },
+  {
+    "model": "impactrecord.impactrecord",
+    "pk": "IMP0000092",
+    "fields": {
+      "meals_saved": 100.0,
+      "weight_saved_kg": 40.0,
+      "co2_reduced_kg": 22.0,
+      "impact_date": "2025-02-05",
+      "food": "FOO0000127"
+    }
+  },
+  {
+    "model": "impactrecord.impactrecord",
+    "pk": "IMP0000093",
+    "fields": {
+      "meals_saved": 100.0,
+      "weight_saved_kg": 40.0,
+      "co2_reduced_kg": 22.0,
+      "impact_date": "2025-02-06",
+      "food": "FOO0000128"
+    }
+  },
+  {
+    "model": "impactrecord.impactrecord",
+    "pk": "IMP0000094",
+    "fields": {
+      "meals_saved": 100.0,
+      "weight_saved_kg": 40.0,
+      "co2_reduced_kg": 22.0,
+      "impact_date": "2025-02-07",
+      "food": "FOO0000129"
+    }
+  },
+  {
+    "model": "impactrecord.impactrecord",
+    "pk": "IMP0000095",
+    "fields": {
+      "meals_saved": 100.0,
+      "weight_saved_kg": 40.0,
+      "co2_reduced_kg": 22.0,
+      "impact_date": "2025-02-08",
+      "food": "FOO0000130"
     }
   }
 ]

@@ -68,5 +68,40 @@
     "fields": {
       "chain_name": "Subway"
     }
+  },
+  {
+    "model": "restaurant_chain.restaurantchain",
+    "pk": "CHA0000014",
+    "fields": {
+      "chain_name": "Swensen's"
+    }
+  },
+  {
+    "model": "restaurant_chain.restaurantchain",
+    "pk": "CHA0000015",
+    "fields": {
+      "chain_name": "Yoshinoya"
+    }
+  },
+  {
+    "model": "restaurant_chain.restaurantchain",
+    "pk": "CHA0000016",
+    "fields": {
+      "chain_name": "Oishi"
+    }
+  },
+  {
+    "model": "restaurant_chain.restaurantchain",
+    "pk": "CHA0000017",
+    "fields": {
+      "chain_name": "Fuji"
+    }
+  },
+  {
+    "model": "restaurant_chain.restaurantchain",
+    "pk": "CHA0000018",
+    "fields": {
+      "chain_name": "Shabushi"
+    }
   }
 ]

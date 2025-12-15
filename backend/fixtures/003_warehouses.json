@@ -118,5 +118,35 @@
       "stored_date": "2025-03-01",
       "exp_date": "2026-02-28"
     }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000013",
+    "fields": {
+      "address": "33 Ratchathewi Food Distribution Hub, Ratchathewi, Bangkok 10400",
+      "capacity": 5500.0,
+      "stored_date": "2025-03-15",
+      "exp_date": "2026-03-14"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000014",
+    "fields": {
+      "address": "44 Phra Khanong Storage Center, Phra Khanong, Bangkok 10110",
+      "capacity": 4200.0,
+      "stored_date": "2025-04-01",
+      "exp_date": "2026-03-31"
+    }
+  },
+  {
+    "model": "warehouse.warehouse",
+    "pk": "WAH0000015",
+    "fields": {
+      "address": "88 Yan Nawa Logistics Hub, Yan Nawa, Bangkok 10120",
+      "capacity": 5800.0,
+      "stored_date": "2025-04-10",
+      "exp_date": "2026-04-09"
+    }
   }
 ]

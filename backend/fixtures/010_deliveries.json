@@ -1034,5 +1034,185 @@
       "donation_id": "DON0000048",
       "community_id": "COM0000001"
     }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000061",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-01-16T12:00:00Z",
+      "dropoff_time": "2025-01-16T14:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Pickup from Swensen's Central World",
+      "warehouse_id": "WAH0000013",
+      "user_id": "DEL0000007",
+      "donation_id": "DON0000049",
+      "community_id": null
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000062",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-01-17T08:00:00Z",
+      "dropoff_time": "2025-01-17T11:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "delivered",
+      "notes": "Distribution to Ratchathewi Community",
+      "warehouse_id": "WAH0000013",
+      "user_id": "DEL0000008",
+      "donation_id": null,
+      "community_id": "COM0000031",
+      "food_item": "FOO0000111",
+      "delivery_quantity": "20 serving"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000063",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-01-18T10:30:00Z",
+      "dropoff_time": "2025-01-18T12:30:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "pending",
+      "notes": "Pickup from Yoshinoya Terminal 21",
+      "warehouse_id": "WAH0000014",
+      "user_id": "DEL0000009",
+      "donation_id": "DON0000051",
+      "community_id": null
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000064",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-01-19T09:00:00Z",
+      "dropoff_time": "2025-01-19T12:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "in_transit",
+      "notes": "Distribution to Phra Khanong Community",
+      "warehouse_id": "WAH0000014",
+      "user_id": "DEL0000010",
+      "donation_id": null,
+      "community_id": "COM0000032",
+      "food_item": "FOO0000112",
+      "delivery_quantity": "25 bowl"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000065",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-01-20T11:00:00Z",
+      "dropoff_time": "2025-01-20T13:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Pickup from Oishi Central Pinklao",
+      "warehouse_id": "WAH0000015",
+      "user_id": "DEL0000007",
+      "donation_id": "DON0000053",
+      "community_id": null
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000066",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-01-21T08:30:00Z",
+      "dropoff_time": "2025-01-21T11:30:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "delivered",
+      "notes": "Distribution to Yan Nawa Community",
+      "warehouse_id": "WAH0000015",
+      "user_id": "DEL0000008",
+      "donation_id": null,
+      "community_id": "COM0000033",
+      "food_item": "FOO0000115",
+      "delivery_quantity": "18 set"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000067",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-01-22T14:00:00Z",
+      "dropoff_time": "2025-01-22T16:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "pending",
+      "notes": "Pickup from Fuji MBK Center",
+      "warehouse_id": "WAH0000013",
+      "user_id": "DEL0000009",
+      "donation_id": "DON0000055",
+      "community_id": null
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000068",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-01-23T09:00:00Z",
+      "dropoff_time": "2025-01-23T12:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "in_transit",
+      "notes": "Distribution to Sathon Community",
+      "warehouse_id": "WAH0000015",
+      "user_id": "DEL0000010",
+      "donation_id": null,
+      "community_id": "COM0000034",
+      "food_item": "FOO0000118",
+      "delivery_quantity": "15 set"
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000069",
+    "fields": {
+      "delivery_type": "donation",
+      "pickup_time": "2025-01-24T10:00:00Z",
+      "dropoff_time": "2025-01-24T12:00:00Z",
+      "pickup_location_type": "restaurant",
+      "dropoff_location_type": "warehouse",
+      "status": "delivered",
+      "notes": "Pickup from Shabushi Seacon Square",
+      "warehouse_id": "WAH0000014",
+      "user_id": "DEL0000007",
+      "donation_id": "DON0000057",
+      "community_id": null
+    }
+  },
+  {
+    "model": "delivery.delivery",
+    "pk": "DLV0000070",
+    "fields": {
+      "delivery_type": "distribution",
+      "pickup_time": "2025-01-25T08:00:00Z",
+      "dropoff_time": "2025-01-25T11:00:00Z",
+      "pickup_location_type": "warehouse",
+      "dropoff_location_type": "community",
+      "status": "delivered",
+      "notes": "Distribution to Prawet Community",
+      "warehouse_id": "WAH0000002",
+      "user_id": "DEL0000008",
+      "donation_id": null,
+      "community_id": "COM0000035",
+      "food_item": "FOO0000120",
+      "delivery_quantity": "20 set"
+    }
   }
 ]

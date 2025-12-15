@@ -478,5 +478,105 @@
       "restaurant": "RES0000010",
       "created_by": "DON0000010"
     }
+  },
+  {
+    "model": "donation.donation",
+    "pk": "DON0000049",
+    "fields": {
+      "donated_at": "2025-01-16T10:00:00Z",
+      "status": "accepted",
+      "restaurant": "RES0000031",
+      "created_by": "DON0000001"
+    }
+  },
+  {
+    "model": "donation.donation",
+    "pk": "DON0000050",
+    "fields": {
+      "donated_at": "2025-01-17T11:30:00Z",
+      "status": "accepted",
+      "restaurant": "RES0000032",
+      "created_by": "DON0000002"
+    }
+  },
+  {
+    "model": "donation.donation",
+    "pk": "DON0000051",
+    "fields": {
+      "donated_at": "2025-01-18T09:15:00Z",
+      "status": "pending",
+      "restaurant": "RES0000033",
+      "created_by": "DON0000003"
+    }
+  },
+  {
+    "model": "donation.donation",
+    "pk": "DON0000052",
+    "fields": {
+      "donated_at": "2025-01-19T14:20:00Z",
+      "status": "accepted",
+      "restaurant": "RES0000034",
+      "created_by": "DON0000004"
+    }
+  },
+  {
+    "model": "donation.donation",
+    "pk": "DON0000053",
+    "fields": {
+      "donated_at": "2025-01-20T08:45:00Z",
+      "status": "accepted",
+      "restaurant": "RES0000035",
+      "created_by": "DON0000005"
+    }
+  },
+  {
+    "model": "donation.donation",
+    "pk": "DON0000054",
+    "fields": {
+      "donated_at": "2025-01-21T12:10:00Z",
+      "status": "pending",
+      "restaurant": "RES0000036",
+      "created_by": "DON0000006"
+    }
+  },
+  {
+    "model": "donation.donation",
+    "pk": "DON0000055",
+    "fields": {
+      "donated_at": "2025-01-22T10:30:00Z",
+      "status": "accepted",
+      "restaurant": "RES0000037",
+      "created_by": "DON0000007"
+    }
+  },
+  {
+    "model": "donation.donation",
+    "pk": "DON0000056",
+    "fields": {
+      "donated_at": "2025-01-23T15:00:00Z",
+      "status": "accepted",
+      "restaurant": "RES0000038",
+      "created_by": "DON0000008"
+    }
+  },
+  {
+    "model": "donation.donation",
+    "pk": "DON0000057",
+    "fields": {
+      "donated_at": "2025-01-24T09:20:00Z",
+      "status": "pending",
+      "restaurant": "RES0000039",
+      "created_by": "DON0000009"
+    }
+  },
+  {
+    "model": "donation.donation",
+    "pk": "DON0000058",
+    "fields": {
+      "donated_at": "2025-01-25T13:45:00Z",
+      "status": "accepted",
+      "restaurant": "RES0000040",
+      "created_by": "DON0000010"
+    }
   }
 ]

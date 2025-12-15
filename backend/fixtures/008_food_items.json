@@ -1652,5 +1652,325 @@
       "donation": "DON0000048",
       "chain": "CHA0000003"
     }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000111",
+    "fields": {
+      "name": "Ice Cream Sundaes",
+      "quantity": 25,
+      "unit": "serving",
+      "expire_date": "2026-01-20",
+      "category": "Dessert",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000049",
+      "chain": "CHA0000014"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000112",
+    "fields": {
+      "name": "Beef Bowls",
+      "quantity": 30,
+      "unit": "bowl",
+      "expire_date": "2026-01-21",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000050",
+      "chain": "CHA0000015"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000113",
+    "fields": {
+      "name": "Sushi Platters",
+      "quantity": 20,
+      "unit": "platter",
+      "expire_date": "2026-01-22",
+      "category": "Seafood",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000051",
+      "chain": "CHA0000016"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000114",
+    "fields": {
+      "name": "Ramen Bowls",
+      "quantity": 28,
+      "unit": "bowl",
+      "expire_date": "2026-01-23",
+      "category": "Vegetarian",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000052",
+      "chain": "CHA0000017"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000115",
+    "fields": {
+      "name": "Shabu Shabu Sets",
+      "quantity": 22,
+      "unit": "set",
+      "expire_date": "2026-01-24",
+      "category": "Meat",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000053",
+      "chain": "CHA0000018"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000116",
+    "fields": {
+      "name": "Milkshakes",
+      "quantity": 35,
+      "unit": "cup",
+      "expire_date": "2026-01-25",
+      "category": "Dessert",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000049",
+      "chain": "CHA0000014"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000117",
+    "fields": {
+      "name": "Chicken Teriyaki",
+      "quantity": 32,
+      "unit": "serving",
+      "expire_date": "2026-01-26",
+      "category": "Meat",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000050",
+      "chain": "CHA0000015"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000118",
+    "fields": {
+      "name": "Tempura Sets",
+      "quantity": 18,
+      "unit": "set",
+      "expire_date": "2026-01-27",
+      "category": "Seafood",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000051",
+      "chain": "CHA0000016"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000119",
+    "fields": {
+      "name": "Udon Noodles",
+      "quantity": 26,
+      "unit": "bowl",
+      "expire_date": "2026-01-28",
+      "category": "Vegetarian",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000052",
+      "chain": "CHA0000017"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000120",
+    "fields": {
+      "name": "Hot Pot Sets",
+      "quantity": 24,
+      "unit": "set",
+      "expire_date": "2026-01-29",
+      "category": "Meat",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000053",
+      "chain": "CHA0000018"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000121",
+    "fields": {
+      "name": "Waffle Cones",
+      "quantity": 40,
+      "unit": "cone",
+      "expire_date": "2026-01-30",
+      "category": "Dessert",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000054",
+      "chain": "CHA0000014"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000122",
+    "fields": {
+      "name": "Pork Bowls",
+      "quantity": 29,
+      "unit": "bowl",
+      "expire_date": "2026-01-31",
+      "category": "Meat",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000055",
+      "chain": "CHA0000015"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000123",
+    "fields": {
+      "name": "Sashimi Platters",
+      "quantity": 16,
+      "unit": "platter",
+      "expire_date": "2026-02-01",
+      "category": "Seafood",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000056",
+      "chain": "CHA0000016"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000124",
+    "fields": {
+      "name": "Miso Soup",
+      "quantity": 38,
+      "unit": "bowl",
+      "expire_date": "2026-02-02",
+      "category": "Vegetarian",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000057",
+      "chain": "CHA0000017"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000125",
+    "fields": {
+      "name": "Sukiyaki Sets",
+      "quantity": 21,
+      "unit": "set",
+      "expire_date": "2026-02-03",
+      "category": "Meat",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000058",
+      "chain": "CHA0000018"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000126",
+    "fields": {
+      "name": "Banana Splits",
+      "quantity": 27,
+      "unit": "serving",
+      "expire_date": "2026-02-04",
+      "category": "Dessert",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000049",
+      "chain": "CHA0000014"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000127",
+    "fields": {
+      "name": "Curry Rice Bowls",
+      "quantity": 33,
+      "unit": "bowl",
+      "expire_date": "2026-02-05",
+      "category": "Halal",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000050",
+      "chain": "CHA0000015"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000128",
+    "fields": {
+      "name": "Bento Boxes",
+      "quantity": 19,
+      "unit": "box",
+      "expire_date": "2026-02-06",
+      "category": "Seafood",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000051",
+      "chain": "CHA0000016"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000129",
+    "fields": {
+      "name": "Soba Noodles",
+      "quantity": 31,
+      "unit": "bowl",
+      "expire_date": "2026-02-07",
+      "category": "Vegetarian",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000052",
+      "chain": "CHA0000017"
+    }
+  },
+  {
+    "model": "fooditem.fooditem",
+    "pk": "FOO0000130",
+    "fields": {
+      "name": "Yakiniku Sets",
+      "quantity": 23,
+      "unit": "set",
+      "expire_date": "2026-02-08",
+      "category": "Meat",
+      "is_expired": false,
+      "is_claimed": false,
+      "is_distributed": false,
+      "donation": "DON0000053",
+      "chain": "CHA0000018"
+    }
   }
 ]
