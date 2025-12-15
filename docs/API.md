@@ -7,24 +7,35 @@ Development: http://localhost:8000/api/
 Production: [Your production URL]
 ```
 
+**API Health Check:**
+```http
+GET http://localhost:8000/
+```
+
+Returns: `Re-Meals API Running 🎉`
+
 ## Authentication
 
-The API uses Django REST Framework authentication. Include authentication credentials in your requests:
+The API uses header-based authentication. Include the following headers in your authenticated requests:
 
 ```http
-Authorization: Token your-auth-token-here
+X-USER-ID: your-user-id-here
+X-USER-IS-ADMIN: true|false
+X-USER-IS-DELIVERY: true|false
 ```
 
-### Getting a Token
+### Getting User Information
 
-To obtain an authentication token, use the login endpoint with test credentials:
+To obtain user information and user_id, use the login endpoint:
 
 ```bash
-# Example: Login as a donor
+# Example: Login as a donor (can use username or email)
 curl -X POST http://localhost:8000/api/users/login/ \
   -H "Content-Type: application/json" \
-  -d '{"username": "donor1", "password": "password123"}'
+  -d '{"identifier": "donor1", "password": "password123"}'
 ```
+
+After login, use the returned `user_id` in the `X-USER-ID` header for subsequent requests.
 
 **Test Users** (after loading fixtures):
 - Admin: `admin` / `password123`
@@ -38,18 +49,44 @@ For complete test user details, see [SETUP.md - Test Users](./SETUP.md#test-user
 
 ### Users
 
-#### Register User
+#### Signup (Register User)
 ```http
-POST /api/users/register/
+POST /api/users/signup/
 ```
 
 **Request Body:**
 ```json
 {
   "username": "string",
+  "fname": "string",
+  "lname": "string",
+  "bod": "string (DD/MM/YYYY or YYYY-MM-DD)",
+  "phone": "string",
   "email": "string",
   "password": "string",
-  "user_type": "donor|recipient|delivery_staff|admin"
+  "restaurant_id": "string (optional)",
+  "restaurant_name": "string (optional)",
+  "branch": "string (optional)",
+  "restaurant_address": "string (optional)"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Signup successful",
+  "username": "string",
+  "email": "string",
+  "user_id": "string",
+  "fname": "string",
+  "lname": "string",
+  "phone": "string",
+  "is_admin": "boolean",
+  "is_delivery_staff": "boolean",
+  "restaurant_id": "string or null",
+  "restaurant_name": "string or null",
+  "branch": "string or null",
+  "restaurant_address": "string or null"
 }
 ```
 
@@ -61,7 +98,7 @@ POST /api/users/login/
 **Request Body:**
 ```json
 {
-  "username": "string",
+  "identifier": "string (username or email)",
   "password": "string"
 }
 ```
@@ -69,13 +106,81 @@ POST /api/users/login/
 **Response:**
 ```json
 {
-  "token": "string",
-  "user": {
-    "id": "integer",
+  "message": "Login success",
+  "username": "string",
+  "email": "string",
+  "user_id": "string",
+  "fname": "string",
+  "lname": "string",
+  "phone": "string",
+  "is_admin": "boolean",
+  "is_delivery_staff": "boolean",
+  "restaurant_id": "string or null",
+  "restaurant_name": "string or null",
+  "branch": "string or null",
+  "restaurant_address": "string or null"
+}
+```
+
+**Note**: Use the returned `user_id` in the `X-USER-ID` header for authenticated requests.
+
+#### List Delivery Staff
+```http
+GET /api/users/delivery-staff/
+```
+
+**Response:**
+```json
+[
+  {
+    "user_id": "string",
     "username": "string",
+    "name": "string",
     "email": "string",
-    "user_type": "string"
+    "assigned_area": "string",
+    "is_available": "boolean"
   }
+]
+```
+
+#### Update Profile
+```http
+PATCH /api/users/profile/
+```
+
+**Headers:**
+```http
+X-USER-ID: your-user-id
+```
+
+**Request Body (all fields optional):**
+```json
+{
+  "username": "string",
+  "fname": "string",
+  "lname": "string",
+  "phone": "string",
+  "email": "string",
+  "restaurant_id": "string",
+  "restaurant_name": "string",
+  "branch": "string",
+  "restaurant_address": "string"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Profile updated successfully",
+  "username": "string",
+  "email": "string",
+  "fname": "string",
+  "lname": "string",
+  "phone": "string",
+  "restaurant_id": "string or null",
+  "restaurant_name": "string or null",
+  "branch": "string or null",
+  "restaurant_address": "string or null"
 }
 ```
 
@@ -129,6 +234,12 @@ or
 }
 ```
 
+**Headers (for authenticated requests):**
+```http
+X-USER-ID: your-user-id
+X-USER-IS-ADMIN: true|false (optional)
+```
+
 The API automatically records the authenticated user (`X-USER-ID` header) as `created_by_user_id`.
 
 #### Get Donation Details
@@ -169,16 +280,26 @@ GET /api/fooditems/
 [
   {
     "id": "integer",
+    "food_id": "string",
     "donation": "integer",
+    "donation_id": "string",
     "name": "string",
     "quantity": "decimal",
     "unit": "string",
     "expiry_date": "date",
     "status": "string",
     "warehouse": "integer",
+    "warehouse_id": "string",
+    "is_distributed": "boolean",
+    "is_claimed": "boolean",
     "created_at": "datetime"
   }
 ]
+```
+
+#### Get Food Item Details
+```http
+GET /api/fooditems/{food_id}/
 ```
 
 #### Create Food Item
@@ -192,17 +313,28 @@ POST /api/fooditems/
   "donation": "integer",
   "name": "string",
   "quantity": "decimal",
-  "unit": "kg|liters|pieces",
-  "expiry_date": "date",
-  "notes": "string"
+  "unit": "string (kg, liters, pieces, etc.)",
+  "expiry_date": "date (YYYY-MM-DD)",
+  "notes": "string (optional)"
 }
+```
+
+#### Update Food Item
+```http
+PUT /api/fooditems/{food_id}/
+PATCH /api/fooditems/{food_id}/
+```
+
+#### Delete Food Item
+```http
+DELETE /api/fooditems/{food_id}/
 ```
 
 ### Deliveries
 
 #### List Deliveries
 ```http
-GET /api/deliveries/
+GET /api/delivery/deliveries/
 ```
 
 **Query Parameters:**
@@ -215,20 +347,30 @@ GET /api/deliveries/
 [
   {
     "id": "integer",
+    "delivery_id": "string",
     "donation": "integer",
+    "donation_id": "string",
     "delivery_staff": "integer",
+    "delivery_staff_user_id": "string",
     "recipient": "integer",
+    "recipient_user_id": "string",
     "pickup_time": "datetime",
     "dropoff_time": "datetime",
     "status": "string",
-    "notes": "string"
+    "notes": "string",
+    "created_at": "datetime"
   }
 ]
 ```
 
+#### Get Delivery Details
+```http
+GET /api/delivery/deliveries/{delivery_id}/
+```
+
 #### Create Delivery
 ```http
-POST /api/deliveries/
+POST /api/delivery/deliveries/
 ```
 
 **Request Body:**
@@ -241,6 +383,17 @@ POST /api/deliveries/
   "estimated_dropoff_time": "datetime",
   "notes": "string"
 }
+```
+
+#### Update Delivery
+```http
+PUT /api/delivery/deliveries/{delivery_id}/
+PATCH /api/delivery/deliveries/{delivery_id}/
+```
+
+#### Delete Delivery
+```http
+DELETE /api/delivery/deliveries/{delivery_id}/
 ```
 
 ### Warehouses
@@ -328,14 +481,21 @@ GET /api/restaurants/
 [
   {
     "id": "integer",
+    "restaurant_id": "string",
     "name": "string",
+    "branch_name": "string",
     "address": "string",
-    "phone": "string",
-    "email": "string",
+    "is_chain": "boolean",
     "chain": "integer",
+    "chain_id": "string",
     "created_at": "datetime"
   }
 ]
+```
+
+#### Get Restaurant Details
+```http
+GET /api/restaurants/{restaurant_id}/
 ```
 
 #### Create Restaurant
@@ -347,18 +507,29 @@ POST /api/restaurants/
 ```json
 {
   "name": "string",
+  "branch_name": "string",
   "address": "string",
-  "phone": "string",
-  "email": "string",
+  "is_chain": "boolean",
   "chain": "integer"
 }
+```
+
+#### Update Restaurant
+```http
+PUT /api/restaurants/{restaurant_id}/
+PATCH /api/restaurants/{restaurant_id}/
+```
+
+#### Delete Restaurant
+```http
+DELETE /api/restaurants/{restaurant_id}/
 ```
 
 ### Communities
 
 #### List Communities
 ```http
-GET /api/communities/
+GET /api/community/communities/
 ```
 
 **Response:**
@@ -366,20 +537,181 @@ GET /api/communities/
 [
   {
     "id": "integer",
+    "community_id": "string",
     "name": "string",
-    "area": "string",
-    "warehouse": "integer",
-    "estimated_demand": "integer",
+    "address": "string",
+    "population": "integer",
+    "warehouse_id": "string",
     "created_at": "datetime"
   }
 ]
 ```
 
+#### Get Community Details
+```http
+GET /api/community/communities/{community_id}/
+```
+
+#### Create Community
+```http
+POST /api/community/communities/
+```
+
+#### Update Community
+```http
+PUT /api/community/communities/{community_id}/
+PATCH /api/community/communities/{community_id}/
+```
+
+#### Delete Community
+```http
+DELETE /api/community/communities/{community_id}/
+```
+
+### Donation Requests
+
+#### List Donation Requests
+```http
+GET /api/donation-requests/
+```
+
+**Query Parameters:**
+- `status`: Filter by request status
+- `community_id`: Filter by community ID
+- `created_by`: Filter by creator user ID
+
+**Response:**
+```json
+[
+  {
+    "request_id": "string",
+    "title": "string",
+    "community_id": "integer",
+    "community_name": "string",
+    "recipient_address": "string",
+    "expected_delivery": "datetime",
+    "people_count": "integer",
+    "contact_phone": "string",
+    "notes": "string",
+    "status": "string",
+    "created_by_user_id": "string",
+    "created_at": "datetime"
+  }
+]
+```
+
+#### Create Donation Request
+```http
+POST /api/donation-requests/
+```
+
+**Headers:**
+```http
+X-USER-ID: your-user-id
+```
+
+**Request Body:**
+```json
+{
+  "title": "string",
+  "community_id": "integer (required)",
+  "community_name": "string (optional, for auto-creation)",
+  "recipient_address": "string",
+  "expected_delivery": "datetime",
+  "people_count": "integer",
+  "contact_phone": "string",
+  "notes": "string"
+}
+```
+
+**Note**: If `community_id` is not provided but `community_name` is, a new community will be auto-created.
+
+#### Get Donation Request Details
+```http
+GET /api/donation-requests/{request_id}/
+```
+
+#### Update Donation Request
+```http
+PUT /api/donation-requests/{request_id}/
+PATCH /api/donation-requests/{request_id}/
+```
+
+**Headers:**
+```http
+X-USER-ID: your-user-id
+X-USER-IS-ADMIN: true|false (optional)
+```
+
+Only the creator or admin can update donation requests.
+
+#### Delete Donation Request
+```http
+DELETE /api/donation-requests/{request_id}/
+```
+
+**Headers:**
+```http
+X-USER-ID: your-user-id
+X-USER-IS-ADMIN: true|false (optional)
+```
+
+Only the creator or admin can delete donation requests.
+
+### Restaurant Chains
+
+#### List Restaurant Chains
+```http
+GET /api/restaurant-chains/
+```
+
+**Response:**
+```json
+[
+  {
+    "id": "integer",
+    "chain_id": "string",
+    "chain_name": "string",
+    "created_at": "datetime"
+  }
+]
+```
+
+#### Get Restaurant Chain Details
+```http
+GET /api/restaurant-chains/{chain_id}/
+```
+
+#### Create Restaurant Chain
+```http
+POST /api/restaurant-chains/
+```
+
+**Request Body:**
+```json
+{
+  "chain_name": "string"
+}
+```
+
+#### Update Restaurant Chain
+```http
+PUT /api/restaurant-chains/{chain_id}/
+PATCH /api/restaurant-chains/{chain_id}/
+```
+
+#### Delete Restaurant Chain
+```http
+DELETE /api/restaurant-chains/{chain_id}/
+```
+
 ### Impact Records
+
+**Note**: Impact records are read-only. They are automatically created when food items are distributed.
 
 #### List Impact Records
 ```http
-GET /api/impact-records/
+GET /api/impact/
 ```
 
 **Query Parameters:**
@@ -401,19 +733,9 @@ GET /api/impact-records/
 ]
 ```
 
-#### Get Total Impact
+#### Get Impact Record Details
 ```http
-GET /api/impact-records/total/
-```
-
-**Response:**
-```json
-{
-  "total_meals_saved": "integer",
-  "total_co2_reduced": "decimal",
-  "total_food_items": "integer",
-  "period": "string"
-}
+GET /api/impact/{id}/
 ```
 
 ## Error Responses
@@ -431,9 +753,11 @@ GET /api/impact-records/total/
 ### 401 Unauthorized
 ```json
 {
-  "error": "Authentication credentials were not provided."
+  "error": "User ID required"
 }
 ```
+
+**Note**: This error occurs when the `X-USER-ID` header is missing or invalid.
 
 ### 403 Forbidden
 ```json

@@ -56,6 +56,7 @@ The platform manages multiple stakeholders:
 - **Donor** - Food donors linked to restaurants
 - **Restaurant/RestaurantChain** - Food donor organizations
 - **Donation** - Food donation records with status tracking
+- **DonationRequest** - Requests from recipients/communities for food donations
 - **FoodItem** - Individual food items with expiry and distribution tracking
 - **Delivery** - Delivery coordination with pickup/dropoff times and status
 - **DeliveryStaff** - Available volunteers with assigned areas
@@ -87,35 +88,29 @@ The platform manages multiple stakeholders:
 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/remeals.git
-cd remeals
+git clone https://github.com/NapatKulnarong/Re-Meals.git
+cd Re-Meals
 ```
 
-2. Install dependencies
+2. Follow the detailed setup instructions
 
+For complete setup instructions, see the [Setup Guide](./docs/SETUP.md). The setup includes:
+
+- Installing prerequisites (Node.js, Python, PostgreSQL)
+- Configuring environment variables
+- Setting up the database
+- Installing backend and frontend dependencies
+- Running migrations
+- Starting development servers
+
+**Quick Start with Docker:**
 ```bash
-npm install
+docker-compose up -d
 ```
 
-3. Set up environment variables
-
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
-
-4. Set up the database
-
-```bash
-npm run db:setup
-npm run db:migrate
-```
-
-5. Start the development server
-
-```bash
-npm run dev
-```
+**Or Local Setup:**
+- Backend: See [SETUP.md - Local Setup](./docs/SETUP.md#method-2-local-setup)
+- Frontend: See [SETUP.md - Frontend Setup](./docs/SETUP.md#step-4-frontend-setup)
 
 ### Using Docker
 
@@ -183,6 +178,7 @@ Comprehensive documentation is available in the `/docs` directory:
 - **[API Reference](./docs/API.md)** - Complete REST API documentation with endpoints, requests, and responses
 - **[Architecture](./docs/ARCHITECTURE.md)** - System design, technology stack, and architectural decisions
 - **[Development Guide](./docs/DEVELOPMENT.md)** - Contributing guidelines, code style, and best practices
+- **[Testing Guide](./docs/TEST.md)** - Comprehensive testing guide for backend, frontend, and integration tests
 
 For a quick overview of all documentation, see the [Documentation Index](./docs/README.md).
 
@@ -241,6 +237,7 @@ remeals/
 │   ├── ARCHITECTURE.md
 │   ├── DEVELOPMENT.md
 │   ├── SETUP.md
+│   ├── TEST.md
 │   ├── db-diagram.png
 │   └── README.md
 │
