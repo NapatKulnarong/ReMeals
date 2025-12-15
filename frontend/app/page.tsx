@@ -8720,8 +8720,8 @@ export default function Home() {
         { id: 0, label: "Home", icon: <HomeIcon className="w-5 h-5" aria-hidden="true" /> },
         { id: 1, label: "Donate", icon: <HeartIcon className="w-5 h-5" aria-hidden="true" /> },
         { id: 2, label: "Get meals", icon: <ShoppingBagIcon className="w-5 h-5" aria-hidden="true" /> },
-        { id: 7, label: "Status", icon: <ChartBarIcon className="w-5 h-5" aria-hidden="true" /> },
         { id: 8, label: "Donation Stats", icon: <ChartBarIcon className="w-5 h-5" aria-hidden="true" /> },
+        { id: 7, label: "Status", icon: <ChartBarIcon className="w-5 h-5" aria-hidden="true" /> },
       ];
 
   const normalizedActiveTab = useMemo(() => {
