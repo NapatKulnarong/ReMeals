@@ -1,6 +1,7 @@
 "use client";
 
-import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import Sidebar from "@/components/Sidebar";
 
 const API_BASE_URL =
@@ -451,7 +452,7 @@ function CO2TrendChart({ data }: { data: Array<{ weekKey: string; co2: number; s
       return;
     }
 
-    const pointDelay = 200; // Time between each point in ms
+    // const pointDelay = 200; // Time between each point in ms (unused)
     const pointShowDuration = 150; // Show point for 150ms
     const pointHideDuration = 50; // Hide point for 50ms before next
 
@@ -511,13 +512,13 @@ function CO2TrendChart({ data }: { data: Array<{ weekKey: string; co2: number; s
     ? `M ${points.slice(0, animatedIndex + 1).map(p => `${p.x},${p.y}`).join(' L ')}`
     : '';
 
-  const pathData = points.length > 1
-    ? `M ${points.map(p => `${p.x},${p.y}`).join(' L ')}`
-    : '';
+  // const pathData = points.length > 1
+  //   ? `M ${points.map(p => `${p.x},${p.y}`).join(' L ')}`
+  //   : ''; // unused
 
-  const areaPath = points.length > 1
-    ? `M ${points[0].x} ${chartHeight - chartPadding.bottom} L ${pathData.replace('M ', '')} L ${points[points.length - 1].x} ${chartHeight - chartPadding.bottom} Z`
-    : '';
+  // const areaPath = points.length > 1
+  //   ? `M ${points[0].x} ${chartHeight - chartPadding.bottom} L ${pathData.replace('M ', '')} L ${points[points.length - 1].x} ${chartHeight - chartPadding.bottom} Z`
+  //   : ''; // unused
 
   const animatedAreaPath = points.length > 1 && animatedIndex >= 0 && animatedPathData
     ? `M ${points[0].x} ${chartHeight - chartPadding.bottom} L ${animatedPathData.replace('M ', '')} L ${points[Math.min(animatedIndex, points.length - 1)].x} ${chartHeight - chartPadding.bottom} Z`
@@ -615,8 +616,8 @@ function CO2TrendChart({ data }: { data: Array<{ weekKey: string; co2: number; s
 
           {points.map((point, idx) => {
             const isHovered = hoveredIndex === point.index;
-            const isVisible = !isAnimating || (visiblePoint === idx) || (idx <= animatedIndex && !isAnimating);
-            const shouldShow = idx <= animatedIndex && (visiblePoint === idx || !isAnimating);
+            // const isVisible = !isAnimating || (visiblePoint === idx) || (idx <= animatedIndex && !isAnimating); // unused
+            // const shouldShow = idx <= animatedIndex && (visiblePoint === idx || !isAnimating); // unused
 
             return (
               <g key={point.weekKey}>
@@ -884,12 +885,24 @@ function AnimatedNumber({
   decimals?: number;
 }) {
   const [displayValue, setDisplayValue] = useState(0);
+  const prevValueRef = useRef(value);
 
   useEffect(() => {
+    // If value is 0, reset displayValue asynchronously to avoid setState in effect
     if (value === 0) {
-      setDisplayValue(0);
+      requestAnimationFrame(() => {
+        setDisplayValue(0);
+      });
+      prevValueRef.current = value;
       return;
     }
+
+    // Only animate if value actually changed
+    if (prevValueRef.current === value) {
+      return;
+    }
+
+    prevValueRef.current = value;
 
     let startTime: number | null = null;
     let animationFrameId: number;
@@ -1179,9 +1192,11 @@ function HomePage({
           <div className="relative flex items-center gap-5">
             {/* Spinning Logo in front of the text */}
             <div className="flex-shrink-0">
-              <img
+              <Image
                 src="/elements/logo_re-meals_2.png"
                 alt="Re-Meals Logo"
+                width={96}
+                height={96}
                 className="h-20 w-20 sm:h-24 sm:w-24 object-contain opacity-90"
                 style={{
                   animation: 'spin 5s linear infinite',
@@ -4354,7 +4369,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
   }, [currentUser, loadData]);
 
   // Helper function to extract province from address
-  const extractArea = (address: string): string => {
+  const extractArea = useCallback((address: string): string => {
     const lowerAddress = address.toLowerCase();
     // Check longer/more specific names first to avoid partial matches
     if (lowerAddress.includes("phra nakhon si ayutthaya") || lowerAddress.includes("ayutthaya")) return "Phra Nakhon Si Ayutthaya";
@@ -4365,10 +4380,10 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
     if (lowerAddress.includes("nonthaburi")) return "Nonthaburi";
     if (lowerAddress.includes("bangkok")) return "Bangkok";
     return "Other";
-  };
+  }, []);
 
   // Get area for a delivery based on dropoff location
-  const getDeliveryArea = (delivery: DeliveryRecordApi): string => {
+  const getDeliveryArea = useCallback((delivery: DeliveryRecordApi): string => {
     // For pickups (donation type): dropoff is warehouse
     if (delivery.delivery_type === "donation" && delivery.warehouse_id && warehouses[delivery.warehouse_id]) {
       return extractArea(warehouses[delivery.warehouse_id].address);
@@ -4382,7 +4397,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
       return extractArea(warehouses[delivery.warehouse_id].address);
     }
     return "Other";
-  };
+  }, [warehouses, communities, extractArea]);
 
   // Get unique areas from ALL addresses in deliveries (pickup and dropoff)
   const uniqueAreas = useMemo(() => {
@@ -4436,10 +4451,10 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
       }
     });
     return Array.from(areas).sort();
-  }, [deliveries, communities, warehouses, donations]);
+  }, [deliveries, communities, warehouses, donations, extractArea]);
 
   // Filter function
-  const applyFilters = (delivery: DeliveryRecordApi): boolean => {
+  const applyFilters = useCallback((delivery: DeliveryRecordApi): boolean => {
     // Status filter
     if (statusFilter !== "all" && delivery.status !== statusFilter) return false;
 
@@ -4470,7 +4485,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
     }
 
     return true;
-  };
+  }, [statusFilter, areaFilter, dateFilter, getDeliveryArea]);
 
   const pickupTasks = useMemo(
     () =>
@@ -4478,7 +4493,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
         .filter((d) => d.delivery_type === "donation")
         .filter(applyFilters)
         .sort((a, b) => new Date(a.pickup_time).getTime() - new Date(b.pickup_time).getTime()),
-    [deliveries, statusFilter, areaFilter, dateFilter, communities, warehouses]
+    [deliveries, applyFilters]
   );
   const distributionTasks = useMemo(
     () =>
@@ -4486,7 +4501,7 @@ function DeliveryStaffDashboard({ currentUser }: { currentUser: LoggedUser | nul
         .filter((d) => d.delivery_type === "distribution")
         .filter(applyFilters)
         .sort((a, b) => new Date(a.pickup_time).getTime() - new Date(b.pickup_time).getTime()),
-    [deliveries, statusFilter, areaFilter, dateFilter, communities, warehouses]
+    [deliveries, applyFilters]
   );
 
   const formatFoodAmount = (donationId?: string | null) => {
@@ -6330,7 +6345,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
                               </span>
                             </div>
                             <p className="text-xs text-gray-500 mt-1">
-                              Available: {selectedItem.quantity} {selectedItem.unit} | Example: "15.5" or "25.67" (unit will be added automatically)
+                              Available: {selectedItem.quantity} {selectedItem.unit} | Example: &quot;15.5&quot; or &quot;25.67&quot; (unit will be added automatically)
                             </p>
                           </div>
                         ) : null;
@@ -6767,15 +6782,15 @@ function WarehouseManagement({ currentUser }: { currentUser: LoggedUser | null }
     return donationId;
   };
 
-  const groupItemsByCategory = (items: FoodItemApiRecord[]) => {
-    const groups: Record<string, FoodItemApiRecord[]> = {};
-    for (const it of items) {
-      const cat = getCategory(it);
-      if (!groups[cat]) groups[cat] = [];
-      groups[cat].push(it);
-    }
-    return groups;
-  };
+  // const groupItemsByCategory = (items: FoodItemApiRecord[]) => {
+  //   const groups: Record<string, FoodItemApiRecord[]> = {};
+  //   for (const it of items) {
+  //     const cat = getCategory(it);
+  //     if (!groups[cat]) groups[cat] = [];
+  //     groups[cat].push(it);
+  //   }
+  //   return groups;
+  // }; // unused
 
   const visibleWarehouses = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
