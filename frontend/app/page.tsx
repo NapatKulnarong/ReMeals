@@ -2484,7 +2484,7 @@ function StatusPieChart({
   const size = 200;
   const center = size / 2;
   const radius = 80;
-  let currentAngle = -90; // Start from top
+  const initialAngle = -90; // Start from top
 
   const statusColors: Record<string, string> = {
     pending: "#FCD34D",
@@ -2492,12 +2492,15 @@ function StatusPieChart({
     declined: "#FCA5A5",
   };
 
+  // Calculate cumulative angles without mutation
   const segments = data.map((item, index) => {
     const percentage = (item.count / total) * 100;
     const angle = (item.count / total) * 360;
-    const startAngle = currentAngle;
-    const endAngle = currentAngle + angle;
-    currentAngle = endAngle;
+    // Calculate start angle as sum of all previous angles
+    const startAngle = initialAngle + data.slice(0, index).reduce((sum, prevItem) => {
+      return sum + (prevItem.count / total) * 360;
+    }, 0);
+    const endAngle = startAngle + angle;
 
     const startAngleRad = (startAngle * Math.PI) / 180;
     const endAngleRad = (endAngle * Math.PI) / 180;
@@ -7199,17 +7202,17 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
     }
   };
 
-  const lookupRestaurantName = (donationId: string) => {
+  const lookupRestaurantName = useCallback((donationId: string) => {
     const donation = donations.find((d) => d.donation_id === donationId);
     if (!donation) return donationId;
     const match = restaurants.find((r) => r.restaurant_id === donation.restaurant);
     return match ? `${match.name}${match.branch_name ? ` (${match.branch_name})` : ""}` : donationId;
-  };
+  }, [donations, restaurants]);
 
-  const lookupStaffName = (userId: string) => {
+  const lookupStaffName = useCallback((userId: string) => {
     const member = staff.find((s) => s.user_id === userId);
     return member ? (member.name || member.username) : userId;
-  };
+  }, [staff]);
 
   // Get unique restaurants, warehouses, and staff for filters
   const uniqueRestaurants = useMemo(() => {
@@ -7223,7 +7226,7 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
         }
       });
     return Array.from(restaurantSet).sort();
-  }, [deliveries, donations, restaurants]);
+  }, [deliveries, lookupRestaurantName]);
 
   const uniqueWarehouses = useMemo(() => {
     const warehouseSet = new Set<string>();
@@ -7252,7 +7255,7 @@ function PickupToWarehouse({ currentUser }: { currentUser: LoggedUser | null }) 
         }
       });
     return Array.from(staffSet).sort();
-  }, [deliveries, staff]);
+  }, [deliveries, lookupStaffName]);
 
   const visibleDeliveries = useMemo(() => {
     let filtered = (canEdit
@@ -8407,14 +8410,14 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
   };
 
   // Helper function to shorten warehouse ID: WAH0000004 -> WH001
-  const shortenWarehouseId = (warehouseId: string): string => {
+  const shortenWarehouseId = useCallback((warehouseId: string): string => {
     if (!warehouseId) return warehouseId;
     // Extract digits from WAH0000004 -> 0000004 -> 4
     const digits = warehouseId.replace(/\D/g, "");
     if (!digits) return warehouseId;
     const num = parseInt(digits, 10);
     return `WH${num.toString().padStart(3, "0")}`;
-  };
+  }, []);
 
   // Helper function to shorten community ID: COM0000001 -> CM001
   const shortenCommunityId = (communityId: string): string => {
@@ -8426,15 +8429,15 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
     return `CM${num.toString().padStart(3, "0")}`;
   };
 
-  const lookupCommunityName = (communityId: string) => {
+  const lookupCommunityName = useCallback((communityId: string) => {
     const community = communities.find((c) => c.community_id === communityId);
     return community ? community.name : communityId;
-  };
+  }, [communities]);
 
-  const lookupStaffName = (userId: string) => {
+  const lookupStaffName = useCallback((userId: string) => {
     const member = staff.find((s) => s.user_id === userId);
     return member ? (member.name || member.username) : userId;
-  };
+  }, [staff]);
 
   // Helper function to remove postal code from address
   const removePostalCode = (address: string): string => {
@@ -8444,11 +8447,11 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
     return address.replace(/\s*[,，]?\s*\d{5}\s*$/, "").trim();
   };
 
-  const lookupWarehouseAddress = (warehouseId: string) => {
+  const lookupWarehouseAddress = useCallback((warehouseId: string) => {
     const warehouse = warehouses.find((w) => w.warehouse_id === warehouseId);
     if (!warehouse) return warehouseId;
     return removePostalCode(warehouse.address);
-  };
+  }, [warehouses]);
 
   // Helper to normalize food ID for matching (handles both F0000014 and FOO0000014 formats)
   const normalizeFoodId = (foodId: string): string => {
@@ -8464,7 +8467,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
   };
 
   // Helper to find food item by ID (handles both formats)
-  const lookupFoodItem = (foodId: string | null | undefined): FoodItemApiRecord | null => {
+  const lookupFoodItem = useCallback((foodId: string | null | undefined): FoodItemApiRecord | null => {
     if (!foodId) return null;
     // Try direct match first
     let foodItem = foodItems.find(f => f.food_id === foodId);
@@ -8478,12 +8481,12 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
     });
     
     return foodItem || null;
-  };
+  }, [foodItems]);
 
-  const lookupFoodItemName = (foodId: string | null | undefined): string => {
+  const lookupFoodItemName = useCallback((foodId: string | null | undefined): string => {
     const item = lookupFoodItem(foodId);
     return item ? item.name : foodId || "N/A";
-  };
+  }, [lookupFoodItem]);
 
   // Get unique communities, warehouses, and staff for filters
   const uniqueCommunities = useMemo(() => {
@@ -8497,7 +8500,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
         }
       });
     return Array.from(communitySet).sort();
-  }, [deliveries, communities]);
+  }, [deliveries, lookupCommunityName]);
 
   const uniqueWarehouses = useMemo(() => {
     const warehouseSet = new Set<string>();
@@ -8508,7 +8511,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
         warehouseSet.add(warehouseId);
       });
     return Array.from(warehouseSet).sort();
-  }, [deliveries]);
+  }, [deliveries, shortenWarehouseId]);
 
   const uniqueStaff = useMemo(() => {
     const staffSet = new Set<string>();
@@ -8521,7 +8524,7 @@ function DeliverToCommunity({ currentUser }: { currentUser: LoggedUser | null })
         }
       });
     return Array.from(staffSet).sort();
-  }, [deliveries, staff]);
+  }, [deliveries, lookupStaffName]);
 
   const visibleDeliveries = useMemo(() => {
     let filtered = (canEdit
@@ -10474,22 +10477,20 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState(0); // Start with home page
   const [showAuthModal, setShowAuthModal] = useState(false); // whether popup is visible
   const [authMode, setAuthMode] = useState<AuthMode>("signup"); // current auth tab
-  const [currentUser, setCurrentUser] = useState<LoggedUser | null>(null);
-  const [showProfileModal, setShowProfileModal] = useState(false);
-
-  // Load user from localStorage on mount
-  useEffect(() => {
+  // Initialize currentUser from localStorage using lazy initializer
+  const [currentUser, setCurrentUser] = useState<LoggedUser | null>(() => {
     try {
       const storedUser = localStorage.getItem(USER_STORAGE_KEY);
       if (storedUser) {
-        const user = JSON.parse(storedUser) as LoggedUser;
-        setCurrentUser(user);
+        return JSON.parse(storedUser) as LoggedUser;
       }
     } catch (error) {
       console.error("Failed to load user from localStorage:", error);
       localStorage.removeItem(USER_STORAGE_KEY);
     }
-  }, []);
+    return null;
+  });
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Save user to localStorage whenever it changes
   useEffect(() => {
